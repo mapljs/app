@@ -1,5 +1,6 @@
+import type { DynamicException, StaticException } from './exception';
 import type { Context } from './types/context';
-import type { HandlerData } from './types/handler';
+import type { Handler, HandlerData, InferHandlerResponse } from './types/handler';
 import type { MacroMiddlewareFunction, MiddlewareData, MiddlewareFunction } from './types/middleware';
 
 export type AnyRouter = Router<any, any, any, any>;
@@ -13,14 +14,17 @@ export class Router<
   // Type inference
   declare public readonly errorReturnType: ErrorReturnType;
 
+  // Leave handling to the main app
   public readonly middlewares: MiddlewareData[];
   public readonly routes: Routes;
   public readonly subrouters: SubRouters;
+  public readonly errorRoutes: [error: StaticException | DynamicException<any>, handler: any][];
 
   public constructor() {
     this.middlewares = [];
     this.routes = [] as unknown as Routes;
     this.subrouters = [] as unknown as SubRouters;
+    this.errorRoutes = [];
   }
 
   /**
@@ -36,7 +40,7 @@ export class Router<
   /**
    * Inline code to the execution
    */
-  public macro(fn: MacroMiddlewareFunction): this {
+  public inline(fn: MacroMiddlewareFunction): this {
     this.middlewares.push([0, fn]);
     return this;
   }
@@ -64,6 +68,29 @@ export class Router<
    */
   public prepare(fn: MiddlewareFunction<State>): this {
     this.middlewares.push([3, fn]);
+    return this;
+  }
+
+  /**
+   * Handle a static exception
+   */
+  public catch<T extends Handler<State>>(exception: StaticException, handler: T): Router<
+    State, Routes, SubRouters, ErrorReturnType | InferHandlerResponse<T>
+  >;
+
+  /**
+   * Handle a dynamic exception
+   */
+  public catch<Payload, T extends Handler<State, [Payload]>>(exception: DynamicException<Payload>, handler: T): Router<
+    State, Routes, SubRouters, ErrorReturnType | InferHandlerResponse<T>
+  >;
+
+  /**
+   * Hide this type
+   * @internal
+   */
+  public catch(exception: any, handler: any): this {
+    this.errorRoutes.push([exception, handler]);
     return this;
   }
 }
