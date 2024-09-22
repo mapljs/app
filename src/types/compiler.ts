@@ -1,5 +1,3 @@
 import type { RouterCompilerState } from '@mapl/router/types';
 
-export interface AppRouterCompilerState extends RouterCompilerState {
-
-}
+export interface AppRouterCompilerState extends RouterCompilerState { }

@@ -1,4 +1,4 @@
-import type { AppRouterCompilerState } from './compiler';
+import type { AppRouterCompilerState } from '../../types/compiler';
 import type { Context } from './context';
 
 export type MacroMiddlewareFunction = (state: AppRouterCompilerState) => void;

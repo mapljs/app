@@ -1,11 +1,8 @@
 import type { Context } from './context';
 import type { MacroMiddlewareFunction } from './middleware';
-import type { MaybePromise } from './utils';
+import type { MaybePromise } from '../../types/utils';
 
-export type HandlerData = [string, string, {
-  type: string,
-  fn: (...args: any[]) => any
-}];
+export type HandlerData = [method: any, path: any, Handler<any, any>];
 
 export interface TextHandler<State, Args extends any[]> {
   type: 'text';

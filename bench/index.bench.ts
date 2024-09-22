@@ -6,8 +6,8 @@ bench('noop2', () => { });
 
 // Example benchmark
 group('Example', () => {
-  bench('Date.now()', () => Date.now());
-  bench('performance.now()', () => performance.now());
+  bench('Date.now()', Date.now);
+  bench('performance.now()', performance.now);
 });
 
 // Start the benchmark
