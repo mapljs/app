@@ -1,5 +1,4 @@
 import type { Context } from './context';
-import type { MacroMiddlewareFunction } from './middleware';
 import type { MaybePromise } from '../../types/utils';
 
 export type HandlerData = [method: any, path: any, Handler<any, any>];
@@ -19,12 +18,7 @@ export interface HTMLHandler<State, Args extends any[]> {
   fn: (...args: [...Args, Context & State]) => MaybePromise<BodyInit>;
 }
 
-export interface MacroHandler {
-  type: 'macro';
-  fn: MacroMiddlewareFunction;
-}
-
-export type Handler<State, Args extends any[] = []> = TextHandler<State, Args> | JSONHandler<State, Args> | HTMLHandler<State, Args> | MacroHandler;
+export type Handler<State, Args extends any[] = []> = TextHandler<State, Args> | JSONHandler<State, Args> | HTMLHandler<State, Args>;
 
 // TODO
 export type InferHandlerResponse<T extends Handler<any, any>> = Awaited<ReturnType<T['fn']>>;

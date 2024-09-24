@@ -1,12 +1,8 @@
-import type { AppRouterCompilerState } from '../../types/compiler';
 import type { Context } from './context';
 
-export type MacroMiddlewareFunction = (state: AppRouterCompilerState) => void;
 export type MiddlewareFunction<State, Args extends any[] = []> = (...args: [...Args, Context & State]) => unknown;
 
 export type MiddlewareData =
-  // Macro
-  [0, MacroMiddlewareFunction]
   // Parser
   | [1, MiddlewareFunction<any>, string]
   // Validator

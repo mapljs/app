@@ -2,9 +2,9 @@ import type { DynamicException, StaticException } from '../exception';
 import type { RouteRegisters } from './route';
 import type { Context } from './types/context';
 import type { Handler, HandlerData, InferHandlerResponse } from './types/handler';
-import type { MacroMiddlewareFunction, MiddlewareData, MiddlewareFunction } from './types/middleware';
+import type { MiddlewareData, MiddlewareFunction } from './types/middleware';
 
-export type AnyRouter = Router<any, any, any, any>;
+export type AnyRouter = Router<any, HandlerData[], [string, AnyRouter][], any>;
 
 interface Router<
   State,
@@ -44,14 +44,6 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
   }
 
   /**
-   * Inline code to the execution
-   */
-  public inline(fn: MacroMiddlewareFunction): this {
-    this.middlewares.push([0, fn]);
-    return this;
-  }
-
-  /**
    * Register a function to parse and set the result to the context
    */
   public parse<Prop extends string, ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
@@ -80,14 +72,14 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
   /**
    * Handle a static exception
    */
-  public catch<T extends Handler<State>>(exception: StaticException, handler: T): Router<
+  public catch<T extends Handler<{}>>(exception: StaticException, handler: T): Router<
     State, Routes, SubRouters, ErrorReturnType | InferHandlerResponse<T>
   >;
 
   /**
    * Handle a dynamic exception
    */
-  public catch<Payload, T extends Handler<State, [Payload]>>(exception: DynamicException<Payload>, handler: T): Router<
+  public catch<Payload, T extends Handler<{}, [Payload]>>(exception: DynamicException<Payload>, handler: T): Router<
     State, Routes, SubRouters, ErrorReturnType | InferHandlerResponse<T>
   >;
 
@@ -103,7 +95,7 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
   /**
    * Handle all exceptions
    */
-  public catchAll<T extends Handler<State>>(handler: T): Router<
+  public catchAll<T extends Handler<{}>>(handler: T): Router<
     State, Routes, SubRouters, ErrorReturnType | InferHandlerResponse<T>
   > {
     this.allErrorRoute = handler;

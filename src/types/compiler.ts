@@ -1,3 +1,6 @@
 import type { RouterCompilerState } from '@mapl/router/types';
 
-export interface AppRouterCompilerState extends RouterCompilerState { }
+// @ts-expect-error Override types
+export interface AppRouterCompilerState extends RouterCompilerState {
+  compileItem: (item: any, state: AppRouterCompilerState) => void;
+}
