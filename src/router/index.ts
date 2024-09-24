@@ -23,14 +23,14 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
   public readonly routes: Routes;
   public readonly subrouters: SubRouters;
 
-  public readonly errorRoutes: [error: StaticException | DynamicException<any>, handler: any][];
-  public allErrorRoute?: Handler<State>;
+  public readonly exceptRoutes: [error: StaticException | DynamicException<any>, handler: Handler<any, any>][];
+  public allExceptRoute?: Handler<State>;
 
   public constructor() {
     this.middlewares = [];
     this.routes = [] as unknown as Routes;
     this.subrouters = [] as unknown as SubRouters;
-    this.errorRoutes = [];
+    this.exceptRoutes = [];
   }
 
   /**
@@ -88,7 +88,7 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
    * @ignore
    */
   public catch(exception: any, handler: any): any {
-    this.errorRoutes.push([exception, handler]);
+    this.exceptRoutes.push([exception, handler]);
     return this;
   }
 
@@ -98,7 +98,7 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
   public catchAll<T extends Handler<{}>>(handler: T): Router<
     State, Routes, SubRouters, ErrorReturnType | InferHandlerResponse<T>
   > {
-    this.allErrorRoute = handler;
+    this.allExceptRoute = handler;
     return this as any;
   }
 

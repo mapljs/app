@@ -4,3 +4,6 @@ import type { RouterCompilerState } from '@mapl/router/types';
 export interface AppRouterCompilerState extends RouterCompilerState {
   compileItem: (item: any, state: AppRouterCompilerState) => void;
 }
+
+export type CachedCompilationResult = [string, requireAsync: boolean, requireContext: boolean];
+export type CachedExceptCompilationResult = [[number, CachedCompilationResult, boolean][], CachedCompilationResult | null];
