@@ -1,6 +1,6 @@
-import { jitc, router } from '@mapl/app';
+import { router } from '@mapl/app';
 
-const app = router()
+export default router()
   .use((c) => c.headers.push(['server', 'mapl']))
 
   .get('/', {
@@ -11,7 +11,3 @@ const app = router()
     type: 'text',
     fn: (c) => c.params[0]
   });
-
-Bun.serve({
-  fetch: jitc(app)
-});
