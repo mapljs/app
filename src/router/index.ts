@@ -1,7 +1,7 @@
 import type { DynamicException, StaticException } from '../exception';
 import type { RouteRegisters } from './route';
 import type { Context } from './types/context';
-import type { Handler, HandlerData, InferHandlerResponse } from './types/handler';
+import type { AnyHandler, Handler, HandlerData, InferHandlerResponse } from './types/handler';
 import type { MiddlewareData, MiddlewareFunction } from './types/middleware';
 
 export type AnyRouter = Router<any, HandlerData[], [string, AnyRouter][], any>;
@@ -23,7 +23,7 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
   public readonly routes: Routes;
   public readonly subrouters: SubRouters;
 
-  public readonly exceptRoutes: [error: StaticException | DynamicException<any>, handler: Handler<any, any>][];
+  public readonly exceptRoutes: [error: StaticException | DynamicException<any>, handler: AnyHandler][];
   public allExceptRoute?: Handler<State>;
 
   public constructor() {

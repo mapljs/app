@@ -2,7 +2,7 @@ import type { AnyRouter, Router } from '.';
 import type { Handler, HandlerData } from './types/handler';
 
 export type RouteRegister<
-  Method,
+  Method extends string,
   State,
   Routes extends HandlerData[],
   SubRouters extends [string, AnyRouter][],

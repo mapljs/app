@@ -1,63 +1,96 @@
-import type { AnyRouter } from '../router';
-import type { Handler } from '../router/types/handler';
-import type { AppRouterCompilerState, CachedCompilationResult, CachedExceptCompilationResult } from '../types/compiler';
-import { EXCEPTION_PAYLOAD, EXCEPTION_SYMBOL, HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, REQUEST_CONTEXT, RESPONSE_500 } from './constants';
+import type { AnyHandler } from '../router/types/handler';
+import type { AppRouterCompilerState } from '../types/compiler';
+import { HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, CTX, CTX_END, CTX_DEF, EXCEPT_SYMBOL, RESPONSE_400 } from './constants';
 import isAsync from './utils/isAsync';
 
-export function compileHandler(handler: Handler<any, any>, state: AppRouterCompilerState, arg: string | null, previouslyHasContext: boolean): CachedCompilationResult {
-  const fn = handler.fn;
+// 0 is catchAll btw
+export type CachedHandlerState = [isFnAsync: boolean, fnNeedContext: boolean, fnId: number, handlerType: string];
+export type ExceptHandlersState = Record<number, [...CachedHandlerState, isStatic: boolean]>;
+export type CompiledExceptHandlers = Record<number, string>;
 
-  const isFnAsync = isAsync(fn);
-  const needContext = fn.length !== (arg === null ? 0 : 1);
+/**
+ * Compile non-macro handler
+ */
+export function compileHandler(
+  isFnAsync: boolean,
+  fnNeedContext: boolean,
+  fnId: number,
+  handlerType: string,
 
-  const fnCall = `${isFnAsync ? 'await ' : ''}f${state.externalValues.push(fn) - 1}(${arg === null
-    ? needContext ? REQUEST_CONTEXT : ''
-    : needContext ? `${arg},${REQUEST_CONTEXT}` : arg})`;
+  firstArg: string | null,
 
-  const handlerType = handler.type;
+  previouslyAsync: boolean,
+  contextPayload: string | null
+): string {
+  const fnCall = `${isFnAsync ? 'await ' : ''}f${fnId}(${fnNeedContext
+    ? firstArg === null ? CTX : `${firstArg},${CTX}`
+    : firstArg ?? ''})`;
 
-  // Whether to use the request context or not
-  previouslyHasContext ||= needContext;
+  // Choose the correct wrapper
+  const fnResult = handlerType === 'text' || handlerType === 'html' ? fnCall : `JSON.stringify(${fnCall})`;
 
+  return contextPayload === null
+    ? `${handlerType === 'text' ? '' : `${CTX}.headers.push(${handlerType === 'html' ? HTML_HEADER_PAIR : JSON_HEADER_PAIR});`}return${!previouslyAsync && isFnAsync ? '(async()=>' : ' '}new Response(${fnResult},${CTX})${!previouslyAsync && isFnAsync ? ')' : ''};`
+    : fnNeedContext
+      ? `${CTX_DEF},headers:[${handlerType === 'text' ? '' : handlerType === 'html' ? HTML_HEADER_PAIR : JSON_HEADER_PAIR}]${contextPayload}${CTX_END}return${!previouslyAsync && isFnAsync ? '(async()=>' : ' '}new Response(${fnResult},${CTX})${!previouslyAsync && isFnAsync ? ')' : ''};`
+      : `return${!previouslyAsync && isFnAsync ? '(async()=>' : ' '}new Response(${fnResult}${handlerType === 'text' ? '' : `,${handlerType === 'html' ? HTML_OPTIONS : JSON_OPTIONS}`})${!previouslyAsync && isFnAsync ? ')' : ''};`;
+}
+
+export function compileNormalHandler(
+  handler: AnyHandler,
+  externalValues: AppRouterCompilerState['externalValues'],
+
+  previouslyAsync: boolean,
+  contextPayload: string | null
+): string {
+  return compileHandler(
+    // Handler state
+    isAsync(handler.fn),
+    handler.fn.length !== 0,
+    externalValues.push(handler.fn) - 1,
+    handler.type,
+    null,
+
+    // Context state
+    previouslyAsync,
+    contextPayload
+  );
+}
+
+export function cacheExceptHandler(
+  isStatic: boolean,
+  handler: AnyHandler,
+  externalValues: AppRouterCompilerState['externalValues']
+): ExceptHandlersState[number] {
   return [
-    // Text handler
-    handlerType === 'text'
-      ? `return new Response(${fnCall}${previouslyHasContext ? `,${REQUEST_CONTEXT}` : ''});`
-      // HTML handler
-      : handlerType === 'html'
-        ? `${previouslyHasContext ? `${REQUEST_CONTEXT}.headers.push(${HTML_HEADER_PAIR});` : ''}return new Response(${fnCall},${previouslyHasContext ? REQUEST_CONTEXT : HTML_OPTIONS});`
-        // JSON handler
-        : `${previouslyHasContext ? `${REQUEST_CONTEXT}.headers.push(${JSON_HEADER_PAIR});` : ''}return new Response(JSON.stringify(${fnCall}),${previouslyHasContext ? REQUEST_CONTEXT : JSON_OPTIONS});`,
-    isFnAsync,
-    needContext
+    isAsync(handler.fn),
+    handler.fn.length > (isStatic ? 0 : 1),
+    externalValues.push(handler.fn) - 1,
+    handler.type,
+    isStatic
   ];
 }
 
-export function compileExceptRoutes(router: AnyRouter, state: AppRouterCompilerState): CachedExceptCompilationResult {
-  return [
-    // eslint-disable-next-line
-    router.exceptRoutes.map((route) => Array.isArray(route[0])
-      ? [route[0][1], compileHandler(route[1], state, null, true), false]
-      : [route[0].id, compileHandler(route[1], state, EXCEPTION_PAYLOAD, true), true]),
-    typeof router.allExceptRoute === 'undefined'
-      ? null
-      : compileHandler(router.allExceptRoute, state, null, true)
-  ];
-}
+export function compileExceptHandlers(
+  exceptRoutes: ExceptHandlersState,
+  value: string,
 
-// Avoid the cost of asynchronous scopes
-export function loadExceptRoutes(cachedResult: CachedExceptCompilationResult, target: string, previouslyAsync: boolean): string {
-  let builder = `if(Array.isArray(${target})&&${target}[0]===${EXCEPTION_SYMBOL})switch(${target}[1]){`;
+  previouslyAsync: boolean,
+  previouslyHasContext: boolean
+): string {
+  const contextPayload = previouslyHasContext ? null : '';
+  let str = `if(Array.isArray(${value})&&${value}[0]===${EXCEPT_SYMBOL})switch(${value}[1]){`;
 
-  for (let i = 0, mappedExcepts = cachedResult[0], l = mappedExcepts.length; i < l; i++) {
-    const curExcept = mappedExcepts[i];
+  for (const key in exceptRoutes) {
+    const args = exceptRoutes[key];
 
-    // Create a scope if requires payload
-    builder += `case ${curExcept[0]}:${!previouslyAsync && curExcept[1][1]
-      // Requires to wap with an async context
-      ? `return (async()=>{${curExcept[2] ? `const ${EXCEPTION_PAYLOAD}=${target}[2];` : ''}}${curExcept[1][0]});`
-      : curExcept[2] ? `{const ${EXCEPTION_PAYLOAD}=${target}[2];${curExcept[1][0]}}` : curExcept[1][0]}`;
+    str += `${key === '0'
+      ? 'default'
+      : `case ${key}`}:${compileHandler(args[0], args[1], args[2], args[3], args[4] ? null : `${value}[2]`, previouslyAsync, contextPayload)}`;
   }
 
-  return `${builder}default:${cachedResult[1] === null ? `return ${RESPONSE_500};` : cachedResult[1][0]}}`;
+  if (typeof exceptRoutes[0] === 'undefined')
+    str += `default:return ${RESPONSE_400};`;
+
+  return `${str}}`;
 }

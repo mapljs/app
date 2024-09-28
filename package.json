@@ -23,5 +23,7 @@
     "mitata": "latest",
     "typescript": "latest"
   },
-  "dependencies": { "@mapl/router": "^0.0.4" }
+  "dependencies": {
+    "@mapl/router": "^0.0.5"
+  }
 }
