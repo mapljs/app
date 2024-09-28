@@ -1,8 +1,16 @@
 {
-  "name": "app",
+  "name": "@mapl/app",
   "version": "0.0.1",
-  "description": "Example package",
-  "keywords": [],
+  "description": "A low overhead web framework",
+  "keywords": [
+    "fast",
+    "simple",
+    "web",
+    "bun",
+    "deno",
+    "node",
+    "framework"
+  ],
   "license": "MIT",
   "type": "module",
   "main": "./index.js",
