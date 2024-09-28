@@ -1,4 +1,4 @@
-import { jitc, router } from '@mapl/router';
+import { jitc, router } from '@mapl/app';
 
 const app = router()
   .use((c) => c.headers.push(['server', 'mapl']))

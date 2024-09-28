@@ -45,7 +45,7 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
 
     if (needContext && !requireContext) {
       // Move the built part to prevContext
-      prevContext = builder + CTX_DEF;
+      prevContext = `${builder}${CTX_DEF},headers:[]`;
       builder = CTX_END;
     }
 

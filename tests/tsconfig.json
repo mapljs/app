@@ -29,10 +29,10 @@
     "noPropertyAccessFromIndexSignature": false,
     // Paths
     "paths": {
-      "@mapl/router": [
+      "@mapl/app": [
         "../lib"
       ],
-      "@mapl/router/*": [
+      "@mapl/app/*": [
         "../lib/*"
       ]
     }
