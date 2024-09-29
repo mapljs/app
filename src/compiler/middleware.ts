@@ -1,9 +1,9 @@
-import type { AnyRouter } from '../router';
-import type { AnyHandler } from '../router/types/handler';
-import type { AppRouterCompilerState } from '../types/compiler';
-import { CTX, CTX_DEF, CTX_END, VAR_PREFIX } from './constants';
-import { cacheExceptHandler, compileExceptHandlers, type ExceptHandlersState } from './handler';
-import isAsync from './utils/isAsync';
+import type { AnyRouter } from '../router/index.js';
+import type { AnyHandler } from '../router/types/handler.js';
+import type { AppRouterCompilerState } from '../types/compiler.js';
+import { CTX, CTX_DEF, CTX_END, VAR_PREFIX } from './constants.js';
+import { cacheExceptHandler, compileExceptHandlers, type ExceptHandlersState } from './handler.js';
+import isAsync from './utils/isAsync.js';
 
 export type CachedMiddlewareCompilationResult = [afterContext: string, beforeContext: string | null, isAsync: boolean, exceptRoutes: ExceptHandlersState];
 

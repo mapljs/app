@@ -7,12 +7,12 @@ export default router()
   })
   .get('/user/*', {
     type: 'html',
-    fn: (ctx) => `<p>Hello ${ctx.params[0]}</p>`
+    fn: (c) => `<p>Hello ${c.params[0]}</p>`
   })
   .any('/**', {
     type: 'text',
-    fn: (ctx) => {
-      ctx.status = 404;
+    fn: (c) => {
+      c.status = 404;
       return 'Where are u going?';
     }
   });

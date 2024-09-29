@@ -1,5 +1,5 @@
-import type { Context } from './context';
-import type { MaybePromise } from '../../types/utils';
+import type { Context } from './context.js';
+import type { MaybePromise } from '../../types/utils.js';
 
 export type HandlerData = [method: string | null, path: string, Handler<any>];
 

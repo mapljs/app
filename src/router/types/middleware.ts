@@ -1,4 +1,4 @@
-import type { Context } from './context';
+import type { Context } from './context.js';
 
 export type MiddlewareFunction<State, Args extends any[] = []> = (...args: [...Args, Context & State]) => unknown;
 

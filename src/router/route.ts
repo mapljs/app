@@ -1,5 +1,5 @@
-import type { AnyRouter, Router } from '.';
-import type { Handler, HandlerData } from './types/handler';
+import type { AnyRouter, Router } from './index.js';
+import type { Handler, HandlerData } from './types/handler.js';
 
 export type RouteRegister<
   Method extends string | null,

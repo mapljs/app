@@ -1,8 +1,8 @@
-import type { DynamicException, StaticException } from '../exception';
-import type { RouteRegisters } from './route';
-import type { Context } from './types/context';
-import type { AnyHandler, Handler, HandlerData, InferHandlerResponse } from './types/handler';
-import type { MiddlewareData, MiddlewareFunction } from './types/middleware';
+import type { DynamicException, StaticException } from '../exception.js';
+import type { RouteRegisters } from './route.js';
+import type { Context } from './types/context.js';
+import type { AnyHandler, Handler, HandlerData, InferHandlerResponse } from './types/handler.js';
+import type { MiddlewareData, MiddlewareFunction } from './types/middleware.js';
 
 export type AnyRouter = Router<any, HandlerData[], [string, AnyRouter][], any>;
 

@@ -1,7 +1,7 @@
-import type { AnyHandler } from '../router/types/handler';
-import type { AppRouterCompilerState } from '../types/compiler';
-import { HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, CTX, CTX_END, CTX_DEF, EXCEPT_SYMBOL, RESPONSE_400 } from './constants';
-import isAsync from './utils/isAsync';
+import type { AnyHandler } from '../router/types/handler.js';
+import type { AppRouterCompilerState } from '../types/compiler.js';
+import { HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, CTX, CTX_END, CTX_DEF, EXCEPT_SYMBOL, RESPONSE_400 } from './constants.js';
+import isAsync from './utils/isAsync.js';
 
 // 0 is catchAll btw
 export type CachedHandlerState = [isFnAsync: boolean, fnNeedContext: boolean, fnId: number, handlerType: string];

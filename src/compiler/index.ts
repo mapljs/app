@@ -1,11 +1,11 @@
 import { createRouter, insertItem, compileRouter as compileBaseRouter } from '@mapl/router';
-import type { AnyRouter } from '../router';
-import type { AppRouterCompilerState } from '../types/compiler';
-import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware';
-import { PARAMS, REQ } from '@mapl/router/constants';
-import { compileNormalHandler } from './handler';
-import { METHOD, PARSE_PATH } from './constants';
-import { symbol as exceptionSymbol } from '../exception';
+import type { AnyRouter } from '../router/index.js';
+import type { AppRouterCompilerState } from '../types/compiler.js';
+import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
+import { PARAMS, REQ } from '@mapl/router/constants.js';
+import { compileNormalHandler } from './handler.js';
+import { METHOD, PARSE_PATH } from './constants.js';
+import { symbol as exceptionSymbol } from '../exception.js';
 
 // DFS and compile every subrouter
 export function compileRouter(prefixPath: string, router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): void {
@@ -71,7 +71,6 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
 
     for (const key in methodTrees) {
       contentBuilder.push(`if(${METHOD}===${JSON.stringify(key)}){${PARSE_PATH}`);
-      // @ts-expect-error Incompatible type
       compileBaseRouter(methodTrees[key], state);
       contentBuilder.push('}');
     }
@@ -83,7 +82,6 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
       contentBuilder.push('else{');
 
     contentBuilder.push(PARSE_PATH);
-    // @ts-expect-error Incompatible type
     compileBaseRouter(routeTrees[1], state);
 
     if (routeTrees[0] !== null)

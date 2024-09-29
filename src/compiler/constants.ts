@@ -1,4 +1,4 @@
-import { PATH, REQ } from '@mapl/router/constants';
+import { PATH, REQ } from '@mapl/router/constants.js';
 
 export const MAPL = '__mapl';
 export const CTX = `${MAPL}_rc`;
