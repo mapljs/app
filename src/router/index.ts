@@ -172,6 +172,15 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
     this.routes.push(['TRACE', path, handler]);
     return this;
   }
+
+  /**
+   * @internal
+   * @ignore
+   */
+  public any(path: string, handler: any): any {
+    this.routes.push([null, path, handler]);
+    return this;
+  }
 }
 
 export { Router };

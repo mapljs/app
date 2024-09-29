@@ -2,7 +2,7 @@ import type { AnyRouter, Router } from '.';
 import type { Handler, HandlerData } from './types/handler';
 
 export type RouteRegister<
-  Method extends string,
+  Method extends string | null,
   State,
   Routes extends HandlerData[],
   SubRouters extends [string, AnyRouter][],
@@ -23,6 +23,5 @@ export type RouteRegisters<
   Routes extends HandlerData[],
   SubRouters extends [string, AnyRouter][],
   ErrorReturnType
-> = {
-    [Method in Methods]: RouteRegister<Uppercase<Method>, State, Routes, SubRouters, ErrorReturnType>
-  };
+> = { [Method in Methods]: RouteRegister<Uppercase<Method>, State, Routes, SubRouters, ErrorReturnType> }
+  & { any: RouteRegister<null, State, Routes, SubRouters, ErrorReturnType> };
