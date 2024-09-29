@@ -78,17 +78,43 @@ export function compileExceptHandlers(
   previouslyAsync: boolean,
   previouslyHasContext: boolean
 ): string {
+  let str = `if(Array.isArray(${value})&&${value}[0]===${EXCEPT_SYMBOL})`;
+
+  const entries = Object.entries(exceptRoutes);
+  const entriesCount = entries.length;
+
+  // No except route is registered
+  if (entriesCount === 0)
+    return `${str}return ${RESPONSE_400};`;
+
+  // Don't create a context if not necessary
+  // Error handler context should not have any other fields
   const contextPayload = previouslyHasContext ? null : '';
-  let str = `if(Array.isArray(${value})&&${value}[0]===${EXCEPT_SYMBOL})switch(${value}[1]){`;
 
-  for (const key in exceptRoutes) {
-    const args = exceptRoutes[key];
+  // One except route is registered
+  if (entriesCount === 1) {
+    const entry = entries[0];
+    const args = entry[1];
 
-    str += `${key === '0'
-      ? 'default'
-      : `case ${key}`}:${compileHandler(args[0], args[1], args[2], args[3], args[4] ? null : `${value}[2]`, previouslyAsync, contextPayload)}`;
+    // If entry is an all except handler -> paste the compile result in directly
+    // Else -> Create an if statement to check whether the exception id matches, else return RESPONSE_400
+    return `${str}{${entry[0] === '0' ? '' : `if(${value}[1]===${entry[0]}){`}${compileHandler(args[0], args[1], args[2], args[3], args[4] ? null : `${value}[2]`, previouslyAsync, contextPayload)}${entry[0] === '0' ? '' : `}else return ${RESPONSE_400};`}}`;
   }
 
+  // Use a switch statement for other types
+  str += `switch(${value}[1]){`;
+
+  for (let i = 0; i < entriesCount; i++) {
+    const key = entries[i][0];
+    const args = entries[i][1];
+
+    // Compile to case statements or default statement if exception id is 0
+    str += `${key === '0'
+      ? 'default'
+      : `case ${key}`}:{${compileHandler(args[0], args[1], args[2], args[3], args[4] ? null : `${value}[2]`, previouslyAsync, contextPayload)}}`;
+  }
+
+  // Handle unhandled exceptions
   if (typeof exceptRoutes[0] === 'undefined')
     str += `default:return ${RESPONSE_400};`;
 
