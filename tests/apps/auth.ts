@@ -1,4 +1,4 @@
-import { router, staticException } from "@mapl/app";
+import { router, staticException } from '@mapl/app';
 
 const authException = staticException();
 const app = router()
