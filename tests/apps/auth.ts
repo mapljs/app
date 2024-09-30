@@ -1,7 +1,6 @@
 import { router, staticException } from "@mapl/app";
 
 const authException = staticException();
-
 const app = router()
   .parse('token', (c) => {
     const authPayload = c.req.headers.get('authorization');
