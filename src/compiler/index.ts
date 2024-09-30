@@ -69,7 +69,7 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
 
   // Actually load the entire tree here
   if (routeTrees[0] !== null) {
-    contentBuilder.push(`const ${METHOD}=${REQ}.method;`);
+    contentBuilder.push(`let ${METHOD}=${REQ}.method;`);
     const methodTrees = routeTrees[0];
     let hasMultiple = false;
 

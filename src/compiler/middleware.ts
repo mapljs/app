@@ -60,14 +60,14 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
       case 1: {
         const resultId = state.localVarCount++;
         // Set the prop to the context (prop name must be an identifier)
-        builder += `const ${VAR_PREFIX}${resultId}=${fnCall}${compileExceptHandlers(exceptRoutes, `${VAR_PREFIX}${resultId}`, requireAsync, requireContext)}c.${middlewareData[2]}=v${resultId};`;
+        builder += `let ${VAR_PREFIX}${resultId}=${fnCall}${compileExceptHandlers(exceptRoutes, `${VAR_PREFIX}${resultId}`, requireAsync, requireContext)}c.${middlewareData[2]}=v${resultId};`;
         break;
       }
 
       // Validators
       case 2: {
         const resultId = state.localVarCount++;
-        builder += `const ${VAR_PREFIX}${resultId}=${fnCall}${compileExceptHandlers(exceptRoutes, `${VAR_PREFIX}${resultId}`, requireAsync, requireContext)}`;
+        builder += `let ${VAR_PREFIX}${resultId}=${fnCall}${compileExceptHandlers(exceptRoutes, `${VAR_PREFIX}${resultId}`, requireAsync, requireContext)}`;
         break;
       }
 
