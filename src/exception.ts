@@ -3,6 +3,7 @@ export type ExceptionSymbol = typeof symbol;
 
 export type StaticException = [ExceptionSymbol, number];
 export type DynamicExceptionInstance<T> = [ExceptionSymbol, number, T];
+export type ExcludeExceptionType<T> = Exclude<T, StaticException | DynamicExceptionInstance<any>>;
 
 let errorId = 0;
 

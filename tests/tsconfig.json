@@ -7,14 +7,14 @@
       "DOM.Iterable"
     ],
     "target": "ESNext",
-    "module": "Preserve",
+    "module": "NodeNext",
     "moduleDetection": "force",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
     "allowJs": true,
     // Bundler mode
-    "moduleResolution": "bundler",
+    "moduleResolution": "NodeNext",
     "verbatimModuleSyntax": true,
     // Best practices
     "strict": true,
@@ -30,12 +30,13 @@
     // Paths
     "paths": {
       "@mapl/app": [
-        "../lib"
+        "../lib/index.js"
       ],
       "@mapl/app/*": [
         "../lib/*"
       ]
-    }
+    },
+    "noEmit": true
   },
   "include": [
     "."

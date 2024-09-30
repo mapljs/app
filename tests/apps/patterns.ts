@@ -13,7 +13,7 @@ const app = router()
     type: 'text',
     fn: (c) => {
       c.status = 404;
-      return 'Where are u going?';
+      return null;
     }
   });
 

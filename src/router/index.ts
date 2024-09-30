@@ -1,4 +1,4 @@
-import type { DynamicException, StaticException } from '../exception.js';
+import type { DynamicException, StaticException, ExcludeExceptionType } from '../exception.js';
 import type { RouteRegisters } from './route.js';
 import type { Context } from './types/context.js';
 import type { AnyHandler, Handler, HandlerData, InferHandlerResponse } from './types/handler.js';
@@ -47,7 +47,7 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
    * Register a function to parse and set the result to the context
    */
   public parse<Prop extends string, ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
-    State & { [K in Prop]: Awaited<ParserReturn> }, Routes, SubRouters, ErrorReturnType
+    State & { [K in Prop]: ExcludeExceptionType<Awaited<ParserReturn>> }, Routes, SubRouters, ErrorReturnType
   > {
     this.middlewares.push([1, fn, prop]);
     return this as any;
