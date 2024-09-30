@@ -4,7 +4,7 @@ import type { AppRouterCompilerState } from '../types/compiler.js';
 import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
 import { PARAMS, REQ } from '@mapl/router/constants.js';
 import { compileNormalHandler } from './handler.js';
-import { METHOD, PARSE_PATH } from './constants.js';
+import { METHOD, PARSE_PATH, RESPONSE_404 } from './constants.js';
 import { symbol as exceptionSymbol } from '../exception.js';
 
 // DFS and compile every subrouter
@@ -71,12 +71,14 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
   if (routeTrees[0] !== null) {
     contentBuilder.push(`const ${METHOD}=${REQ}.method;`);
     const methodTrees = routeTrees[0];
+    let hasMultiple = false;
 
     for (const key in methodTrees) {
-      contentBuilder.push(`if(${METHOD}===${JSON.stringify(key)}){${PARSE_PATH}`);
+      contentBuilder.push(`${hasMultiple ? 'else ' : ''}if(${METHOD}===${JSON.stringify(key)}){${PARSE_PATH}`);
       // @ts-expect-error Same state lol
       compileBaseRouter(methodTrees[key], state);
       contentBuilder.push('}');
+      hasMultiple = true;
     }
   }
 
@@ -90,8 +92,9 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
     compileBaseRouter(routeTrees[1], state);
 
     if (routeTrees[0] !== null)
-      contentBuilder.push('}');
-  }
+      contentBuilder.push(`return ${RESPONSE_404};}`);
+  } else
+    contentBuilder.push(`${routeTrees[0] === null ? '' : 'else '}return ${RESPONSE_404};`);
 
   return state;
 }
