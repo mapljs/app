@@ -40,11 +40,14 @@ export const compileItem: AppRouterCompilerState['compileItem'] = (item, state, 
   const middlewareResult = item[0];
   const contextPayload = hasParam ? `,params:${PARAMS}` : '';
 
+  // Remember to close scope
+  const closeScope = middlewareResult[2] ? '});' : '';
+
   if (middlewareResult[1] === null)
-    state.contentBuilder.push(`${middlewareResult[0]}${compileNormalHandler(item[1], state.externalValues, middlewareResult[2], contextPayload)}`);
+    state.contentBuilder.push(`${middlewareResult[0]}${compileNormalHandler(item[1], state.externalValues, middlewareResult[2], contextPayload)}${closeScope}`);
   else
     // Don't try to create a new context if it already has been created
-    state.contentBuilder.push(`${middlewareResult[1]}${contextPayload}${middlewareResult[0]}${compileNormalHandler(item[1], state.externalValues, middlewareResult[2], null)}`);
+    state.contentBuilder.push(`${middlewareResult[1]}${contextPayload}${middlewareResult[0]}${compileNormalHandler(item[1], state.externalValues, middlewareResult[2], null)}${closeScope}`);
 };
 
 export function compile(router: AnyRouter): AppRouterCompilerState {
@@ -71,6 +74,7 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
 
     for (const key in methodTrees) {
       contentBuilder.push(`if(${METHOD}===${JSON.stringify(key)}){${PARSE_PATH}`);
+      // @ts-expect-error Same state lol
       compileBaseRouter(methodTrees[key], state);
       contentBuilder.push('}');
     }
@@ -82,6 +86,7 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
       contentBuilder.push('else{');
 
     contentBuilder.push(PARSE_PATH);
+    // @ts-expect-error Same state lol
     compileBaseRouter(routeTrees[1], state);
 
     if (routeTrees[0] !== null)

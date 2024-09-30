@@ -126,6 +126,7 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
    */
   public post(path: string, handler: any): any {
     this.routes.push(['POST', path, handler]);
+    return this;
   }
 
   /**

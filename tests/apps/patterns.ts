@@ -1,6 +1,6 @@
 import { router } from '@mapl/app';
 
-export default router()
+const app = router()
   .get('/', {
     type: 'text',
     fn: () => 'Hi'
@@ -17,3 +17,4 @@ export default router()
     }
   });
 
+export default app;

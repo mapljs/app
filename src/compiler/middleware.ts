@@ -41,7 +41,8 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
 
     // Wrap with an async context
     if (isFnAsync && !requireAsync)
-      builder += '(async()=>{';
+      // Create an async scope
+      builder += 'return (async()=>{';
 
     if (needContext && !requireContext) {
       // Move the built part to prevContext
