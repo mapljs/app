@@ -92,9 +92,10 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
     compileBaseRouter(routeTrees[1], state);
 
     if (routeTrees[0] !== null)
-      contentBuilder.push(`return ${RESPONSE_404};}`);
-  } else
-    contentBuilder.push(`${routeTrees[0] === null ? '' : 'else '}return ${RESPONSE_404};`);
+      contentBuilder.push('}');
+  }
+
+  contentBuilder.push(`return ${RESPONSE_404};`);
 
   return state;
 }
