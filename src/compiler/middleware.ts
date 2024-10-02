@@ -1,7 +1,7 @@
 import type { AnyRouter } from '../router/index.js';
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
-import { CTX, CTX_DEF, CTX_END, VAR_PREFIX } from './constants.js';
+import { ASYNC_START, CTX, VAR_PREFIX } from './constants.js';
 import { cacheExceptHandler, compileExceptHandlers, type ExceptHandlersState } from './handler.js';
 import isAsync from './utils/isAsync.js';
 
@@ -9,12 +9,6 @@ export type CachedMiddlewareCompilationResult = [afterContext: string, beforeCon
 
 // Compile and cache middleware compilation result
 export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): CachedMiddlewareCompilationResult {
-  let requireAsync = prevValue[2];
-  let requireContext = prevValue[1] !== null;
-  // Save the string part before context creation
-  let prevContext = requireContext ? prevValue[1] : null;
-  let builder = prevValue[0];
-
   const externalValues = state.externalValues;
 
   // Clone exception routes
@@ -27,6 +21,7 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
     else
       exceptRoutes[exception.id] = cacheExceptHandler(false, routes[i][1], externalValues);
   }
+  const currentResult: CachedMiddlewareCompilationResult = [prevValue[0], prevValue[1], prevValue[2], exceptRoutes];
 
   // Set all except route
   if (typeof router.allExceptRoute !== 'undefined')
@@ -34,51 +29,62 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
 
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
     const middlewareData = list[i];
+    const middlewareType = middlewareData[0];
     const fn = middlewareData[1];
 
-    const isFnAsync = isAsync(fn);
-    const needContext = fn.length !== 0;
-
-    // Wrap with an async context
-    if (isFnAsync && !requireAsync)
-      // Create an async scope
-      builder += 'return (async()=>{';
-
-    if (needContext && !requireContext) {
-      // Move the built part to prevContext
-      prevContext = `${builder}${CTX_DEF},headers:[]`;
-      builder = CTX_END;
+    // Handle macros separately
+    if (middlewareType === 0) {
+      fn(currentResult, state);
+      continue;
     }
 
-    // TODO: Handle
-    requireAsync ||= isFnAsync;
-    requireContext ||= needContext;
+    const isFnAsync = isAsync(fn);
+
+    // Need context if fn has ctx argument or it is a parser or a setter
+    const needContext = fn.length !== 0 || middlewareType === 1 || middlewareType === 4;
+
+    // Wrap with an async context
+    if (isFnAsync && !currentResult[2]) {
+      // Create an async scope
+      currentResult[0] += ASYNC_START;
+      currentResult[2] = true;
+    }
+
+    if (needContext && currentResult[1] === null) {
+      // Move the built part to prevContext
+      currentResult[1] = currentResult[0];
+      currentResult[0] = '';
+    }
 
     const fnCall = `${isFnAsync ? 'await ' : ''}f${externalValues.push(fn) - 1}(${needContext ? CTX : ''});`;
-    switch (middlewareData[0]) {
+    switch (middlewareType) {
       // Parsers
       case 1: {
         const resultId = state.localVarCount++;
         // Set the prop to the context (prop name must be an identifier)
-        builder += `let ${VAR_PREFIX}${resultId}=${fnCall}${compileExceptHandlers(exceptRoutes, `${VAR_PREFIX}${resultId}`, requireAsync, requireContext)}c.${middlewareData[2]}=v${resultId};`;
+        currentResult[0] += `let ${VAR_PREFIX}${resultId}=${fnCall}${compileExceptHandlers(exceptRoutes, `${VAR_PREFIX}${resultId}`, currentResult[2], currentResult[1] === null)}${CTX}.${middlewareData[2]}=v${resultId};`;
         break;
       }
 
       // Validators
       case 2: {
         const resultId = state.localVarCount++;
-        builder += `let ${VAR_PREFIX}${resultId}=${fnCall}${compileExceptHandlers(exceptRoutes, `${VAR_PREFIX}${resultId}`, requireAsync, requireContext)}`;
+        currentResult[0] += `let ${VAR_PREFIX}${resultId}=${fnCall}${compileExceptHandlers(exceptRoutes, `${VAR_PREFIX}${resultId}`, currentResult[2], currentResult[1] === null)}`;
         break;
       }
 
       // Normal middlewares
-      case 3: {
-        builder += fnCall;
+      case 3:
+        currentResult[0] += fnCall;
         break;
-      }
+
+      // Setter
+      case 4:
+        currentResult[0] += `${CTX}.${middlewareData[2]}=${fnCall}`;
+        break;
     }
   }
 
-  return [builder, prevContext, requireAsync, exceptRoutes];
+  return currentResult;
 }
 

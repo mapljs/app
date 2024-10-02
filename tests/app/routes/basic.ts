@@ -1,4 +1,4 @@
-import { router } from '@mapl/app';
+import { router } from '@mapl/app/index.js';
 
 const app = router()
   .use((c) => c.headers.push(['server', 'mapl']))

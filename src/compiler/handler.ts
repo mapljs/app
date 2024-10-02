@@ -71,6 +71,26 @@ export function cacheExceptHandler(
   ];
 }
 
+// Fast path for static exception
+export function compileStaticExceptHandler(
+  args: ExceptHandlersState[number],
+  previouslyAsync: boolean,
+  contextPayload: string | null
+): string {
+  return compileHandler(args[0], args[1], args[2], args[3], null, previouslyAsync, contextPayload);
+}
+
+// General path
+export function compileExceptHandler(
+  args: ExceptHandlersState[number],
+  value: string,
+
+  previouslyAsync: boolean,
+  contextPayload: string | null
+): string {
+  return compileHandler(args[0], args[1], args[2], args[3], args[4] ? null : `${value}[2]`, previouslyAsync, contextPayload);
+}
+
 export function compileExceptHandlers(
   exceptRoutes: ExceptHandlersState,
   value: string,
@@ -98,7 +118,7 @@ export function compileExceptHandlers(
 
     // If entry is an all except handler -> paste the compile result in directly
     // Else -> Create an if statement to check whether the exception id matches, else return RESPONSE_400
-    return `${str}{${entry[0] === '0' ? '' : `if(${value}[1]===${entry[0]}){`}${compileHandler(args[0], args[1], args[2], args[3], args[4] ? null : `${value}[2]`, previouslyAsync, contextPayload)}${entry[0] === '0' ? '' : `}else return ${RESPONSE_400};`}}`;
+    return `${str}{${entry[0] === '0' ? '' : `if(${value}[1]===${entry[0]}){`}${compileExceptHandler(args, value, previouslyAsync, contextPayload)}${entry[0] === '0' ? '' : `}else return ${RESPONSE_400};`}}`;
   }
 
   // Use a switch statement for other types
@@ -111,7 +131,7 @@ export function compileExceptHandlers(
     // Compile to case statements or default statement if exception id is 0
     str += `${key === '0'
       ? 'default'
-      : `case ${key}`}:{${compileHandler(args[0], args[1], args[2], args[3], args[4] ? null : `${value}[2]`, previouslyAsync, contextPayload)}}`;
+      : `case ${key}`}:{${compileExceptHandler(args, value, previouslyAsync, contextPayload)}}`;
   }
 
   // Handle unhandled exceptions

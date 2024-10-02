@@ -4,7 +4,7 @@ import type { AppRouterCompilerState } from '../types/compiler.js';
 import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
 import { PARAMS, REQ } from '@mapl/router/constants.js';
 import { compileNormalHandler } from './handler.js';
-import { METHOD, PARSE_PATH, RESPONSE_404 } from './constants.js';
+import { ASYNC_END, BASIC_CTX_DEF, CTX_END, METHOD, PARSE_PATH, RESPONSE_404 } from './constants.js';
 import { symbol as exceptionSymbol } from '../exception.js';
 
 // DFS and compile every subrouter
@@ -41,13 +41,13 @@ export const compileItem: AppRouterCompilerState['compileItem'] = (item, state, 
   const contextPayload = hasParam ? `,params:${PARAMS}` : '';
 
   // Remember to close scope
-  const closeScope = middlewareResult[2] ? '});' : '';
+  const closeScope = middlewareResult[2] ? ASYNC_END : '';
 
   if (middlewareResult[1] === null)
     state.contentBuilder.push(`${middlewareResult[0]}${compileNormalHandler(item[1], state.externalValues, middlewareResult[2], contextPayload)}${closeScope}`);
   else
     // Don't try to create a new context if it already has been created
-    state.contentBuilder.push(`${middlewareResult[1]}${contextPayload}${middlewareResult[0]}${compileNormalHandler(item[1], state.externalValues, middlewareResult[2], null)}${closeScope}`);
+    state.contentBuilder.push(`${middlewareResult[1]}${BASIC_CTX_DEF}${contextPayload}${CTX_END}${middlewareResult[0]}${compileNormalHandler(item[1], state.externalValues, middlewareResult[2], null)}${closeScope}`);
 };
 
 export function compile(router: AnyRouter): AppRouterCompilerState {
@@ -61,9 +61,12 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
     contentBuilder,
     declarationBuilders: [],
     localVarCount: 0,
+
+    // Exception symbol is f0
     externalValues: [exceptionSymbol]
   };
 
+  // Put all stuff into the radix tree
   // eslint-disable-next-line
   compileRouter('', router, state, ['', null, false, {}]);
 
@@ -71,6 +74,8 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
   if (routeTrees[0] !== null) {
     contentBuilder.push(`let ${METHOD}=${REQ}.method;`);
     const methodTrees = routeTrees[0];
+
+    // Track whether this has more than 1 element
     let hasMultiple = false;
 
     for (const key in methodTrees) {
@@ -78,6 +83,8 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
       // @ts-expect-error Same state lol
       compileBaseRouter(methodTrees[key], state);
       contentBuilder.push('}');
+
+      // Whether to do else if or just if
       hasMultiple = true;
     }
   }

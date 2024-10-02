@@ -24,7 +24,12 @@ export const CONST_VARS = `let ${HTML_HEADER_PAIR}=['content-type','text/html'],
 
 // Request context
 export const CTX_DEF = `let ${CTX}={status:200,req:${REQ}`;
+export const BASIC_CTX_DEF = `${CTX_DEF},headers:[]`;
 export const CTX_END = '};';
+
+// Async scope
+export const ASYNC_START = 'return (async()=>{';
+export const ASYNC_END = '});';
 
 // Parsings and constants
 export const PARSE_PATH = `let ${C_URL}=${REQ}.url,${PATH_START}=${C_URL}.indexOf('/',12)+1,${PATH_END}=${C_URL}.indexOf('?',${PATH_START}),${PATH}=${PATH_END}===-1?${C_URL}.slice(${PATH_START}):${C_URL}.substring(${PATH_START},${PATH_END});`;

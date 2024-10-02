@@ -2,9 +2,18 @@ import type { DynamicException, StaticException, ExcludeExceptionType } from '..
 import type { RouteRegisters } from './route.js';
 import type { Context } from './types/context.js';
 import type { AnyHandler, Handler, HandlerData, InferHandlerResponse } from './types/handler.js';
-import type { MiddlewareData, MiddlewareFunction } from './types/middleware.js';
+import type { MacroMiddlewareFunction, MiddlewareData, MiddlewareFunction } from './types/middleware.js';
 
 export type AnyRouter = Router<any, HandlerData[], [string, AnyRouter][], any>;
+export type BaseRouter = Router<{}, [], [], never>;
+
+// Merge two router types
+export type MergeRouter<T1 extends AnyRouter, T2 extends AnyRouter> = Router<
+  T1['stateType'] & T2['stateType'],
+  [...T1['routes'], ...T2['routes']],
+  [...T1['subrouters'], ...T2['subrouters']],
+  T1['errorReturnType'] | T2['errorReturnType']
+>;
 
 interface Router<
   State,
@@ -17,6 +26,7 @@ interface Router<
 class Router<State, Routes, SubRouters, ErrorReturnType> {
   // Type inference
   declare public readonly errorReturnType: ErrorReturnType;
+  declare public readonly stateType: State;
 
   // Leave handling to the main app
   public readonly middlewares: MiddlewareData[];
@@ -44,6 +54,14 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
   }
 
   /**
+   * Register a macro
+   */
+  public inline<TypeExtension extends AnyRouter>(fn: MacroMiddlewareFunction<TypeExtension>): MergeRouter<this, TypeExtension> {
+    this.middlewares.push([0, fn]);
+    return this as any;
+  }
+
+  /**
    * Register a function to parse and set the result to the context
    */
   public parse<Prop extends string, ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
@@ -67,6 +85,16 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
   public use(fn: MiddlewareFunction<State>): this {
     this.middlewares.push([3, fn]);
     return this;
+  }
+
+  /**
+   * Register a function that runs on every request and set result to context
+   */
+  public set<Prop extends string, ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
+    State & { [K in Prop]: Awaited<ParserReturn> }, Routes, SubRouters, ErrorReturnType
+  > {
+    this.middlewares.push([4, fn, prop]);
+    return this as any;
   }
 
   /**
@@ -186,6 +214,6 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
 
 export { Router };
 
-export function router(): Router<{}, [], [], never> {
-  return new Router() as any;
+export function router(): BaseRouter {
+  return new Router();
 }
