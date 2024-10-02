@@ -12,17 +12,16 @@ export type CompiledExceptHandlers = Record<number, string>;
  * Compile non-macro handler
  */
 export function compileHandler(
-  isFnAsync: boolean,
-  fnNeedContext: boolean,
-  fnId: number,
-  handlerType: string,
-
+  handlerData: CachedHandlerState,
   firstArg: string | null,
 
   previouslyAsync: boolean,
   contextPayload: string | null
 ): string {
-  const fnCall = `${isFnAsync ? 'await ' : ''}f${fnId}(${fnNeedContext
+  const fnNeedContext = handlerData[1];
+  const handlerType = handlerData[3];
+
+  const fnCall = `${handlerData[0] ? 'await ' : ''}f${handlerData[2]}(${fnNeedContext
     ? firstArg === null ? CTX : `${firstArg},${CTX}`
     : firstArg ?? ''})`;
 
@@ -30,10 +29,10 @@ export function compileHandler(
   const fnResult = handlerType === 'text' || handlerType === 'html' ? fnCall : `JSON.stringify(${fnCall})`;
 
   return contextPayload === null
-    ? `${handlerType === 'text' ? '' : `${CTX}.headers.push(${handlerType === 'html' ? HTML_HEADER_PAIR : JSON_HEADER_PAIR});`}return${!previouslyAsync && isFnAsync ? '(async()=>' : ' '}new Response(${fnResult},${CTX})${!previouslyAsync && isFnAsync ? ')' : ''};`
+    ? `${handlerType === 'text' ? '' : `${CTX}.headers.push(${handlerType === 'html' ? HTML_HEADER_PAIR : JSON_HEADER_PAIR});`}return${!previouslyAsync && handlerData[0] ? '(async()=>' : ' '}new Response(${fnResult},${CTX})${!previouslyAsync && handlerData[0] ? ')' : ''};`
     : fnNeedContext
-      ? `${CTX_DEF},headers:[${handlerType === 'text' ? '' : handlerType === 'html' ? HTML_HEADER_PAIR : JSON_HEADER_PAIR}]${contextPayload}${CTX_END}return${!previouslyAsync && isFnAsync ? '(async()=>' : ' '}new Response(${fnResult},${CTX})${!previouslyAsync && isFnAsync ? ')' : ''};`
-      : `return${!previouslyAsync && isFnAsync ? '(async()=>' : ' '}new Response(${fnResult}${handlerType === 'text' ? '' : `,${handlerType === 'html' ? HTML_OPTIONS : JSON_OPTIONS}`})${!previouslyAsync && isFnAsync ? ')' : ''};`;
+      ? `${CTX_DEF},headers:[${handlerType === 'text' ? '' : handlerType === 'html' ? HTML_HEADER_PAIR : JSON_HEADER_PAIR}]${contextPayload}${CTX_END}return${!previouslyAsync && handlerData[0] ? '(async()=>' : ' '}new Response(${fnResult},${CTX})${!previouslyAsync && handlerData[0] ? ')' : ''};`
+      : `return${!previouslyAsync && handlerData[0] ? '(async()=>' : ' '}new Response(${fnResult}${handlerType === 'text' ? '' : `,${handlerType === 'html' ? HTML_OPTIONS : JSON_OPTIONS}`})${!previouslyAsync && handlerData[0] ? ')' : ''};`;
 }
 
 export function compileNormalHandler(
@@ -45,10 +44,12 @@ export function compileNormalHandler(
 ): string {
   return compileHandler(
     // Handler state
-    isAsync(handler.fn),
-    handler.fn.length !== 0,
-    externalValues.push(handler.fn) - 1,
-    handler.type,
+    [
+      isAsync(handler.fn),
+      handler.fn.length !== 0,
+      externalValues.push(handler.fn) - 1,
+      handler.type
+    ],
     null,
 
     // Context state
@@ -77,7 +78,7 @@ export function compileStaticExceptHandler(
   previouslyAsync: boolean,
   contextPayload: string | null
 ): string {
-  return compileHandler(args[0], args[1], args[2], args[3], null, previouslyAsync, contextPayload);
+  return compileHandler(args as unknown as CachedHandlerState, null, previouslyAsync, contextPayload);
 }
 
 // General path
@@ -88,9 +89,10 @@ export function compileExceptHandler(
   previouslyAsync: boolean,
   contextPayload: string | null
 ): string {
-  return compileHandler(args[0], args[1], args[2], args[3], args[4] ? null : `${value}[2]`, previouslyAsync, contextPayload);
+  return compileHandler(args as unknown as CachedHandlerState, args[4] ? null : `${value}[2]`, previouslyAsync, contextPayload);
 }
 
+// Compile a group of exception handlers
 export function compileExceptHandlers(
   exceptRoutes: ExceptHandlersState,
   value: string,
