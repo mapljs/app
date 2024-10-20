@@ -1,5 +1,5 @@
 import { Router, macro, staticException } from '@mapl/app/index.js';
-import { HEADERS, CTX, REQ, VAR_PREFIX, RET_400 } from '@mapl/app/constants.js';
+import { CTX, REQ, VAR_PREFIX, RET_400, CREATE_EMPTY_HEADER } from '@mapl/app/constants.js';
 
 export const invalidBodyFormat = staticException();
 export const parseBody = macro<Router<{ body: { name: string } }, [], [], never>>((ctx, state) => {
@@ -11,7 +11,7 @@ export const parseBody = macro<Router<{ body: { name: string } }, [], [], never>
 
   // Require a context object
   if (ctx[1] === null) {
-    ctx[1] = ctx[0] + `let ${HEADERS}=[];`;
+    ctx[1] = ctx[0] + CREATE_EMPTY_HEADER;
     ctx[0] = '';
   }
 
