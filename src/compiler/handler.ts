@@ -1,6 +1,6 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
-import { HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, CTX, CTX_END, CTX_DEF, CTX_PARAM_DEF, HEADERS, SET_HTML_HEADER, SET_JSON_HEADER } from './constants.js';
+import { HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, CTX, CTX_END, CTX_DEF, CTX_PARAM_DEF, HEADERS, SET_HTML_HEADER, SET_JSON_HEADER, ASYNC_START } from './constants.js';
 import { isFunctionAsync } from './utils.js';
 
 /**
@@ -28,6 +28,6 @@ export function compileHandler(
   return contextNeedParam === null
     ? `${handlerType === 'text' ? '' : handlerType === 'html' ? SET_HTML_HEADER : SET_JSON_HEADER}return${wrapAsync ? '(async()=>' : ' '}new Response(${fnResult},${CTX})${wrapAsync ? ')' : ''};`
     : fnNeedContext
-      ? `${wrapAsync ? 'return(async()=>{' : ''}let ${HEADERS}=[${handlerType === 'text' ? '' : handlerType === 'html' ? HTML_HEADER_PAIR : JSON_HEADER_PAIR}];${CTX_DEF}${contextNeedParam ? CTX_PARAM_DEF : ''}${CTX_END}return new Response(${fnResult},${CTX})${wrapAsync ? ';})' : ''};`
+      ? `${wrapAsync ? ASYNC_START : ''}let ${HEADERS}=[${handlerType === 'text' ? '' : handlerType === 'html' ? HTML_HEADER_PAIR : JSON_HEADER_PAIR}];${CTX_DEF}${contextNeedParam ? CTX_PARAM_DEF : ''}${CTX_END}return new Response(${fnResult},${CTX})${wrapAsync ? ';})' : ''};`
       : `return${wrapAsync ? '(async()=>' : ' '}new Response(${fnResult}${handlerType === 'text' ? '' : `,${handlerType === 'html' ? HTML_OPTIONS : JSON_OPTIONS}`})${wrapAsync ? ')' : ''};`;
 }

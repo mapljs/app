@@ -1,7 +1,7 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 
-import { CTX, CTX_DEF, CTX_END, EXCEPT_SYMBOL, HEADERS, HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, RET_500, SET_HTML_HEADER, SET_JSON_HEADER, VAR_PREFIX } from './constants.js';
+import { ASYNC_START, CTX, CTX_DEF, CTX_END, EXCEPT_SYMBOL, HEADERS, HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, RET_500, SET_HTML_HEADER, SET_JSON_HEADER, VAR_PREFIX } from './constants.js';
 import { isFunctionAsync } from './utils.js';
 
 // A cached function to build out handlers
@@ -34,7 +34,7 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
   return (arg, isAsync, hasContext) => {
     // Whether it is required to wrap the context in an async scope
     isAsync = !isAsync && isFnAsync;
-    let result = isAsync ? 'return (async()=>{' : '';
+    let result = isAsync ? ASYNC_START : '';
 
     if (hasContext) {
       // Append correct content type headers

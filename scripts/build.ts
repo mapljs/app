@@ -21,6 +21,8 @@ const transpiler = new Bun.Transpiler({
   // Lighter output
   minifyWhitespace: true,
   treeShaking: true,
+
+  // Inline constants if possible
   inline: true
 });
 

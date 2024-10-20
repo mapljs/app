@@ -1,6 +1,6 @@
 import type { AnyRouter } from '../router/index.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
-import { CREATE_EMPTY_HEADER, CTX, VAR_PREFIX } from './constants.js';
+import { ASYNC_START, CREATE_EMPTY_HEADER, CTX, VAR_PREFIX } from './constants.js';
 import { buildHandler, loadHandlers, type ExceptHandlerBuilders } from './exceptions.js';
 import { isFunctionAsync } from './utils.js';
 
@@ -46,7 +46,7 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
     // Wrap with an async context
     if (isFnAsync && !currentResult[2]) {
       // Create an async scope
-      currentResult[0] += 'return(async()=>{';
+      currentResult[0] += ASYNC_START;
       currentResult[2] = true;
     }
 

@@ -16,6 +16,9 @@ export const CTX_DEF = `let ${CTX}={status:200,req:${REQ},headers:${HEADERS}`;
 export const CTX_PARAM_DEF = `,params:${PARAMS}`;
 export const CTX_END = '};';
 
+// Async
+export const ASYNC_START = 'return (async()=>{';
+
 // Default vars
 export const HTML_HEADER_PAIR = `${MAPL}_htmlhp`;
 export const HTML_OPTIONS = `${MAPL}_htmlo`;

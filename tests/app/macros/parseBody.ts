@@ -17,8 +17,9 @@ export const parseBody = macro<Router<{ body: { name: string } }, [], [], never>
 
   const id = state.localVarCount++;
   const exceptHandler = ctx[3][invalidBodyFormat[1]] ?? ctx[3][0];
-  ctx[0] += `let ${VAR_PREFIX}${id}=await ${REQ}.json().catch(()=>null);if(${VAR_PREFIX}${id}===null||typeof ${VAR_PREFIX}${id}!=='object'||typeof ${VAR_PREFIX}${id}.name!=='string'){${typeof exceptHandler === 'undefined'
-    ? RET_400
-    : exceptHandler('', true, true)
-    }}${CTX}.body=${VAR_PREFIX}${id};`;
+
+  // Build
+  ctx[0] += `let ${VAR_PREFIX}${id}=await ${REQ}.json().catch(()=>null);if(${VAR_PREFIX}${id}===null||typeof ${VAR_PREFIX}${id}!=='object'||typeof ${VAR_PREFIX}${id}.name!=='string'){${
+    typeof exceptHandler === 'undefined' ? RET_400 : exceptHandler('', true, true)
+  }}${CTX}.body=${VAR_PREFIX}${id};`;
 });
