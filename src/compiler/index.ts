@@ -2,9 +2,9 @@ import { createRouter, insertItem, compileRouter as compileBaseRouter } from '@m
 import type { AnyRouter } from '../router/index.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
-import { PARAMS, REQ } from '@mapl/router/constants.js';
-import { compileNormalHandler } from './handler.js';
-import { ASYNC_END, BASIC_CTX_DEF, CTX_END, METHOD, PARSE_PATH, RESPONSE_404 } from './constants.js';
+import { REQ } from '@mapl/router/constants.js';
+import { compileHandler } from './handler.js';
+import { CTX_DEF, CTX_END, CTX_PARAM_DEF, METHOD, PARSE_PATH, RET_404 } from './constants.js';
 import { symbol as exceptionSymbol } from '../exception.js';
 
 // DFS and compile every subrouter
@@ -38,16 +38,15 @@ export function compileRouter(prefixPath: string, router: AnyRouter, state: AppR
 // eslint-disable-next-line
 export const compileItem: AppRouterCompilerState['compileItem'] = (item, state, hasParam) => {
   const middlewareResult = item[0];
-  const contextPayload = hasParam ? `,params:${PARAMS}` : '';
 
-  // Remember to close scope
-  const closeScope = middlewareResult[2] ? ASYNC_END : '';
+  // Remember to close async scope
+  const closeScope = middlewareResult[2] ? '});' : '';
 
   if (middlewareResult[1] === null)
-    state.contentBuilder.push(`${middlewareResult[0]}${compileNormalHandler(item[1], state.externalValues, middlewareResult[2], contextPayload)}${closeScope}`);
+    state.contentBuilder.push(`${middlewareResult[0]}${compileHandler(item[1], state.externalValues, middlewareResult[2], hasParam)}${closeScope}`);
   else
     // Don't try to create a new context if it already has been created
-    state.contentBuilder.push(`${middlewareResult[1]}${BASIC_CTX_DEF}${contextPayload}${CTX_END}${middlewareResult[0]}${compileNormalHandler(item[1], state.externalValues, middlewareResult[2], null)}${closeScope}`);
+    state.contentBuilder.push(`${middlewareResult[1]}${CTX_DEF}${hasParam ? CTX_PARAM_DEF : ''}${CTX_END}${middlewareResult[0]}${compileHandler(item[1], state.externalValues, middlewareResult[2], null)}${closeScope}`);
 };
 
 export function compile(router: AnyRouter): AppRouterCompilerState {
@@ -102,7 +101,7 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
       contentBuilder.push('}');
   }
 
-  contentBuilder.push(`return ${RESPONSE_404};`);
+  contentBuilder.push(RET_404);
 
   return state;
 }

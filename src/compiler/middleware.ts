@@ -1,11 +1,10 @@
 import type { AnyRouter } from '../router/index.js';
-import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
-import { ASYNC_START, CTX, VAR_PREFIX } from './constants.js';
-import { cacheExceptHandler, compileExceptHandlers, type ExceptHandlersState } from './handler.js';
-import isAsync from './utils/isAsync.js';
+import { CREATE_EMPTY_HEADER, CTX, VAR_PREFIX } from './constants.js';
+import { buildHandler, loadHandlers, type ExceptHandlerBuilders } from './exceptions.js';
+import { isFunctionAsync } from './utils.js';
 
-export type CachedMiddlewareCompilationResult = [afterContext: string, beforeContext: string | null, isAsync: boolean, exceptRoutes: ExceptHandlersState];
+export type CachedMiddlewareCompilationResult = [afterContext: string, beforeContext: string | null, isAsync: boolean, exceptRoutes: ExceptHandlerBuilders];
 
 // Compile and cache middleware compilation result
 export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): CachedMiddlewareCompilationResult {
@@ -17,15 +16,16 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
     const exception = routes[i][0];
 
     if (Array.isArray(exception))
-      exceptRoutes[exception[1]] = cacheExceptHandler(true, routes[i][1], externalValues);
+      exceptRoutes[exception[1]] = buildHandler(false, routes[i][1], externalValues);
     else
-      exceptRoutes[exception.id] = cacheExceptHandler(false, routes[i][1], externalValues);
+      exceptRoutes[exception.id] = buildHandler(true, routes[i][1], externalValues);
   }
+
   const currentResult: CachedMiddlewareCompilationResult = [prevValue[0], prevValue[1], prevValue[2], exceptRoutes];
 
   // Set all except route
   if (typeof router.allExceptRoute !== 'undefined')
-    exceptRoutes[0] = cacheExceptHandler(false, router.allExceptRoute.fn as unknown as AnyHandler, externalValues);
+    exceptRoutes[0] = buildHandler(false, router.allExceptRoute, externalValues);
 
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
     const middlewareData = list[i];
@@ -38,7 +38,7 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
       continue;
     }
 
-    const isFnAsync = isAsync(fn);
+    const isFnAsync = isFunctionAsync(fn);
 
     // Need context if fn has ctx argument or it is a parser or a setter
     const needContext = fn.length !== 0 || middlewareType === 1 || middlewareType === 4;
@@ -46,13 +46,13 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
     // Wrap with an async context
     if (isFnAsync && !currentResult[2]) {
       // Create an async scope
-      currentResult[0] += ASYNC_START;
+      currentResult[0] += 'return(async()=>{';
       currentResult[2] = true;
     }
 
     if (needContext && currentResult[1] === null) {
       // Move the built part to prevContext
-      currentResult[1] = currentResult[0];
+      currentResult[1] = currentResult[0] + CREATE_EMPTY_HEADER;
       currentResult[0] = '';
     }
 
@@ -62,14 +62,18 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
       case 1: {
         const resultId = state.localVarCount++;
         // Set the prop to the context (prop name must be an identifier)
-        currentResult[0] += `let ${VAR_PREFIX}${resultId}=${fnCall}${compileExceptHandlers(exceptRoutes, `${VAR_PREFIX}${resultId}`, currentResult[2], currentResult[1] === null)}${CTX}.${middlewareData[2]}=v${resultId};`;
+        currentResult[0] += `let ${VAR_PREFIX}${resultId}=${fnCall}${
+          loadHandlers(exceptRoutes, resultId, currentResult[2], currentResult[1] === null)
+        }${CTX}.${middlewareData[2]}=v${resultId};`;
         break;
       }
 
       // Validators
       case 2: {
         const resultId = state.localVarCount++;
-        currentResult[0] += `let ${VAR_PREFIX}${resultId}=${fnCall}${compileExceptHandlers(exceptRoutes, `${VAR_PREFIX}${resultId}`, currentResult[2], currentResult[1] === null)}`;
+        currentResult[0] += `let ${VAR_PREFIX}${resultId}=${fnCall}${
+          loadHandlers(exceptRoutes, resultId, currentResult[2], currentResult[1] === null)
+        }`;
         break;
       }
 
@@ -87,4 +91,3 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
 
   return currentResult;
 }
-

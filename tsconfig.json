@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     // Enable latest features
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "NodeNext",
     "moduleDetection": "force",
@@ -15,7 +11,6 @@
     "allowJs": true,
     // Bundler mode
     "moduleResolution": "NodeNext",
-    "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     // Best practices
     "strict": true,
@@ -35,7 +30,5 @@
     "stripInternal": true,
     "extendedDiagnostics": true
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

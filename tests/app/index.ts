@@ -5,11 +5,17 @@ import auth from './routes/auth.js';
 import timer from './routes/timer.js';
 import inline from './routes/inline.js';
 
-const app = router()
-  .route('/basic', basic)
-  .route('/patterns', patterns)
-  .route('/auth', auth)
-  .route('/timer', timer)
-  .route('/inline', inline);
+console.time('Build time');
 
-export default { fetch: jitc(app) };
+const fetch = jitc(
+  router()
+    .route('/basic', basic)
+    .route('/patterns', patterns)
+    .route('/auth', auth)
+    .route('/timer', timer)
+    .route('/inline', inline)
+);
+
+console.timeEnd('Build time');
+
+export default { fetch };

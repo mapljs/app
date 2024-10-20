@@ -33,6 +33,6 @@
     "typescript": "latest"
   },
   "dependencies": {
-    "@mapl/router": "^0.0.9"
+    "@mapl/router": "^0.0.10"
   }
 }
