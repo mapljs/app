@@ -5,6 +5,7 @@ import auth from './routes/auth.js';
 import timer from './routes/timer.js';
 import inline from './routes/inline.js';
 
+// Check build time
 console.time('Build time');
 
 const fetch = jitc(
@@ -18,4 +19,6 @@ const fetch = jitc(
 
 console.timeEnd('Build time');
 
-export default { fetch };
+// Debug
+Bun.write(`${import.meta.dir}/debug.js`, fetch.toString());
+Bun.serve({ fetch });
