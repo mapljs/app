@@ -2,7 +2,9 @@ import { PARAMS, PATH, REQ } from '@mapl/router/constants.js';
 
 // Prefixes
 export const MAPL = '__mapl';
-export const VAR_PREFIX = `${MAPL}_v`;
+
+export const HOLDER = `${MAPL}_ph`;
+export const CREATE_HOLDER = `let ${HOLDER}`;
 
 export const CTX = `${MAPL}_rc`;
 export const METHOD = `${MAPL}_m`;

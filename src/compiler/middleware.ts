@@ -1,17 +1,17 @@
 import type { AnyRouter } from '../router/index.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
-import { ASYNC_START, CREATE_EMPTY_HEADER, CTX, VAR_PREFIX } from './constants.js';
+import { ASYNC_START, CREATE_EMPTY_HEADER, CREATE_HOLDER, CTX, HOLDER } from './constants.js';
 import { buildHandler, loadHandlers, type ExceptHandlerBuilders } from './exceptions.js';
 import { isFunctionAsync } from './utils.js';
 
-export type CachedMiddlewareCompilationResult = [afterContext: string, beforeContext: string | null, isAsync: boolean, exceptRoutes: ExceptHandlerBuilders];
+export type CachedMiddlewareCompilationResult = [afterContext: string, beforeContext: string | null, isAsync: boolean, hasPlaceholder: boolean, exceptRoutes: ExceptHandlerBuilders];
 
 // Compile and cache middleware compilation result
 export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): CachedMiddlewareCompilationResult {
   const externalValues = state.externalValues;
 
   // Clone exception routes
-  const exceptRoutes = { ...prevValue[3] };
+  const exceptRoutes = { ...prevValue[4] };
   for (let i = 0, routes = router.exceptRoutes, l = routes.length; i < l; i++) {
     const exception = routes[i][0];
 
@@ -21,7 +21,8 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
       exceptRoutes[exception.id] = buildHandler(true, routes[i][1], externalValues);
   }
 
-  const currentResult: CachedMiddlewareCompilationResult = [prevValue[0], prevValue[1], prevValue[2], exceptRoutes];
+  // Create a new cache store
+  const currentResult: CachedMiddlewareCompilationResult = [prevValue[0], prevValue[1], prevValue[2], prevValue[3], exceptRoutes];
 
   // Set all except route
   if (typeof router.allExceptRoute !== 'undefined')
@@ -60,20 +61,22 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
     switch (middlewareType) {
       // Parsers
       case 1: {
-        const resultId = state.localVarCount++;
         // Set the prop to the context (prop name must be an identifier)
-        currentResult[0] += `let ${VAR_PREFIX}${resultId}=${fnCall}${
-          loadHandlers(exceptRoutes, resultId, currentResult[2], currentResult[1] === null)
-        }${CTX}.${middlewareData[2]}=v${resultId};`;
+        currentResult[0] += `${currentResult[3] ? HOLDER : CREATE_HOLDER}=${fnCall}${
+          loadHandlers(exceptRoutes, currentResult[1] === null, currentResult[2])
+        }${CTX}.${middlewareData[2]}=${HOLDER};`;
+
+        currentResult[3] = true;
         break;
       }
 
       // Validators
       case 2: {
-        const resultId = state.localVarCount++;
-        currentResult[0] += `let ${VAR_PREFIX}${resultId}=${fnCall}${
-          loadHandlers(exceptRoutes, resultId, currentResult[2], currentResult[1] === null)
+        currentResult[0] += `${currentResult[3] ? HOLDER : CREATE_HOLDER}=${fnCall}${
+          loadHandlers(exceptRoutes, currentResult[1] === null, currentResult[2])
         }`;
+
+        currentResult[3] = true;
         break;
       }
 

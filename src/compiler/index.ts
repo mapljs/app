@@ -65,7 +65,7 @@ export function compile(router: AnyRouter): AppRouterCompilerState {
 
   // Put all stuff into the radix tree
   // eslint-disable-next-line
-  compileRouter('', router, state, ['', null, false, {}]);
+  compileRouter('', router, state, ['', null, false, false, {}]);
 
   // Actually load the entire tree here
   if (routeTrees[0] !== null) {

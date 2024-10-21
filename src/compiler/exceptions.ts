@@ -1,11 +1,11 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 
-import { ASYNC_START, CTX, CTX_DEF, CTX_END, EXCEPT_SYMBOL, HEADERS, HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, RET_500, SET_HTML_HEADER, SET_JSON_HEADER, VAR_PREFIX } from './constants.js';
+import { ASYNC_START, CTX, CTX_DEF, CTX_END, EXCEPT_SYMBOL, HEADERS, HOLDER, HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, RET_500, SET_HTML_HEADER, SET_JSON_HEADER, VAR_PREFIX } from './constants.js';
 import { buildStaticHandler, isFunctionAsync, serializeBody } from './utils.js';
 
 // A cached function to build out handlers
-type ExceptHandlerBuilder = (arg: string, isAsync: boolean, hasContext: boolean) => string;
+type ExceptHandlerBuilder = (hasContext: boolean, isAsync: boolean) => string;
 export type ExceptHandlerBuilders = Record<number, ExceptHandlerBuilder>;
 
 // Cache stuff
@@ -30,7 +30,7 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
     const noContextCase = buildStaticHandler(body, handler.options, externalValues, false);
 
     // eslint-disable-next-line
-    return (_, _1, hasContext) => hasContext ? hasContextCase : noContextCase;
+    return (hasContext) => hasContext ? hasContextCase : noContextCase;
   }
 
   const fn = handler.fn;
@@ -39,27 +39,25 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
   // Return a raw Response
   if (handlerType === 'response') {
     if (isDynamic) {
-      const retStart = `return f${externalValues.push(fn) - 1}(`;
-      const retEnd = `,${fnNeedContext ? CTX : ''});`;
-
-      // Insert first arg in
-      return (arg, _, hasContext) => `${!hasContext && fnNeedContext ? TEXT_CTX_DEF : ''}${retStart}${arg}${retEnd}`;
+      const ret = `return f${externalValues.push(fn) - 1}(${HOLDER},${fnNeedContext ? CTX : ''});`;
+      return (hasContext) => `${!hasContext && fnNeedContext ? TEXT_CTX_DEF : ''}${ret}`;
     }
 
     const str = `return f${externalValues.push(fn) - 1}(${fnNeedContext ? CTX : ''});`;
     // eslint-disable-next-line
-    return (_, _1, hasContext) => !hasContext && fnNeedContext ? TEXT_CTX_DEF + str : str;
+    return (hasContext) => !hasContext && fnNeedContext ? TEXT_CTX_DEF + str : str;
   }
 
   const isFnAsync = isFunctionAsync(fn);
 
   // Cache known parts
-  const retStart = `return new Response(${handlerType === 'json' ? 'JSON.stringify(' : ''}${isFnAsync ? 'await ' : ''}f${externalValues.push(fn) - 1}(`;
-  const endArgs = `${fnNeedContext ? isDynamic ? COLON_CTX : CTX : ''}${handlerType === 'json' ? '))' : ')'}`;
+  const retStart = `return new Response(${handlerType === 'json' ? 'JSON.stringify(' : ''}${isFnAsync ? 'await ' : ''}f${externalValues.push(fn) - 1}(${
+    fnNeedContext ? isDynamic ? `${HOLDER}${COLON_CTX}` : CTX : ''
+  }${handlerType === 'json' ? '))' : ')'}`;
   const retEnd = `${fnNeedContext ? COLON_CTX : ''});`;
 
   // Build a closure to generate strings faster
-  return (arg, isAsync, hasContext) => {
+  return (hasContext, isAsync) => {
     // Whether it is required to wrap the context in an async scope
     isAsync = !isAsync && isFnAsync;
     let result = isAsync ? ASYNC_START : '';
@@ -76,11 +74,6 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
 
     // Push the first return part
     result += retStart;
-
-    // Insert the payload as the first arg if needed
-    if (isDynamic)
-      result += arg;
-    result += endArgs;
 
     if (!fnNeedContext) {
       // If we already have a context it should be passed
@@ -107,14 +100,14 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
 }
 
 const DEFAULT_RET = `default:${RET_500}}`;
+const START_CHECK = `if(Array.isArray(${HOLDER})&&${HOLDER}[0]===${EXCEPT_SYMBOL})switch(${HOLDER}[1]){`;
 
-export function loadHandlers(builders: ExceptHandlerBuilders, varId: number, isAsync: boolean, hasContext: boolean): string {
-  let str = `if(Array.isArray(${VAR_PREFIX}${varId})&&${VAR_PREFIX}${varId}[0]===${EXCEPT_SYMBOL})switch(${VAR_PREFIX}${varId}[1]){`;
-  const payload = `${VAR_PREFIX}${varId}[2]`;
+export function loadHandlers(builders: ExceptHandlerBuilders, hasContext: boolean, isAsync: boolean): string {
+  let str = START_CHECK;
 
   // Build all exceptions
-  for (const id in builders) str += `case ${id}:{${builders[id](payload, isAsync, hasContext)}}`;
+  for (const id in builders) str += `case ${id}:{${builders[id](hasContext, isAsync)}}`;
 
   // Catch all
-  return str + (typeof builders[0] === 'undefined' ? DEFAULT_RET : `default:{${builders[0](payload, isAsync, hasContext)}}}`);
+  return str + (typeof builders[0] === 'undefined' ? DEFAULT_RET : `default:{${builders[0](hasContext, isAsync)}}}`);
 }
