@@ -18,6 +18,7 @@ const TEXT_CTX_DEF = `let ${HEADERS}=[];${CTX_DEF}${CTX_END}`;
 const HTML_CTX_DEF = `let ${HEADERS}=[${HTML_HEADER_PAIR}];${CTX_DEF}${CTX_END}`;
 const JSON_CTX_DEF = `let ${HEADERS}=[${JSON_HEADER_PAIR}];${CTX_DEF}${CTX_END}`;
 
+// Build closures that generates exception content
 export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilder {
   const handlerType = handler.type;
 
@@ -39,7 +40,7 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
   // Return a raw Response
   if (handlerType === 'response') {
     if (isDynamic) {
-      const ret = `return f${externalValues.push(fn) - 1}(${HOLDER},${fnNeedContext ? CTX : ''});`;
+      const ret = `return f${externalValues.push(fn) - 1}(${HOLDER}[2],${fnNeedContext ? CTX : ''});`;
       return (hasContext) => `${!hasContext && fnNeedContext ? TEXT_CTX_DEF : ''}${ret}`;
     }
 
@@ -52,7 +53,7 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
 
   // Cache known parts
   const retStart = `return new Response(${handlerType === 'json' ? 'JSON.stringify(' : ''}${isFnAsync ? 'await ' : ''}f${externalValues.push(fn) - 1}(${
-    fnNeedContext ? isDynamic ? `${HOLDER}${COLON_CTX}` : CTX : ''
+    fnNeedContext ? isDynamic ? `${HOLDER}[2]${COLON_CTX}` : CTX : ''
   }${handlerType === 'json' ? '))' : ')'}`;
   const retEnd = `${fnNeedContext ? COLON_CTX : ''});`;
 

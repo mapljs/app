@@ -1,31 +1,27 @@
 import type { DynamicException, StaticException, ExcludeExceptionType } from '../exception.js';
 import type { RouteRegisters } from './route.js';
 import type { Context } from './types/context.js';
-import type { AnyHandler, Handler, HandlerData, InferHandlerResponse } from './types/handler.js';
+import type { AnyHandler, Handler, HandlerData } from './types/handler.js';
 import type { MacroMiddlewareFunction, MiddlewareData, MiddlewareFunction } from './types/middleware.js';
 
-export type AnyRouter = Router<any, HandlerData[], [string, AnyRouter][], any>;
-export type BaseRouter = Router<{}, [], [], never>;
+export type AnyRouter = Router<any, HandlerData[], [string, AnyRouter][]>;
+export type BaseRouter = Router<{}, [], []>;
 
 // Merge two router types
 export type MergeRouter<T1 extends AnyRouter, T2 extends AnyRouter> = Router<
   T1['stateType'] & T2['stateType'],
   [...T1['routes'], ...T2['routes']],
-  [...T1['subrouters'], ...T2['subrouters']],
-  T1['errorReturnType'] | T2['errorReturnType']
+  [...T1['subrouters'], ...T2['subrouters']]
 >;
 
 interface Router<
   State,
   Routes extends HandlerData[],
-  SubRouters extends [string, AnyRouter][],
-  ErrorReturnType
-> extends RouteRegisters<State, Routes, SubRouters, ErrorReturnType> { }
+  SubRouters extends [string, AnyRouter][]
+> extends RouteRegisters<State, Routes, SubRouters> { }
 
 // eslint-disable-next-line
-class Router<State, Routes, SubRouters, ErrorReturnType> {
-  // Type inference
-  declare public readonly errorReturnType: ErrorReturnType;
+class Router<State, Routes, SubRouters> {
   declare public readonly stateType: State;
 
   // Leave handling to the main app
@@ -47,7 +43,7 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
    * Register a subrouter
    */
   public route<Path extends string, SubRouter extends AnyRouter>(path: string, subrouter: SubRouter): Router<
-    State, Routes, [...SubRouters, [Path, SubRouter]], ErrorReturnType
+    State, Routes, [...SubRouters, [Path, SubRouter]]
   > {
     this.subrouters.push([path, subrouter]);
     return this as any;
@@ -65,7 +61,7 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
    * Register a function to parse and set the result to the context
    */
   public parse<Prop extends string, ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
-    State & { [K in Prop]: ExcludeExceptionType<Awaited<ParserReturn>> }, Routes, SubRouters, ErrorReturnType
+    State & { [K in Prop]: ExcludeExceptionType<Awaited<ParserReturn>> }, Routes, SubRouters
   > {
     this.middlewares.push([1, fn, prop]);
     return this as any;
@@ -91,7 +87,7 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
    * Register a function that runs on every request and set result to context
    */
   public set<Prop extends string, ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
-    State & { [K in Prop]: Awaited<ParserReturn> }, Routes, SubRouters, ErrorReturnType
+    State & { [K in Prop]: Awaited<ParserReturn> }, Routes, SubRouters
   > {
     this.middlewares.push([4, fn, prop]);
     return this as any;
@@ -101,14 +97,14 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
    * Handle a static exception
    */
   public catch<T extends Handler<{}>>(exception: StaticException, handler: T): Router<
-    State, Routes, SubRouters, ErrorReturnType | InferHandlerResponse<T>
+    State, Routes, SubRouters
   >;
 
   /**
    * Handle a dynamic exception
    */
   public catch<Payload, T extends Handler<{}, [Payload]>>(exception: DynamicException<Payload>, handler: T): Router<
-    State, Routes, SubRouters, ErrorReturnType | InferHandlerResponse<T>
+    State, Routes, SubRouters
   >;
 
   /**
@@ -124,7 +120,7 @@ class Router<State, Routes, SubRouters, ErrorReturnType> {
    * Handle all exceptions
    */
   public catchAll<T extends Handler<{}>>(handler: T): Router<
-    State, Routes, SubRouters, ErrorReturnType | InferHandlerResponse<T>
+    State, Routes, SubRouters
   > {
     this.allExceptRoute = handler;
     return this as any;

@@ -1,4 +1,3 @@
-import type { StaticHandler } from '../router/types/handler.js';
 import { CTX, HEADERS } from './constants.js';
 
 // eslint-disable-next-line

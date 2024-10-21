@@ -36,6 +36,7 @@ export const SET_JSON_HEADER = `${HEADERS}.push(${JSON_HEADER_PAIR});`;
 // Exception symbol is always the first external value
 export const EXCEPT_SYMBOL = 'f0';
 
+// Static response
 const RESPONSE_400 = `${MAPL}_r400`;
 export const RET_400 = `return ${RESPONSE_400};`;
 
@@ -45,6 +46,7 @@ export const RET_404 = `return ${RESPONSE_404};`;
 const RESPONSE_500 = `${MAPL}_r500`;
 export const RET_500 = `return ${RESPONSE_500};`;
 
+// Default vars
 export const CONST_VARS = `var ${HTML_HEADER_PAIR}=['content-type','text/html'],${HTML_OPTIONS}={headers:[${HTML_HEADER_PAIR}]},${JSON_HEADER_PAIR}=['content-type','application/json'],${JSON_OPTIONS}={headers:[${JSON_HEADER_PAIR}]},${RESPONSE_400}=new Response(null,{status:400}),${RESPONSE_404}=new Response(null,{status:404}),${RESPONSE_500}=new Response(null,{status:500});`;
 
 // Parsings and constants

@@ -5,13 +5,11 @@ export type RouteRegister<
   Method extends string | null,
   State,
   Routes extends HandlerData[],
-  SubRouters extends [string, AnyRouter][],
-  ErrorReturnType
+  SubRouters extends [string, AnyRouter][]
 > = <Path extends string, T extends Handler<State>>(path: Path, handler: T) => Router<
   State,
   [...Routes, [Method, Path, T]],
-  SubRouters,
-  ErrorReturnType
+  SubRouters
 >;
 
 // Request method type utils
@@ -21,7 +19,6 @@ export type Methods = 'get' | 'head' | 'post' | 'put' | 'delete' | 'patch' | 'op
 export type RouteRegisters<
   State,
   Routes extends HandlerData[],
-  SubRouters extends [string, AnyRouter][],
-  ErrorReturnType
-> = { [Method in Methods]: RouteRegister<Uppercase<Method>, State, Routes, SubRouters, ErrorReturnType> }
-  & { any: RouteRegister<null, State, Routes, SubRouters, ErrorReturnType> };
+  SubRouters extends [string, AnyRouter][]
+> = { [Method in Methods]: RouteRegister<Uppercase<Method>, State, Routes, SubRouters> }
+  & { any: RouteRegister<null, State, Routes, SubRouters> };

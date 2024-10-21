@@ -1,5 +1,4 @@
 import type { AnyHandler } from '../router/types/handler.js';
-import type { AppRouterCompilerState } from '../types/compiler.js';
 import { HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, CTX, CTX_END, CTX_DEF, CTX_PARAM_DEF, HEADERS, SET_HTML_HEADER, SET_JSON_HEADER, ASYNC_START } from './constants.js';
 import { buildStaticHandler, isFunctionAsync, serializeBody } from './utils.js';
 
@@ -8,7 +7,7 @@ import { buildStaticHandler, isFunctionAsync, serializeBody } from './utils.js';
  */
 export function compileHandler(
   handler: AnyHandler,
-  externalValues: AppRouterCompilerState['externalValues'],
+  externalValues: any[],
 
   previouslyAsync: boolean,
   contextNeedParam: boolean | null
