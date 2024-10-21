@@ -173,6 +173,7 @@
                             status: 200,
                             req: __req,
                             headers: __mapl_h,
+                            params: __req_ps,
                           };
                           return new Response(f17(__mapl_rc), __mapl_rc);
                         }
