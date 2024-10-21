@@ -20,6 +20,7 @@ export const CTX_END = '};';
 
 // Async
 export const ASYNC_START = 'return (async()=>{';
+export const ASYNC_END = '})();';
 
 // Default vars
 export const HTML_HEADER_PAIR = `${MAPL}_htmlhp`;

@@ -1,3 +1,4 @@
+import type { StaticHandler } from '../router/types/handler.js';
 import { CTX, HEADERS } from './constants.js';
 
 // eslint-disable-next-line
@@ -5,31 +6,6 @@ const AsyncFunction = (async () => { }).constructor;
 
 export function isFunctionAsync(fn: any): fn is (...args: any[]) => Promise<any> {
   return fn instanceof AsyncFunction;
-}
-
-export function serializeBody(body: any): string {
-  switch (typeof body) {
-    case 'bigint':
-    case 'number':
-    case 'boolean':
-      return `"${body}"`;
-
-    case 'undefined':
-      return 'null';
-
-    case 'object':
-      if (body === null)
-        return 'null';
-
-      // Let the user explicitly choose how to
-      // serialize objects by default
-      break;
-
-    // Just throw
-    default: break;
-  }
-
-  throw new Error(`${body} is not serializable`);
 }
 
 export function toHeaderTuples(headers: HeadersInit): [string, string][] {
@@ -40,7 +16,9 @@ export function toHeaderTuples(headers: HeadersInit): [string, string][] {
       : Object.entries(headers);
 }
 
-export function buildStaticHandler(body: string, options: ResponseInit | undefined, externalValues: any[], contextNeedParam: boolean | null): string {
+export function buildStaticHandler(handler: StaticHandler, externalValues: any[], contextNeedParam: boolean | null): string {
+  const options = handler.options;
+
   // Has context then serialize options to
   // statements that changes the context
   if (contextNeedParam === null) {
@@ -51,16 +29,16 @@ export function buildStaticHandler(body: string, options: ResponseInit | undefin
         tmpl += `${CTX}.status=${options.status};`;
 
       if (typeof options.statusText === 'string')
-        tmpl += `${CTX}.statusText=${options.statusText};`;
+        tmpl += `${CTX}.statusText="${options.statusText.replace(/"/, '\\"')}";`;
 
       if (typeof options.headers === 'object')
-        tmpl += `${HEADERS}.push(...${externalValues.push(toHeaderTuples(options.headers))});`;
+        tmpl += `${HEADERS}.push(...f${externalValues.push(toHeaderTuples(options.headers))});`;
     }
 
-    return `${tmpl}return new Response(${body},${CTX});`;
+    return `${tmpl}return new Response(${typeof handler.body === 'string'
+      ? `"${handler.body.replace(/"/, '\\"')}"`
+      : `f${externalValues.push(handler.body) - 1}`},${CTX});`;
   }
 
-  return typeof options === 'undefined'
-    ? `return new Response(${body});`
-    : `return new Response(${body},${externalValues.push(options)});`;
+  return `return ${externalValues.push(new Response(handler.body, handler.options)) - 1}.clone();`;
 }

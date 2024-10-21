@@ -26,7 +26,7 @@ export interface ResponseHandler<State, Args extends any[]> {
 export interface StaticHandler {
   type: 'static';
 
-  body?: any;
+  body?: BodyInit | null;
   options?: ResponseInit;
 }
 

@@ -1,8 +1,8 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 
-import { ASYNC_START, CTX, CTX_DEF, CTX_END, EXCEPT_SYMBOL, HEADERS, HOLDER, HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, RET_500, SET_HTML_HEADER, SET_JSON_HEADER, VAR_PREFIX } from './constants.js';
-import { buildStaticHandler, isFunctionAsync, serializeBody } from './utils.js';
+import { ASYNC_END, ASYNC_START, CTX, CTX_DEF, CTX_END, EXCEPT_SYMBOL, HEADERS, HOLDER, HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, RET_500, SET_HTML_HEADER, SET_JSON_HEADER } from './constants.js';
+import { buildStaticHandler, isFunctionAsync } from './utils.js';
 
 // A cached function to build out handlers
 type ExceptHandlerBuilder = (hasContext: boolean, isAsync: boolean) => string;
@@ -24,14 +24,14 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
 
   // Static response
   if (handlerType === 'static') {
-    const body = serializeBody(handler.body);
-
-    // Cache two cases
-    const hasContextCase = buildStaticHandler(body, handler.options, externalValues, null);
-    const noContextCase = buildStaticHandler(body, handler.options, externalValues, false);
+    // Lazily compile two cases
+    let hasContextCase: string | null = null;
+    let noContextCase: string | null = null;
 
     // eslint-disable-next-line
-    return (hasContext) => hasContext ? hasContextCase : noContextCase;
+    return (hasContext) => hasContext
+      ? hasContextCase ??= buildStaticHandler(handler, externalValues, null)
+      : noContextCase ??= buildStaticHandler(handler, externalValues, false);
   }
 
   const fn = handler.fn;
@@ -94,7 +94,7 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
 
     // Wrap the scope if necessary
     if (isAsync)
-      result += '});';
+      result += ASYNC_END;
 
     return result;
   };
