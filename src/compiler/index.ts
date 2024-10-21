@@ -40,13 +40,11 @@ export const compileItem: AppRouterCompilerState['compileItem'] = (item, state, 
   const middlewareResult = item[0];
 
   // Remember to close async scope
-  const closeScope = middlewareResult[2] ? '});' : '';
+  const content = middlewareResult[1] === null
+    ? `${middlewareResult[0]}${compileHandler(item[1], state.externalValues, middlewareResult[2], hasParam)}${middlewareResult[2] ? '});' : ''}`
+    : `${middlewareResult[1]}${CTX_DEF}${hasParam ? CTX_PARAM_DEF : ''}${CTX_END}${middlewareResult[0]}${compileHandler(item[1], state.externalValues, middlewareResult[2], null)}${middlewareResult[2] ? '});' : ''}`;
 
-  if (middlewareResult[1] === null)
-    state.contentBuilder.push(`${middlewareResult[0]}${compileHandler(item[1], state.externalValues, middlewareResult[2], hasParam)}${closeScope}`);
-  else
-    // Don't try to create a new context if it already has been created
-    state.contentBuilder.push(`${middlewareResult[1]}${CTX_DEF}${hasParam ? CTX_PARAM_DEF : ''}${CTX_END}${middlewareResult[0]}${compileHandler(item[1], state.externalValues, middlewareResult[2], null)}${closeScope}`);
+  state.contentBuilder.push(content);
 };
 
 export function compile(router: AnyRouter): AppRouterCompilerState {

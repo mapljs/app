@@ -2,7 +2,7 @@ import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 
 import { ASYNC_START, CTX, CTX_DEF, CTX_END, EXCEPT_SYMBOL, HEADERS, HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, RET_500, SET_HTML_HEADER, SET_JSON_HEADER, VAR_PREFIX } from './constants.js';
-import { isFunctionAsync } from './utils.js';
+import { buildStaticHandler, isFunctionAsync, serializeBody } from './utils.js';
 
 // A cached function to build out handlers
 type ExceptHandlerBuilder = (arg: string, isAsync: boolean, hasContext: boolean) => string;
@@ -20,10 +20,42 @@ const JSON_CTX_DEF = `let ${HEADERS}=[${JSON_HEADER_PAIR}];${CTX_DEF}${CTX_END}`
 
 export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilder {
   const handlerType = handler.type;
+
+  // Static response
+  if (handlerType === 'static') {
+    // No prebuilt for error handlers
+    if (handler.prebuilt === true)
+      throw new Error('Error handlers can not be pre-built!');
+
+    const body = serializeBody(handler.body);
+
+    // Cache two cases
+    const hasContextCase = buildStaticHandler(body, handler.options, externalValues, null);
+    const noContextCase = buildStaticHandler(body, handler.options, externalValues, false);
+
+    // eslint-disable-next-line
+    return (_, _1, hasContext) => hasContext ? hasContextCase : noContextCase;
+  }
+
   const fn = handler.fn;
+  const fnNeedContext = fn.length > (isDynamic ? 1 : 0);
+
+  // Return a raw Response
+  if (handlerType === 'response') {
+    if (isDynamic) {
+      const retStart = `return f${externalValues.push(fn) - 1}(`;
+      const retEnd = `,${fnNeedContext ? CTX : ''});`;
+
+      // Insert first arg in
+      return (arg, _, hasContext) => `${!hasContext && fnNeedContext ? TEXT_CTX_DEF : ''}${retStart}${arg}${retEnd}`;
+    }
+
+    const str = `return f${externalValues.push(fn) - 1}(${fnNeedContext ? CTX : ''});`;
+    // eslint-disable-next-line
+    return (_, _1, hasContext) => !hasContext && fnNeedContext ? TEXT_CTX_DEF + str : str;
+  }
 
   const isFnAsync = isFunctionAsync(fn);
-  const fnNeedContext = fn.length > (isDynamic ? 1 : 0);
 
   // Cache known parts
   const retStart = `return new Response(${handlerType === 'json' ? 'JSON.stringify(' : ''}${isFnAsync ? 'await ' : ''}f${externalValues.push(fn) - 1}(`;

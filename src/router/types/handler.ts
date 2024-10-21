@@ -18,8 +18,19 @@ export interface HTMLHandler<State, Args extends any[]> {
   fn: (...args: [...Args, Context & State]) => MaybePromise<BodyInit | null>;
 }
 
-export type Handler<State, Args extends any[] = []> = TextHandler<State, Args> | JSONHandler<State, Args> | HTMLHandler<State, Args>;
-export type AnyHandler = Handler<any> | Handler<any, [any]>;
+export interface ResponseHandler<State, Args extends any[]> {
+  type: 'response';
+  fn: (...args: [...Args, Context & State]) => MaybePromise<BodyInit | null>;
+}
 
-// TODO
-export type InferHandlerResponse<T extends AnyHandler> = Awaited<ReturnType<T['fn']>>;
+export interface StaticHandler {
+  type: 'static';
+
+  body?: any;
+  options?: ResponseInit;
+
+  prebuilt?: boolean;
+}
+
+export type Handler<State, Args extends any[] = []> = TextHandler<State, Args> | JSONHandler<State, Args> | HTMLHandler<State, Args> | ResponseHandler<State, Args> | StaticHandler;
+export type AnyHandler = Handler<any> | Handler<any, [any]>;

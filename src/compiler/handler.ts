@@ -1,7 +1,7 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 import { HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, CTX, CTX_END, CTX_DEF, CTX_PARAM_DEF, HEADERS, SET_HTML_HEADER, SET_JSON_HEADER, ASYNC_START } from './constants.js';
-import { isFunctionAsync } from './utils.js';
+import { buildStaticHandler, isFunctionAsync, serializeBody, toHeaderTuples } from './utils.js';
 
 /**
  * Compile a handler. This is a fast path for handlers that doesn't need recompilation
@@ -13,12 +13,21 @@ export function compileHandler(
   previouslyAsync: boolean,
   contextNeedParam: boolean | null
 ): string {
-  const fn = handler.fn;
   const handlerType = handler.type;
+
+  // Build static response
+  if (handlerType === 'static')
+    return buildStaticHandler(serializeBody(handler.body), handler.options, externalValues, contextNeedParam);
+
+  const fn = handler.fn;
+  const fnNeedContext = fn.length !== 0;
+
+  // Return a raw Response
+  if (handlerType === 'response')
+    return `return f${externalValues.push(fn) - 1}(${fnNeedContext ? CTX : ''});`;
 
   const isFnAsync = isFunctionAsync(fn);
   const wrapAsync = isFnAsync && !previouslyAsync;
-  const fnNeedContext = fn.length !== 0;
 
   const fnCall = `${isFnAsync ? 'await ' : ''}f${externalValues.push(fn) - 1}(${fnNeedContext ? CTX : ''})`;
 
