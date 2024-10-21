@@ -23,10 +23,6 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
 
   // Static response
   if (handlerType === 'static') {
-    // No prebuilt for error handlers
-    if (handler.prebuilt === true)
-      throw new Error('Error handlers can not be pre-built!');
-
     const body = serializeBody(handler.body);
 
     // Cache two cases

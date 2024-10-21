@@ -28,8 +28,6 @@ export interface StaticHandler {
 
   body?: any;
   options?: ResponseInit;
-
-  prebuilt?: boolean;
 }
 
 export type Handler<State, Args extends any[] = []> = TextHandler<State, Args> | JSONHandler<State, Args> | HTMLHandler<State, Args> | ResponseHandler<State, Args> | StaticHandler;
