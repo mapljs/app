@@ -20,8 +20,13 @@
       __mapl_rc.statusText = "Hi";
       __mapl_h.push(...f9);
       return new Response("<p>This is static content</p>", __mapl_rc);
+    } else if (__req_p === "basic/response") {
+      let __mapl_h = [];
+      let __mapl_rc = { status: 200, req: __req, headers: __mapl_h };
+      f1(__mapl_rc);
+      return f9();
     } else if (__req_p === "patterns") {
-      return new Response(f9());
+      return new Response(f10());
     } else if (__req_p === "auth/yield") {
       let __mapl_h = [];
       let __mapl_rc = { status: 200, req: __req, headers: __mapl_h };
@@ -35,14 +40,14 @@
             return __mapl_r500;
         }
       __mapl_rc.token = __mapl_ph;
-      return new Response(f10(__mapl_rc), __mapl_rc);
+      return new Response(f11(__mapl_rc), __mapl_rc);
     } else if (__req_p === "timer") {
       let __mapl_h = [];
       let __mapl_rc = { status: 200, req: __req, headers: __mapl_h };
       __mapl_rc.startTime = f4(__mapl_rc);
       f5(__mapl_rc);
       __mapl_rc.totalTime = f6(__mapl_rc);
-      return new Response(f11(__mapl_rc), __mapl_rc);
+      return new Response(f12(__mapl_rc), __mapl_rc);
     } else {
       let __req_pl = __req_p.length;
       switch (__req_p.charCodeAt(0)) {
@@ -69,7 +74,7 @@
                                   };
                                   f1(__mapl_rc);
                                   return new Response(
-                                    f12(__mapl_rc),
+                                    f13(__mapl_rc),
                                     __mapl_rc,
                                   );
                                 }
@@ -100,7 +105,7 @@
                                           params: __req_ps,
                                         };
                                         return new Response(
-                                          f13(__mapl_rc),
+                                          f14(__mapl_rc),
                                           __mapl_rc,
                                         );
                                       }
@@ -122,7 +127,7 @@
       f1(__mapl_rc);
       __mapl_h.push(__mapl_jsonhp);
       return (async () =>
-        new Response(JSON.stringify(await f14(__mapl_rc)), __mapl_rc))();
+        new Response(JSON.stringify(await f15(__mapl_rc)), __mapl_rc))();
     } else if (__req_p === "inline/yield") {
       return async () => {
         let __mapl_h = [];
@@ -137,7 +142,7 @@
         }
         __mapl_rc.body = __mapl_ph;
         __mapl_h.push(__mapl_jsonhp);
-        return new Response(JSON.stringify(f15(__mapl_rc)), __mapl_rc);
+        return new Response(JSON.stringify(f16(__mapl_rc)), __mapl_rc);
       };
     } else {
       let __req_pl = __req_p.length;
@@ -169,7 +174,7 @@
                             req: __req,
                             headers: __mapl_h,
                           };
-                          return new Response(f16(__mapl_rc), __mapl_rc);
+                          return new Response(f17(__mapl_rc), __mapl_rc);
                         }
                       }
     }

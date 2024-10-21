@@ -33,6 +33,12 @@ const app = router()
       },
       statusText: 'Hi'
     }
+  })
+
+  // Return a raw response
+  .get('/response', {
+    type: 'response',
+    fn: async () => fetch('http://example.com')
   });
 
 export default app;

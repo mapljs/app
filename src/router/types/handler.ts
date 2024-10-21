@@ -20,7 +20,7 @@ export interface HTMLHandler<State, Args extends any[]> {
 
 export interface ResponseHandler<State, Args extends any[]> {
   type: 'response';
-  fn: (...args: [...Args, Context & State]) => MaybePromise<BodyInit | null>;
+  fn: (...args: [...Args, Context & State]) => MaybePromise<Response>;
 }
 
 export interface StaticHandler {
