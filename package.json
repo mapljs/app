@@ -1,6 +1,6 @@
 {
   "name": "@mapl/app",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "A low overhead web framework",
   "keywords": [
     "fast",
@@ -25,12 +25,13 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "latest",
-    "eslint": "latest",
-    "typescript-eslint": "latest",
-    "eslint-plugin-jsdoc": "latest",
     "@types/bun": "latest",
+    "eslint": "latest",
+    "eslint-plugin-jsdoc": "latest",
     "mitata": "latest",
-    "typescript": "latest"
+    "prettier": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "latest"
   },
   "dependencies": {
     "@mapl/router": "^0.0.10"
