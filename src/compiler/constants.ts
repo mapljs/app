@@ -14,9 +14,8 @@ export const PATH_START = `${MAPL}_ps`;
 export const PATH_END = `${MAPL}_pe`;
 
 // Request context
-export const CTX_DEF = `let ${CTX}={status:200,req:${REQ},headers:${HEADERS}`;
-export const CTX_PARAM_DEF = `,params:${PARAMS}`;
-export const CTX_END = '};';
+export const CTX_DEF = `let ${CTX}={status:200,req:${REQ},headers:${HEADERS}};`;
+export const CTX_PARAMS_DEF = `let ${CTX}={status:200,req:${REQ},headers:${HEADERS},params:${PARAMS}};`;
 
 // Async
 export const ASYNC_START = 'return (async()=>{';

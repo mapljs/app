@@ -1,7 +1,7 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 
-import { ASYNC_END, ASYNC_START, CTX, CTX_DEF, CTX_END, EXCEPT_SYMBOL, HEADERS, HOLDER, HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, RET_500, SET_HTML_HEADER, SET_JSON_HEADER } from './constants.js';
+import { ASYNC_END, ASYNC_START, CTX, CTX_DEF, EXCEPT_SYMBOL, HEADERS, HOLDER, HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, RET_500, SET_HTML_HEADER, SET_JSON_HEADER } from './constants.js';
 import { buildStaticHandler, isFunctionAsync } from './utils.js';
 
 // A cached function to build out handlers
@@ -14,9 +14,9 @@ const COLON_HTML_OPTIONS = `,${HTML_OPTIONS}`;
 const COLON_JSON_OPTIONS = `,${JSON_OPTIONS}`;
 
 // Text & HTML & JSON context creation
-const TEXT_CTX_DEF = `let ${HEADERS}=[];${CTX_DEF}${CTX_END}`;
-const HTML_CTX_DEF = `let ${HEADERS}=[${HTML_HEADER_PAIR}];${CTX_DEF}${CTX_END}`;
-const JSON_CTX_DEF = `let ${HEADERS}=[${JSON_HEADER_PAIR}];${CTX_DEF}${CTX_END}`;
+const TEXT_CTX_DEF = `let ${HEADERS}=[];${CTX_DEF}`;
+const HTML_CTX_DEF = `let ${HEADERS}=[${HTML_HEADER_PAIR}];${CTX_DEF}`;
+const JSON_CTX_DEF = `let ${HEADERS}=[${JSON_HEADER_PAIR}];${CTX_DEF}`;
 
 // Build closures that generates exception content
 export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilder {

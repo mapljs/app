@@ -6,7 +6,7 @@ import type { AppRouterCompilerState } from '../types/compiler.js';
 import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
 import { REQ } from '@mapl/router/constants.js';
 import { compileHandler } from './handler.js';
-import { ASYNC_END, CTX_DEF, CTX_END, CTX_PARAM_DEF, METHOD, PARSE_PATH, RET_404 } from './constants.js';
+import { ASYNC_END, CTX_DEF, CTX_PARAMS_DEF, METHOD, PARSE_PATH, RET_404 } from './constants.js';
 import { symbol as exceptionSymbol } from '../exception.js';
 
 // DFS and compile every subrouter
@@ -41,12 +41,13 @@ export function compileRouter(prefixPath: string, router: AnyRouter, state: AppR
 export const compileItem: AppRouterCompilerState['compileItem'] = (item, state, hasParam) => {
   const middlewareResult = item[0];
 
-  // Remember to close async scope
-  const content = middlewareResult[1] === null
-    ? `${middlewareResult[0]}${compileHandler(item[1], state.externalValues, middlewareResult[2], hasParam)}${middlewareResult[2] ? ASYNC_END : ''}`
-    : `${middlewareResult[1]}${CTX_DEF}${hasParam ? CTX_PARAM_DEF : ''}${CTX_END}${middlewareResult[0]}${compileHandler(item[1], state.externalValues, middlewareResult[2], null)}${middlewareResult[2] ? '});' : ''}`;
+  state.contentBuilder.push(middlewareResult[1] === null
+    ? middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], hasParam)
+    : middlewareResult[1] + (hasParam ? CTX_PARAMS_DEF : CTX_DEF) + middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], null));
 
-  state.contentBuilder.push(content);
+  // Remember to close async scope
+  if (middlewareResult[2])
+    state.contentBuilder.push(ASYNC_END);
 };
 
 // 0: JIT
