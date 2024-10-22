@@ -1,4 +1,5 @@
 import type { StaticHandler } from '../router/types/handler.js';
+import type { AppRouterCompilerState } from '../types/compiler.js';
 import { CTX, HEADERS } from './constants.js';
 
 // eslint-disable-next-line
@@ -16,7 +17,7 @@ export function toHeaderTuples(headers: HeadersInit): [string, string][] {
       : Object.entries(headers);
 }
 
-export function buildStaticHandler(handler: StaticHandler, externalValues: any[], contextNeedParam: boolean | null): string {
+export function buildStaticHandler(handler: StaticHandler, externalValues: AppRouterCompilerState['externalValues'], contextNeedParam: boolean | null): string {
   const options = handler.options;
 
   // Has context then serialize options to
@@ -37,8 +38,8 @@ export function buildStaticHandler(handler: StaticHandler, externalValues: any[]
 
     return `${tmpl}return new Response(${typeof handler.body === 'string'
       ? `"${handler.body.replace(/"/, '\\"')}"`
-      : `f${externalValues.push(handler.body) - 1}`},${CTX});`;
+      : `f${externalValues.push(handler.body)}`},${CTX});`;
   }
 
-  return `return ${externalValues.push(new Response(handler.body, handler.options)) - 1}.clone();`;
+  return `return ${externalValues.push(new Response(handler.body, handler.options))}.clone();`;
 }

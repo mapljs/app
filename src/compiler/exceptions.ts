@@ -40,11 +40,11 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
   // Return a raw Response
   if (handlerType === 'response') {
     if (isDynamic) {
-      const ret = `return f${externalValues.push(fn) - 1}(${HOLDER}[2],${fnNeedContext ? CTX : ''});`;
+      const ret = `return f${externalValues.push(fn)}(${HOLDER}[2],${fnNeedContext ? CTX : ''});`;
       return (hasContext) => `${!hasContext && fnNeedContext ? TEXT_CTX_DEF : ''}${ret}`;
     }
 
-    const str = `return f${externalValues.push(fn) - 1}(${fnNeedContext ? CTX : ''});`;
+    const str = `return f${externalValues.push(fn)}(${fnNeedContext ? CTX : ''});`;
     // eslint-disable-next-line
     return (hasContext) => !hasContext && fnNeedContext ? TEXT_CTX_DEF + str : str;
   }
@@ -52,7 +52,7 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
   const isFnAsync = isFunctionAsync(fn);
 
   // Cache known parts
-  const retStart = `return new Response(${handlerType === 'json' ? 'JSON.stringify(' : ''}${isFnAsync ? 'await ' : ''}f${externalValues.push(fn) - 1}(${
+  const retStart = `return new Response(${handlerType === 'json' ? 'JSON.stringify(' : ''}${isFnAsync ? 'await ' : ''}f${externalValues.push(fn)}(${
     fnNeedContext ? isDynamic ? `${HOLDER}[2]${COLON_CTX}` : CTX : ''
   }${handlerType === 'json' ? '))' : ')'}`;
   const retEnd = `${fnNeedContext ? COLON_CTX : ''});`;

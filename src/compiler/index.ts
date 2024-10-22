@@ -1,4 +1,6 @@
 import { createRouter, insertItem, compileRouter as compileBaseRouter } from '@mapl/router';
+import { statefulNoOpBuilder, statelessNoOpBuilder } from '@mapl/compiler';
+
 import type { AnyRouter } from '../router/index.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
@@ -47,20 +49,28 @@ export const compileItem: AppRouterCompilerState['compileItem'] = (item, state, 
   state.contentBuilder.push(content);
 };
 
-export function compile(router: AnyRouter): AppRouterCompilerState {
-  // Load all states in the tree first
-  const contentBuilder: string[] = [];
+// 0: JIT
+// 1: Get only the body
+// 2: Get only the dependency
+export function compile(router: AnyRouter, mode: 0 | 1 | 2): AppRouterCompilerState {
   const routeTrees: AppRouterCompilerState['routeTrees'] = [null, null];
+
+  // Fake externalValues when only requires the body
+  const externalValues = mode === 1 ? statefulNoOpBuilder() : [] as any[];
+  externalValues.push(exceptionSymbol);
+
+  // Fake content builder when only requires the external dependencies
+  const contentBuilder = mode === 2 ? statelessNoOpBuilder : [] as string[];
+
   const state: AppRouterCompilerState = {
     routeTrees,
     compileItem,
 
     contentBuilder,
-    declarationBuilders: [],
-    localVarCount: 0,
+    declarationBuilders: mode === 2 ? statelessNoOpBuilder : [] as any[],
 
     // Exception symbol is f0
-    externalValues: [exceptionSymbol]
+    externalValues
   };
 
   // Put all stuff into the radix tree

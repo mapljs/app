@@ -1,4 +1,5 @@
 import type { AnyHandler } from '../router/types/handler.js';
+import type { AppRouterCompilerState } from '../types/compiler.js';
 import { HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, CTX, CTX_END, CTX_DEF, CTX_PARAM_DEF, HEADERS, SET_HTML_HEADER, SET_JSON_HEADER, ASYNC_START, ASYNC_END } from './constants.js';
 import { buildStaticHandler, isFunctionAsync } from './utils.js';
 
@@ -10,7 +11,7 @@ const LIGHT_ASYNC_END = ')();';
  */
 export function compileHandler(
   handler: AnyHandler,
-  externalValues: any[],
+  externalValues: AppRouterCompilerState['externalValues'],
 
   previouslyAsync: boolean,
   contextNeedParam: boolean | null
@@ -26,12 +27,12 @@ export function compileHandler(
 
   // Return a raw Response
   if (handlerType === 'response')
-    return `return f${externalValues.push(fn) - 1}(${fnNeedContext ? CTX : ''});`;
+    return `return f${externalValues.push(fn)}(${fnNeedContext ? CTX : ''});`;
 
   const isFnAsync = isFunctionAsync(fn);
   const wrapAsync = isFnAsync && !previouslyAsync;
 
-  const fnCall = `${isFnAsync ? 'await ' : ''}f${externalValues.push(fn) - 1}(${fnNeedContext ? CTX : ''})`;
+  const fnCall = `${isFnAsync ? 'await ' : ''}f${externalValues.push(fn)}(${fnNeedContext ? CTX : ''})`;
 
   // Choose the correct wrapper
   const fnResult = handlerType === 'text' || handlerType === 'html' ? fnCall : `JSON.stringify(${fnCall})`;

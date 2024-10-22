@@ -16,7 +16,7 @@ export type CachedMiddlewareCompilationResult = [
 ];
 
 // Load new exceptions
-export function loadNewExceptions(prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: any[]): ExceptHandlerBuilders {
+export function loadNewExceptions(prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilders {
   const routes = router.exceptRoutes;
   const allExceptRoute = router.allExceptRoute;
 
@@ -90,7 +90,7 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
       currentResult[5] = null;
     }
 
-    const fnCall = `${isFnAsync ? 'await ' : ''}f${externalValues.push(fn) - 1}(${needContext ? CTX : ''});`;
+    const fnCall = `${isFnAsync ? 'await ' : ''}f${externalValues.push(fn)}(${needContext ? CTX : ''});`;
     switch (middlewareType) {
       // Parsers
       case 1: {

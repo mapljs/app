@@ -11,43 +11,43 @@
     if (__req_p === "basic") {
       let __mapl_h = [];
       let __mapl_rc = { status: 200, req: __req, headers: __mapl_h };
-      f1(__mapl_rc);
-      return new Response(f7(), __mapl_rc);
+      f2(__mapl_rc);
+      return new Response(f8(), __mapl_rc);
     } else if (__req_p === "basic/static") {
       let __mapl_h = [];
       let __mapl_rc = { status: 200, req: __req, headers: __mapl_h };
-      f1(__mapl_rc);
+      f2(__mapl_rc);
       __mapl_rc.statusText = "Hi";
       __mapl_h.push(...f9);
       return new Response("<p>This is static content</p>", __mapl_rc);
     } else if (__req_p === "basic/response") {
       let __mapl_h = [];
       let __mapl_rc = { status: 200, req: __req, headers: __mapl_h };
-      f1(__mapl_rc);
-      return f9();
+      f2(__mapl_rc);
+      return f10();
     } else if (__req_p === "patterns") {
-      return new Response(f10());
+      return new Response(f11());
     } else if (__req_p === "auth/yield") {
       let __mapl_h = [];
       let __mapl_rc = { status: 200, req: __req, headers: __mapl_h };
-      let __mapl_ph = f3(__mapl_rc);
+      let __mapl_ph = f4(__mapl_rc);
       if (Array.isArray(__mapl_ph) && __mapl_ph[0] === f0)
         switch (__mapl_ph[1]) {
           case 1: {
-            return new Response(f2());
+            return new Response(f3());
           }
           default:
             return __mapl_r500;
         }
       __mapl_rc.token = __mapl_ph;
-      return new Response(f11(__mapl_rc), __mapl_rc);
+      return new Response(f12(__mapl_rc), __mapl_rc);
     } else if (__req_p === "timer") {
       let __mapl_h = [];
       let __mapl_rc = { status: 200, req: __req, headers: __mapl_h };
-      __mapl_rc.startTime = f4(__mapl_rc);
-      f5(__mapl_rc);
-      __mapl_rc.totalTime = f6(__mapl_rc);
-      return new Response(f12(__mapl_rc), __mapl_rc);
+      __mapl_rc.startTime = f5(__mapl_rc);
+      f6(__mapl_rc);
+      __mapl_rc.totalTime = f7(__mapl_rc);
+      return new Response(f13(__mapl_rc), __mapl_rc);
     } else {
       let __req_pl = __req_p.length;
       switch (__req_p.charCodeAt(0)) {
@@ -72,9 +72,9 @@
                                     headers: __mapl_h,
                                     params: __req_ps,
                                   };
-                                  f1(__mapl_rc);
+                                  f2(__mapl_rc);
                                   return new Response(
-                                    f13(__mapl_rc),
+                                    f14(__mapl_rc),
                                     __mapl_rc,
                                   );
                                 }
@@ -105,7 +105,7 @@
                                           params: __req_ps,
                                         };
                                         return new Response(
-                                          f14(__mapl_rc),
+                                          f15(__mapl_rc),
                                           __mapl_rc,
                                         );
                                       }
@@ -124,10 +124,10 @@
     if (__req_p === "basic/json") {
       let __mapl_h = [];
       let __mapl_rc = { status: 200, req: __req, headers: __mapl_h };
-      f1(__mapl_rc);
+      f2(__mapl_rc);
       __mapl_h.push(__mapl_jsonhp);
       return (async () =>
-        new Response(JSON.stringify(await f15(__mapl_rc)), __mapl_rc))();
+        new Response(JSON.stringify(await f16(__mapl_rc)), __mapl_rc))();
     } else if (__req_p === "inline/yield") {
       return async () => {
         let __mapl_h = [];
@@ -142,7 +142,7 @@
         }
         __mapl_rc.body = __mapl_ph;
         __mapl_h.push(__mapl_jsonhp);
-        return new Response(JSON.stringify(f16(__mapl_rc)), __mapl_rc);
+        return new Response(JSON.stringify(f17(__mapl_rc)), __mapl_rc);
       };
     } else {
       let __req_pl = __req_p.length;
@@ -175,7 +175,7 @@
                             headers: __mapl_h,
                             params: __req_ps,
                           };
-                          return new Response(f17(__mapl_rc), __mapl_rc);
+                          return new Response(f18(__mapl_rc), __mapl_rc);
                         }
                       }
     }
