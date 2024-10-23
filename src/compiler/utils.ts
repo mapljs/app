@@ -1,6 +1,5 @@
 import type { StaticHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
-import { CTX, HEADERS } from './constants.js';
 
 // eslint-disable-next-line
 const AsyncFunction = (async () => { }).constructor;
@@ -27,19 +26,19 @@ export function buildStaticHandler(handler: StaticHandler, externalValues: AppRo
 
     if (typeof options !== 'undefined') {
       if (typeof options.status === 'number')
-        tmpl += `${CTX}.status=${options.status};`;
+        tmpl += `${compilerConstants.CTX}.status=${options.status};`;
 
       if (typeof options.statusText === 'string')
-        tmpl += `${CTX}.statusText="${options.statusText.replace(/"/, '\\"')}";`;
+        tmpl += `${compilerConstants.CTX}.statusText="${options.statusText.replace(/"/, '\\"')}";`;
 
       if (typeof options.headers === 'object')
-        tmpl += `${HEADERS}.push(...f${externalValues.push(toHeaderTuples(options.headers))});`;
+        tmpl += `${compilerConstants.HEADERS}.push(...f${externalValues.push(toHeaderTuples(options.headers))});`;
     }
 
     return `${tmpl}return new Response(${typeof handler.body === 'string'
       ? `"${handler.body.replace(/"/, '\\"')}"`
-      : `f${externalValues.push(handler.body)}`},${CTX});`;
+      : `f${externalValues.push(handler.body)}`}${compilerConstants.COLON_CTX});`;
   }
 
-  return `return ${externalValues.push(new Response(handler.body, handler.options))}.clone();`;
+  return `return f${externalValues.push(new Response(handler.body, handler.options))}.clone();`;
 }

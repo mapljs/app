@@ -1,12 +1,10 @@
 import { createRouter, insertItem, compileRouter as compileBaseRouter } from '@mapl/router';
-import { statefulNoOpBuilder, statelessNoOpBuilder } from '@mapl/compiler';
+import { statelessNoOpBuilder } from '@mapl/compiler';
 
 import type { AnyRouter } from '../router/index.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
-import { REQ } from '@mapl/router/constants.js';
 import { compileHandler } from './handler.js';
-import { ASYNC_END, CTX_DEF, CTX_PARAMS_DEF, METHOD, PARSE_PATH, RET_404 } from './constants.js';
 import { symbol as exceptionSymbol } from '../exception.js';
 
 // DFS and compile every subrouter
@@ -43,35 +41,31 @@ export const compileItem: AppRouterCompilerState['compileItem'] = (item, state, 
 
   state.contentBuilder.push(middlewareResult[1] === null
     ? middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], hasParam)
-    : middlewareResult[1] + (hasParam ? CTX_PARAMS_DEF : CTX_DEF) + middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], null));
+    : middlewareResult[1] + (hasParam ? compilerConstants.CTX_PARAMS_DEF : compilerConstants.CTX_DEF) + middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], null));
 
   // Remember to close async scope
   if (middlewareResult[2])
-    state.contentBuilder.push(ASYNC_END);
+    state.contentBuilder.push(compilerConstants.ASYNC_END);
 };
 
 // 0: JIT
 // 1: Get only the body
 // 2: Get only the dependency
-export function compile(router: AnyRouter, mode: 0 | 1 | 2): AppRouterCompilerState {
+export function compile(router: AnyRouter, loadOnlyDependency: boolean): AppRouterCompilerState {
   const routeTrees: AppRouterCompilerState['routeTrees'] = [null, null];
 
-  // Fake externalValues when only requires the body
-  const externalValues = mode === 1 ? statefulNoOpBuilder() : [] as any[];
-  externalValues.push(exceptionSymbol);
-
   // Fake content builder when only requires the external dependencies
-  const contentBuilder = mode === 2 ? statelessNoOpBuilder : [] as string[];
+  const contentBuilder = loadOnlyDependency ? statelessNoOpBuilder : [] as string[];
 
   const state: AppRouterCompilerState = {
     routeTrees,
     compileItem,
 
     contentBuilder,
-    declarationBuilders: mode === 2 ? statelessNoOpBuilder : [] as any[],
+    declarationBuilders: loadOnlyDependency ? statelessNoOpBuilder : [] as any[],
 
     // Exception symbol is f0
-    externalValues
+    externalValues: [exceptionSymbol]
   };
 
   // Put all stuff into the radix tree
@@ -80,14 +74,14 @@ export function compile(router: AnyRouter, mode: 0 | 1 | 2): AppRouterCompilerSt
 
   // Actually load the entire tree here
   if (routeTrees[0] !== null) {
-    contentBuilder.push(`let ${METHOD}=${REQ}.method;`);
+    contentBuilder.push(`let ${compilerConstants.METHOD}=${compilerConstants.REQ}.method;`);
     const methodTrees = routeTrees[0];
 
     // Track whether this has more than 1 element
     let hasMultiple = false;
 
     for (const key in methodTrees) {
-      contentBuilder.push(`${hasMultiple ? 'else ' : ''}if(${METHOD}===${JSON.stringify(key)}){${PARSE_PATH}`);
+      contentBuilder.push(`${hasMultiple ? 'else ' : ''}if(${compilerConstants.METHOD}===${JSON.stringify(key)}){${compilerConstants.PARSE_PATH}`);
       // @ts-expect-error Same state lol
       compileBaseRouter(methodTrees[key], state);
       contentBuilder.push('}');
@@ -102,7 +96,7 @@ export function compile(router: AnyRouter, mode: 0 | 1 | 2): AppRouterCompilerSt
     if (routeTrees[0] !== null)
       contentBuilder.push('else{');
 
-    contentBuilder.push(PARSE_PATH);
+    contentBuilder.push(compilerConstants.PARSE_PATH);
     // @ts-expect-error Same state lol
     compileBaseRouter(routeTrees[1], state);
 
@@ -110,7 +104,7 @@ export function compile(router: AnyRouter, mode: 0 | 1 | 2): AppRouterCompilerSt
       contentBuilder.push('}');
   }
 
-  contentBuilder.push(RET_404);
+  contentBuilder.push(compilerConstants.RET_404);
 
   return state;
 }
