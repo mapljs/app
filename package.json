@@ -30,6 +30,7 @@
     "eslint-plugin-jsdoc": "latest",
     "mitata": "latest",
     "prettier": "latest",
+    "tsx": "^4.19.1",
     "typescript": "latest",
     "typescript-eslint": "latest"
   },

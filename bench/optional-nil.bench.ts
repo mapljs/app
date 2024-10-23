@@ -10,19 +10,9 @@ summary(() => {
   const dataset = new Array(100).fill(0).map(() => Math.random() < 0.5 ? null : true);
 
   const fn1 = (str: any) => str ?? false;
-  fn1(null);
-  fn1(true);
-  fn1(null);
-  fn1(true);
-  optimizeNextInvocation(fn1);
   bench('??', () => dataset.map(fn1))
 
   const fn2 = (str: any) => str || false;
-  fn2(null);
-  fn2(true);
-  fn2(null);
-  fn2(true);
-  optimizeNextInvocation(fn2);
   bench('||', () => dataset.map(fn2));
 
   const fn3 = (str: any) => str === null ? false : true;
