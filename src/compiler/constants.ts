@@ -29,9 +29,18 @@ export const JSON_HEADER_PAIR = `${MAPL}_jsonhp`;
 export const JSON_OPTIONS = `${MAPL}_jsono`;
 
 // Context modification
-export const CREATE_EMPTY_HEADER = `let ${HEADERS}=[];`;
+export const TEXT_HEADER_DEF = `let ${HEADERS}=[];`;
+
 export const SET_HTML_HEADER = `${HEADERS}.push(${HTML_HEADER_PAIR});`;
 export const SET_JSON_HEADER = `${HEADERS}.push(${JSON_HEADER_PAIR});`;
+
+export const HTML_HEADER_DEF = `let ${HEADERS}=[${HTML_HEADER_PAIR}];`;
+export const JSON_HEADER_DEF = `let ${HEADERS}=[${JSON_HEADER_PAIR}];`;
+
+// Stuff with colon to pass as arguments
+export const COLON_CTX = `,${CTX}`;
+export const COLON_HTML_OPTIONS = `,${HTML_OPTIONS}`;
+export const COLON_JSON_OPTIONS = `,${JSON_OPTIONS}`;
 
 // Exception symbol is always the first external value
 export const EXCEPT_SYMBOL = 'f0';

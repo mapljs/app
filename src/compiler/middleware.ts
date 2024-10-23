@@ -1,6 +1,6 @@
 import type { AnyRouter } from '../router/index.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
-import { ASYNC_START, CREATE_EMPTY_HEADER, CREATE_HOLDER, CTX, HOLDER } from './constants.js';
+import { ASYNC_START, CREATE_HOLDER, CTX, HOLDER, TEXT_HEADER_DEF } from './constants.js';
 import { buildHandler, loadHandlers, type ExceptHandlerBuilders } from './exceptions.js';
 import { isFunctionAsync } from './utils.js';
 
@@ -83,7 +83,7 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
 
     if (needContext && currentResult[1] === null) {
       // Move the built part to prevContext
-      currentResult[1] = currentResult[0] + CREATE_EMPTY_HEADER;
+      currentResult[1] = currentResult[0] + TEXT_HEADER_DEF;
       currentResult[0] = '';
 
       // Reset the exception value

@@ -1,8 +1,8 @@
 import { Router, macro, staticException } from '@mapl/app/index.js';
-import { CTX, REQ, RET_400, CREATE_EMPTY_HEADER, HOLDER, CREATE_HOLDER, ASYNC_START } from '@mapl/app/constants.js';
+import { CTX, REQ, RET_400, TEXT_HEADER_DEF, HOLDER, CREATE_HOLDER, ASYNC_START } from '@mapl/app/constants.js';
 
 export const invalidBodyFormat = staticException();
-export const parseBody = macro<Router<{ body: { name: string } }, [], [], never>>((ctx, state) => {
+export const parseBody = macro<Router<{ body: { name: string } }, [], []>>((ctx, state) => {
   // Require async
   if (!ctx[2]) {
     ctx[0] += ASYNC_START;
@@ -11,11 +11,10 @@ export const parseBody = macro<Router<{ body: { name: string } }, [], [], never>
 
   // Require a context object
   if (ctx[1] === null) {
-    ctx[1] = ctx[0] + CREATE_EMPTY_HEADER;
+    ctx[1] = ctx[0] + TEXT_HEADER_DEF
     ctx[0] = '';
   }
 
-  const id = state.localVarCount++;
   const exceptHandler = ctx[4][invalidBodyFormat[1]] ?? ctx[4][0];
 
   // Build

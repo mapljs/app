@@ -1,10 +1,7 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
-import { HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, CTX, CTX_DEF, HEADERS, SET_HTML_HEADER, SET_JSON_HEADER, ASYNC_START, ASYNC_END, CTX_PARAMS_DEF } from './constants.js';
+import { CTX, CTX_DEF, SET_HTML_HEADER, SET_JSON_HEADER, ASYNC_START, ASYNC_END, CTX_PARAMS_DEF, TEXT_HEADER_DEF, HTML_HEADER_DEF, JSON_HEADER_DEF, COLON_HTML_OPTIONS, COLON_JSON_OPTIONS } from './constants.js';
 import { buildStaticHandler, isFunctionAsync } from './utils.js';
-
-const LIGHT_ASYNC_START = '(async()=>';
-const LIGHT_ASYNC_END = ')();';
 
 /**
  * Compile a handler. This is a fast path for handlers that doesn't need recompilation
@@ -37,8 +34,8 @@ export function compileHandler(
     fnResult = `JSON.stringify(${fnResult})`;
 
   return contextNeedParam === null
-    ? `${handlerType === 'text' ? '' : handlerType === 'html' ? SET_HTML_HEADER : SET_JSON_HEADER}return${wrapAsync ? LIGHT_ASYNC_START : ' '}new Response(${fnResult},${CTX})${wrapAsync ? LIGHT_ASYNC_END : ';'}`
+    ? `${handlerType === 'text' ? '' : handlerType === 'html' ? SET_HTML_HEADER : SET_JSON_HEADER}return${wrapAsync ? '(async()=>' : ' '}new Response(${fnResult},${CTX})${wrapAsync ? ')();' : ';'}`
     : fnNeedContext
-      ? `${wrapAsync ? ASYNC_START : ''}let ${HEADERS}=[${handlerType === 'text' ? '' : handlerType === 'html' ? HTML_HEADER_PAIR : JSON_HEADER_PAIR}];${contextNeedParam ? CTX_PARAMS_DEF : CTX_DEF}return new Response(${fnResult},${CTX});${wrapAsync ? ASYNC_END : ''}`
-      : `return${wrapAsync ? LIGHT_ASYNC_START : ' '}new Response(${fnResult}${handlerType === 'text' ? '' : `,${handlerType === 'html' ? HTML_OPTIONS : JSON_OPTIONS}`})${wrapAsync ? LIGHT_ASYNC_END : ';'}`;
+      ? `${wrapAsync ? ASYNC_START : ''}${handlerType === 'text' ? TEXT_HEADER_DEF : handlerType === 'html' ? HTML_HEADER_DEF : JSON_HEADER_DEF}${contextNeedParam ? CTX_PARAMS_DEF : CTX_DEF}return new Response(${fnResult},${CTX});${wrapAsync ? ASYNC_END : ''}`
+      : `return${wrapAsync ? '(async()=>' : ' '}new Response(${fnResult}${handlerType === 'text' ? '' : handlerType === 'html' ? COLON_HTML_OPTIONS : COLON_JSON_OPTIONS})${wrapAsync ? ')();' : ';'}`;
 }

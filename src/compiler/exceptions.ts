@@ -1,22 +1,17 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 
-import { ASYNC_END, ASYNC_START, CTX, CTX_DEF, EXCEPT_SYMBOL, HEADERS, HOLDER, HTML_HEADER_PAIR, HTML_OPTIONS, JSON_HEADER_PAIR, JSON_OPTIONS, RET_500, SET_HTML_HEADER, SET_JSON_HEADER } from './constants.js';
+import { ASYNC_END, ASYNC_START, COLON_CTX, COLON_HTML_OPTIONS, COLON_JSON_OPTIONS, CTX, CTX_DEF, EXCEPT_SYMBOL, HOLDER, HTML_HEADER_DEF, JSON_HEADER_DEF, RET_500, SET_HTML_HEADER, SET_JSON_HEADER, TEXT_HEADER_DEF } from './constants.js';
 import { buildStaticHandler, isFunctionAsync } from './utils.js';
 
 // A cached function to build out handlers
 type ExceptHandlerBuilder = (hasContext: boolean, isAsync: boolean) => string;
 export type ExceptHandlerBuilders = Record<number, ExceptHandlerBuilder>;
 
-// Cache stuff
-const COLON_CTX = `,${CTX}`;
-const COLON_HTML_OPTIONS = `,${HTML_OPTIONS}`;
-const COLON_JSON_OPTIONS = `,${JSON_OPTIONS}`;
-
 // Text & HTML & JSON context creation
-const TEXT_CTX_DEF = `let ${HEADERS}=[];${CTX_DEF}`;
-const HTML_CTX_DEF = `let ${HEADERS}=[${HTML_HEADER_PAIR}];${CTX_DEF}`;
-const JSON_CTX_DEF = `let ${HEADERS}=[${JSON_HEADER_PAIR}];${CTX_DEF}`;
+const TEXT_CTX_DEF = TEXT_HEADER_DEF + CTX_DEF;
+const HTML_CTX_DEF = HTML_HEADER_DEF + CTX_DEF;
+const JSON_CTX_DEF = JSON_HEADER_DEF + CTX_DEF;
 
 // Build closures that generates exception content
 export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilder {
@@ -39,12 +34,9 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
 
   // Return a raw Response
   if (handlerType === 'response') {
-    if (isDynamic) {
-      const ret = `return f${externalValues.push(fn)}(${HOLDER}[2],${fnNeedContext ? CTX : ''});`;
-      return (hasContext) => `${!hasContext && fnNeedContext ? TEXT_CTX_DEF : ''}${ret}`;
-    }
-
-    const str = `return f${externalValues.push(fn)}(${fnNeedContext ? CTX : ''});`;
+    const str = isDynamic
+      ? `return f${externalValues.push(fn)}(${HOLDER}[2]${fnNeedContext ? COLON_CTX : ''});`
+      : `return f${externalValues.push(fn)}(${fnNeedContext ? CTX : ''});`;
     // eslint-disable-next-line
     return (hasContext) => !hasContext && fnNeedContext ? TEXT_CTX_DEF + str : str;
   }
