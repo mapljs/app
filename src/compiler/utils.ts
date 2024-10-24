@@ -35,10 +35,18 @@ export function buildStaticHandler(handler: StaticHandler, externalValues: AppRo
         tmpl += `${compilerConstants.HEADERS}.push(...f${externalValues.push(toHeaderTuples(options.headers))});`;
     }
 
-    return `${tmpl}return new Response(${typeof handler.body === 'string'
-      ? `"${handler.body.replace(/"/, '\\"')}"`
-      : `f${externalValues.push(handler.body)}`}${compilerConstants.COLON_CTX});`;
+    return `${tmpl}return new Response(${handler.body == null
+      ? 'null'
+      : typeof handler.body === 'string'
+        ? `"${handler.body.replace(/"/, '\\"')}"`
+        : `f${externalValues.push(Array.isArray(handler.body) ? handler.body : [handler.body])}`
+    }${compilerConstants.COLON_CTX});`;
   }
 
-  return `return f${externalValues.push(new Response(handler.body, handler.options))}.clone();`;
+  return `return f${externalValues.push(new Response(
+    handler.body == null
+      ? null
+      : new Blob(Array.isArray(handler.body) ? handler.body : [handler.body]),
+    handler.options
+  ))};`;
 }
