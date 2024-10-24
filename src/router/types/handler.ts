@@ -26,7 +26,8 @@ export interface ResponseHandler<State, Args extends any[]> {
 export interface StaticHandler {
   type: 'static';
 
-  body?: BlobPart | BlobPart[] | null;
+  // Support all static format
+  body?: URLSearchParams | FormData | Blob | ArrayBuffer | string | null;
   options?: ResponseInit;
 }
 
