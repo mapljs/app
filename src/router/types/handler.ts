@@ -3,10 +3,7 @@ import type { MaybePromise } from '../../types/utils.js';
 
 export type HandlerData = [method: string | null, path: string, Handler<any>];
 
-export interface TextHandler<State, Args extends any[]> {
-  type: 'text';
-  fn: (...args: [...Args, Context & State]) => MaybePromise<BodyInit | null>;
-}
+export type TextHandler<State, Args extends any[]> = (...args: [...Args, Context & State]) => MaybePromise<BodyInit | null>;
 
 export interface JSONHandler<State, Args extends any[]> {
   type: 'json';

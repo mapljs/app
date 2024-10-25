@@ -1,3 +1,4 @@
+import { COLON_CTX } from '../constants.js';
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 
@@ -9,6 +10,31 @@ export type ExceptHandlerBuilders = Record<number, ExceptHandlerBuilder>;
 
 // Build closures that generates exception content
 export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilder {
+  // Plain text
+  if (typeof handler === 'function') {
+    const isFnAsync = isFunctionAsync(handler);
+    const fnNeedContext = handler.length > (isDynamic ? 1 : 0);
+
+    const retStart = `return new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${
+      fnNeedContext ? isDynamic ? compilerConstants.PAYLOAD_CTX_ARG : compilerConstants.ONLY_CTX_ARG : compilerConstants.NO_ARG
+    }`;
+    const retEnd = `${fnNeedContext ? compilerConstants.COLON_CTX : ''});`;
+
+    return (hasContext, isAsync) => `${!isAsync && isFnAsync
+      ? compilerConstants.ASYNC_START
+      : ''
+    }${!hasContext && fnNeedContext
+      ? compilerConstants.TEXT_CTX_DEF
+      : ''
+    }${retStart}${!fnNeedContext && hasContext
+      ? compilerConstants.COLON_CTX
+      : ''
+    }${retEnd}${!isAsync && isFnAsync
+      ? compilerConstants.ASYNC_END
+      : ''
+    }`;
+  }
+
   const handlerType = handler.type;
 
   // Static response
@@ -44,47 +70,25 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
   }${handlerType === 'json' ? ')' : ''}`;
   const retEnd = `${fnNeedContext ? compilerConstants.COLON_CTX : ''});`;
 
-  // Build a closure to generate strings faster
-  return (hasContext, isAsync) => {
-    // Whether it is required to wrap the context in an async scope
-    isAsync = !isAsync && isFnAsync;
-    let result = isAsync ? compilerConstants.ASYNC_START : '';
-
-    if (hasContext) {
-      // Append correct content type headers
-      if (handlerType === 'html')
-        result += compilerConstants.SET_HTML_HEADER;
-      else if (handlerType === 'json')
-        result += compilerConstants.SET_JSON_HEADER;
-    } else if (fnNeedContext)
-      // Need to create a new context
-      result += handlerType === 'text' ? compilerConstants.TEXT_CTX_DEF : handlerType === 'html' ? compilerConstants.HTML_CTX_DEF : compilerConstants.JSON_CTX_DEF;
-
-    // Push the first return part
-    result += retStart;
-
-    if (!fnNeedContext) {
-      // If we already have a context it should be passed
-      // as the response option
-      if (hasContext)
-        result += compilerConstants.COLON_CTX;
-
-      // Else pass the correct option for the expected content type
-      else if (handlerType === 'html')
-        result += compilerConstants.COLON_HTML_OPTIONS;
-      else if (handlerType === 'json')
-        result += compilerConstants.COLON_JSON_OPTIONS;
-    }
-
-    // End the return
-    result += retEnd;
-
-    // Wrap the scope if necessary
-    if (isAsync)
-      result += compilerConstants.ASYNC_END;
-
-    return result;
-  };
+  return (hasContext, isAsync) => `${!isAsync && isFnAsync
+    ? compilerConstants.ASYNC_START
+    : ''
+  }${hasContext
+    ? handlerType === 'html' ? compilerConstants.SET_HTML_HEADER : compilerConstants.SET_JSON_HEADER
+    : fnNeedContext
+      ? handlerType === 'html' ? compilerConstants.HTML_CTX_DEF : compilerConstants.JSON_CTX_DEF
+      : ''
+  }${retStart}${!fnNeedContext
+    ? hasContext
+      ? compilerConstants.COLON_CTX
+      : handlerType === 'html'
+        ? compilerConstants.COLON_HTML_OPTIONS
+        : compilerConstants.COLON_JSON_OPTIONS
+    : ''
+  }${retEnd}${!isAsync && isFnAsync
+    ? compilerConstants.ASYNC_END
+    : ''
+  }`;
 }
 
 export function loadHandlers(builders: ExceptHandlerBuilders, hasContext: boolean, isAsync: boolean): string {

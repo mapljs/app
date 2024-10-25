@@ -6,13 +6,7 @@ const app = router()
     const authPayload = c.req.headers.get('authorization');
     return authPayload === null || !authPayload.startsWith('Bearer ') ? authException : authPayload.slice(7);
   })
-  .catch(authException, {
-    type: 'text',
-    fn: () => 'Invalid token'
-  })
-  .get('/yield', {
-    type: 'text',
-    fn: (c) => c.token
-  });
+  .catch(authException, () => 'Invalid token')
+  .get('/yield', (c) => c.token);
 
 export default app;

@@ -46,6 +46,5 @@ export function buildStaticHandler(handler: StaticHandler, externalValues: AppRo
   }
 
   // Save the entire response object in memory and clone when necessary
-  console.warn('You may want to use `app.prebuild(path, { body?, options? })` instead!');
   return `return f${externalValues.push(new Response(handler.body, handler.options))}.clone();`;
 }

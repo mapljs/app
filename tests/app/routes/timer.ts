@@ -5,9 +5,6 @@ const app = router()
   .use((c) => c.headers.push(['Set-Cookie', `value=${Math.random()}`]))
   .set('totalTime', (c) => performance.now() - c.startTime)
 
-  .get('/', {
-    type: 'text',
-    fn: (c) => `Total time: ${c.totalTime}`
-  });
+  .get('/', (c) => `Total time: ${c.totalTime}`);
 
 export default app;

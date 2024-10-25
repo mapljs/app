@@ -5,16 +5,10 @@ const app = router()
   .use((c) => c.headers.push(['server', 'mapl']))
 
   // Simple endpoint
-  .get('/', {
-    type: 'text',
-    fn: () => 'Hi'
-  })
+  .get('/', () => 'Hi')
 
   // Dynamic path parameter
-  .get('/user/*', {
-    type: 'text',
-    fn: (c) => c.params[0]
-  })
+  .get('/user/*', (c) => c.params[0])
 
   // Send JSON
   .post('/json', {
