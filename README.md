@@ -18,10 +18,7 @@ const subroute = router()
 
 const app = router()
   // Send normal text
-  .get('/', {
-    type: 'text',
-    fn: () => 'Hi'
-  })
+  .get('/', () => 'Hi')
 
   // Send JSON
   .get('/req', {
