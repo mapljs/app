@@ -30,12 +30,12 @@
     "eslint-plugin-jsdoc": "latest",
     "mitata": "latest",
     "prettier": "latest",
-    "tsx": "^4.19.1",
+    "tsx": "latest",
     "typescript": "latest",
     "typescript-eslint": "latest"
   },
   "dependencies": {
     "@mapl/compiler": "^0.0.6",
-    "@mapl/router": "^0.0.13"
+    "@mapl/router": "^0.0.14"
   }
 }

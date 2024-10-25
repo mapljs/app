@@ -15,22 +15,31 @@ export function compileRouter(prefixPath: string, router: AnyRouter, state: AppR
   // Load all routes into the tree
   for (let i = 0, routeTrees = state.routeTrees, routes = router.routes, l = routes.length; i < l; i++) {
     const route = routes[i];
-    const path = route[1] === '/'
-      ? prefixPath === '' ? '/' : prefixPath
-      : prefixPath + route[1];
-    const item = [middlewareCompilationResult, route[2]];
 
     // Load that into the tree to compile later on
-    if (route[0] === null)
-      insertItem(routeTrees[1] ??= createRouter(), path, item);
-    else
-      insertItem((routeTrees[0] ??= {})[route[0]] ??= createRouter(), path, item);
+    insertItem(
+      route[0] === null
+        ? routeTrees[1] ??= createRouter()
+        : (routeTrees[0] ??= {})[route[0]] ??= createRouter(),
+
+      route[1] === '/'
+        ? prefixPath === '' ? '/' : prefixPath
+        : prefixPath + route[1],
+
+      [middlewareCompilationResult, route[2]]
+    );
   }
 
-  // DFS the subrouters
+  // Visit and compile all sub-routers
   for (let i = 0, subrouters = router.subrouters, l = subrouters.length; i < l; i++) {
     const subrouterData = subrouters[i];
-    compileRouter(subrouterData[0] === '/' ? prefixPath : prefixPath + subrouterData[0], subrouterData[1], state, middlewareCompilationResult);
+
+    compileRouter(
+      subrouterData[0] === '/' ? prefixPath : prefixPath + subrouterData[0],
+      subrouterData[1],
+      state,
+      middlewareCompilationResult
+    );
   }
 }
 
@@ -81,7 +90,8 @@ export function compile(router: AnyRouter, loadOnlyDependency: boolean): AppRout
     let hasMultiple = false;
 
     for (const key in methodTrees) {
-      contentBuilder.push(`${hasMultiple ? 'else ' : ''}if(${compilerConstants.METHOD}===${JSON.stringify(key)}){${compilerConstants.PARSE_PATH}`);
+      // Method should not be malformed
+      contentBuilder.push(`${hasMultiple ? 'else ' : ''}if(${compilerConstants.METHOD}==="${key}"){${compilerConstants.PARSE_PATH}`);
       // @ts-expect-error Same state lol
       compileBaseRouter(methodTrees[key], state);
       contentBuilder.push('}');
