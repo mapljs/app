@@ -1,4 +1,3 @@
-import { COLON_CTX } from '../constants.js';
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 
