@@ -13,6 +13,7 @@
   ],
   "license": "MIT",
   "type": "module",
+  "homepage": "https://mapl.pages.dev",
   "main": "./index.js",
   "types": "./index.d.ts",
   "scripts": {
@@ -36,6 +37,6 @@
   },
   "dependencies": {
     "@mapl/compiler": "^0.0.6",
-    "@mapl/router": "^0.0.14"
+    "@mapl/router": "^0.0.16"
   }
 }

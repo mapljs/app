@@ -75,4 +75,4 @@ export const JSON_CTX_DEF = JSON_HEADER_DEF + CTX_DEF;
 export const CONST_VARS = `var ${HTML_HEADER_PAIR}=['content-type','text/html'],${HTML_OPTIONS}={headers:[${HTML_HEADER_PAIR}]},${JSON_HEADER_PAIR}=['content-type','application/json'],${JSON_OPTIONS}={headers:[${JSON_HEADER_PAIR}]},${RESPONSE_400}=new Response(null,{status:400}),${RESPONSE_404}=new Response(null,{status:404}),${RESPONSE_500}=new Response(null,{status:500});`;
 
 // Parsings and constants
-export const PARSE_PATH = `let ${C_URL}=${REQ}.url,${PATH_START}=${C_URL}.indexOf('/',12)+1,${PATH_END}=${C_URL}.indexOf('?',${PATH_START}),${PATH}=${PATH_END}===-1?${C_URL}.slice(${PATH_START}):${C_URL}.substring(${PATH_START},${PATH_END});`;
+export const PARSE_PATH = `let ${C_URL}=${REQ}.url,${PATH_START}=${C_URL}.indexOf('/',12)+1,${PATH_END}=${C_URL}.indexOf('?',${PATH_START}),${PATH}=${C_URL}.substring(${PATH_START},${PATH_END}>>>0);`;
