@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     // Enable latest features
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "NodeNext",
     "moduleDetection": "force",
@@ -29,13 +25,10 @@
     "noPropertyAccessFromIndexSignature": false,
     // Paths
     "paths": {
-      "@mapl/app/*": [
-        "../lib/*"
-      ]
+      "@mapl/app/*": ["../lib/*"],
+      "@measure": ["./measure/index.ts"]
     },
     "noEmit": true
   },
-  "include": [
-    "."
-  ]
+  "include": ["."]
 }

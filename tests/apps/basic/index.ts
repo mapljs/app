@@ -6,6 +6,8 @@ import auth from './routes/auth.js';
 import timer from './routes/timer.js';
 import inline from './routes/inline.js';
 
+import { measureApp } from '@measure';
+
 const app = router()
   .route('/basic', basic)
   .route('/patterns', patterns)
@@ -13,8 +15,5 @@ const app = router()
   .route('/timer', timer)
   .route('/inline', inline);
 
-// Load stress test
-if (Bun.env.STRESS_TEST === '1')
-  app.route('/stress', (await import('./routes/stress.js')).default);
-
+measureApp(app);
 export default app;
