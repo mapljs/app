@@ -18,4 +18,6 @@ export type MiddlewareData =
   // Middleware
   | [3, MiddlewareFunction<any>]
   // Setter
-  | [4, MiddlewareFunction<any>, string];
+  | [4, MiddlewareFunction<any>, string]
+  // Headers
+  | [5, [string, string][]];

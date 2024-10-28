@@ -1,4 +1,4 @@
-import type { StaticHandler } from '../router/types/handler.js';
+import type { AnyTypedHandler, StaticHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 
 // eslint-disable-next-line
@@ -47,4 +47,36 @@ export function buildStaticHandler(handler: StaticHandler, externalValues: AppRo
 
   // Save the entire response object in memory and clone when necessary
   return `return f${externalValues.push(new Response(handler.body, handler.options))}.clone();`;
+}
+
+export function selectHeaderDef(type: AnyTypedHandler['type']): string {
+  return type === 'html'
+    ? compilerConstants.HTML_HEADER_DEF
+    : type === 'json'
+      ? compilerConstants.JSON_HEADER_DEF
+      : compilerConstants.TEXT_HEADER_DEF;
+}
+
+export function selectCtxDef(type: AnyTypedHandler['type']): string {
+  return type === 'html'
+    ? compilerConstants.HTML_CTX_DEF
+    : type === 'json'
+      ? compilerConstants.JSON_CTX_DEF
+      : compilerConstants.TEXT_CTX_DEF;
+}
+
+export function selectResOption(type: AnyTypedHandler['type']): string {
+  return type === 'html'
+    ? compilerConstants.COLON_HTML_OPTIONS
+    : type === 'json'
+      ? compilerConstants.COLON_JSON_OPTIONS
+      : compilerConstants.COLON_TEXT_OPTIONS;
+}
+
+export function selectSetHeader(type: AnyTypedHandler['type']): string {
+  return type === 'html'
+    ? compilerConstants.SET_HTML_HEADER
+    : type === 'json'
+      ? compilerConstants.SET_JSON_HEADER
+      : compilerConstants.SET_TEXT_HEADER;
 }

@@ -1,11 +1,16 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
 
-import { buildStaticHandler, isFunctionAsync } from './utils.js';
+import { buildStaticHandler, isFunctionAsync, selectCtxDef, selectResOption, selectSetHeader } from './utils.js';
 
 // A cached function to build out handlers
 type ExceptHandlerBuilder = (hasContext: boolean, isAsync: boolean) => string;
 export type ExceptHandlerBuilders = Record<number, ExceptHandlerBuilder>;
+
+// eslint-disable-next-line
+const selectFnArgs = (isDynamic: boolean, fnNeedContext: boolean): string => isDynamic
+  ? fnNeedContext ? compilerConstants.PAYLOAD_CTX_ARG : compilerConstants.ONLY_PAYLOAD_ARG
+  : fnNeedContext ? compilerConstants.ONLY_CTX_ARG : compilerConstants.NO_ARG;
 
 // Build closures that generates exception content
 export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilder {
@@ -14,16 +19,14 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
     const isFnAsync = isFunctionAsync(handler);
     const fnNeedContext = handler.length > (isDynamic ? 1 : 0);
 
-    const retStart = `return new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${
-      fnNeedContext ? isDynamic ? compilerConstants.PAYLOAD_CTX_ARG : compilerConstants.ONLY_CTX_ARG : compilerConstants.NO_ARG
-    }`;
+    const retStart = `return new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${selectFnArgs(isDynamic, fnNeedContext)}`;
     const retEnd = `${fnNeedContext ? compilerConstants.COLON_CTX : ''});`;
 
     return (hasContext, isAsync) => `${!isAsync && isFnAsync
       ? compilerConstants.ASYNC_START
       : ''
     }${!hasContext && fnNeedContext
-      ? compilerConstants.TEXT_CTX_DEF
+      ? compilerConstants.CTX_DEF
       : ''
     }${retStart}${!fnNeedContext && hasContext
       ? compilerConstants.COLON_CTX
@@ -53,36 +56,30 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
 
   // Return a raw Response
   if (handlerType === 'response') {
-    const str = `return f${externalValues.push(fn)}${isDynamic
-      ? fnNeedContext ? compilerConstants.PAYLOAD_CTX_ARG : compilerConstants.ONLY_PAYLOAD_ARG
-      : fnNeedContext ? compilerConstants.ONLY_CTX_ARG : compilerConstants.NO_ARG};`;
+    const str = `return f${externalValues.push(fn)}${selectFnArgs(isDynamic, fnNeedContext)};`;
 
     // eslint-disable-next-line
-    return (hasContext) => !hasContext && fnNeedContext ? compilerConstants.TEXT_CTX_DEF + str : str;
+    return (hasContext) => !hasContext && fnNeedContext ? compilerConstants.CTX_DEF + str : str;
   }
 
   const isFnAsync = isFunctionAsync(fn);
 
   // Cache known parts
-  const retStart = `return new Response(${handlerType === 'json' ? 'JSON.stringify(' : ''}${isFnAsync ? 'await ' : ''}f${externalValues.push(fn)}${
-    fnNeedContext ? isDynamic ? compilerConstants.PAYLOAD_CTX_ARG : compilerConstants.ONLY_CTX_ARG : compilerConstants.NO_ARG
-  }${handlerType === 'json' ? ')' : ''}`;
+  const retStart = `return new Response(${handlerType === 'json' ? 'JSON.stringify(' : ''}${isFnAsync ? 'await ' : ''}f${externalValues.push(fn)}${selectFnArgs(isDynamic, fnNeedContext)}${handlerType === 'json' ? ')' : ''}`;
   const retEnd = `${fnNeedContext ? compilerConstants.COLON_CTX : ''});`;
 
   return (hasContext, isAsync) => `${!isAsync && isFnAsync
     ? compilerConstants.ASYNC_START
     : ''
   }${hasContext
-    ? handlerType === 'html' ? compilerConstants.SET_HTML_HEADER : compilerConstants.SET_JSON_HEADER
+    ? selectSetHeader(handlerType)
     : fnNeedContext
-      ? handlerType === 'html' ? compilerConstants.HTML_CTX_DEF : compilerConstants.JSON_CTX_DEF
+      ? selectCtxDef(handlerType)
       : ''
   }${retStart}${!fnNeedContext
     ? hasContext
       ? compilerConstants.COLON_CTX
-      : handlerType === 'html'
-        ? compilerConstants.COLON_HTML_OPTIONS
-        : compilerConstants.COLON_JSON_OPTIONS
+      : selectResOption(handlerType)
     : ''
   }${retEnd}${!isAsync && isFnAsync
     ? compilerConstants.ASYNC_END

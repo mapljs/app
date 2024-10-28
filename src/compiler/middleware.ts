@@ -56,19 +56,33 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
 
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
     const middlewareData = list[i];
-    const middlewareType = middlewareData[0];
-    const fn = middlewareData[1];
 
-    // Handle macros separately
-    if (middlewareType === 0) {
-      fn(currentResult, state);
+    if (middlewareData[0] === 0) {
+      // Handle macros separately
+      middlewareData[1](currentResult, state);
+      continue;
+    } else if (middlewareData[0] === 5) {
+      // Handle headers
+      if (currentResult[1] === null) {
+        // Move the built part to prevContext
+        currentResult[1] = `${currentResult[0]}let ${compilerConstants.HEADERS}=[${middlewareData[1].length === 1
+          ? externalValues.push(middlewareData[1][0])
+          : `...${externalValues.push(middlewareData[1])}`
+        }];`;
+        currentResult[0] = '';
+
+        // Reset the exception value
+        currentResult[5] = null;
+      } else
+        // Just push
+        currentResult[0] += `${compilerConstants.HEADERS}.push(...${externalValues.push(middlewareData[1])});`;
       continue;
     }
 
-    const isFnAsync = isFunctionAsync(fn);
+    const isFnAsync = isFunctionAsync(middlewareData[1]);
 
     // Need context if fn has ctx argument or it is a parser or a setter
-    const needContext = fn.length !== 0 || middlewareType === 1 || middlewareType === 4;
+    const needContext = middlewareData[1].length !== 0 || middlewareData[0] === 1 || middlewareData[0] === 4;
 
     // Wrap with an async context
     if (isFnAsync && !currentResult[2]) {
@@ -89,8 +103,8 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
       currentResult[5] = null;
     }
 
-    const fnCall = `${isFnAsync ? 'await ' : ''}f${externalValues.push(fn)}(${needContext ? compilerConstants.CTX : ''});`;
-    switch (middlewareType) {
+    const fnCall = `${isFnAsync ? 'await ' : ''}f${externalValues.push(middlewareData[1])}(${needContext ? compilerConstants.CTX : ''});`;
+    switch (middlewareData[0]) {
       // Parsers
       case 1: {
         // Set the prop to the context (prop name must be an identifier)

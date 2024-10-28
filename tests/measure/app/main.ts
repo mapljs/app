@@ -6,9 +6,15 @@ import auth from './routes/auth.js';
 import timer from './routes/timer.js';
 import inline from './routes/inline.js';
 
-export default router()
+const app = router()
   .route('/basic', basic)
   .route('/patterns', patterns)
   .route('/auth', auth)
   .route('/timer', timer)
-  .route('/inline', inline)
+  .route('/inline', inline);
+
+// Load stress test
+if (Bun.env.STRESS_TEST === '1')
+  app.route('/stress', (await import('./routes/stress.js')).default);
+
+export default app;

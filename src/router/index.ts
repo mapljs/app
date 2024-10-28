@@ -94,6 +94,21 @@ class Router<State, Routes, SubRouters> {
   }
 
   /**
+   * Add response headers
+   */
+  public headers(headers: HeadersInit): this {
+    this.middlewares.push([
+      5,
+      Array.isArray(headers)
+        ? headers
+        : headers instanceof Headers
+          ? Array.from(headers.entries())
+          : Object.entries(headers)
+    ]);
+    return this;
+  }
+
+  /**
    * Handle a static exception
    */
   public catch<T extends Handler<{}>>(exception: StaticException, handler: T): Router<

@@ -23,6 +23,9 @@ export const ASYNC_START = 'return (async()=>{';
 export const ASYNC_END = '})();';
 
 // Default vars
+export const TEXT_HEADER_PAIR = `${MAPL}_txtp`;
+export const TEXT_OPTIONS = `${MAPL}_txto`;
+
 export const HTML_HEADER_PAIR = `${MAPL}_htmlhp`;
 export const HTML_OPTIONS = `${MAPL}_htmlo`;
 
@@ -30,18 +33,29 @@ export const JSON_HEADER_PAIR = `${MAPL}_jsonhp`;
 export const JSON_OPTIONS = `${MAPL}_jsono`;
 
 // Context modification
-export const TEXT_HEADER_DEF = `let ${HEADERS}=[];`;
+export const HEADER_DEF = `let ${HEADERS}=[];`;
 
+export const SET_TEXT_HEADER = `${HEADERS}.push(${TEXT_HEADER_PAIR});`;
 export const SET_HTML_HEADER = `${HEADERS}.push(${HTML_HEADER_PAIR});`;
 export const SET_JSON_HEADER = `${HEADERS}.push(${JSON_HEADER_PAIR});`;
 
+export const TEXT_HEADER_DEF = `let ${HEADERS}=[${TEXT_HEADER_PAIR}];`;
 export const HTML_HEADER_DEF = `let ${HEADERS}=[${HTML_HEADER_PAIR}];`;
 export const JSON_HEADER_DEF = `let ${HEADERS}=[${JSON_HEADER_PAIR}];`;
 
 // Stuff with colon to pass as arguments
 export const COLON_CTX = `,${CTX}`;
+
+export const COLON_TEXT_OPTIONS = `,${TEXT_OPTIONS}`;
 export const COLON_HTML_OPTIONS = `,${HTML_OPTIONS}`;
 export const COLON_JSON_OPTIONS = `,${JSON_OPTIONS}`;
+
+// Text & HTML & JSON context creation
+export const PLAIN_CTX_DEF = HEADER_DEF + CTX_DEF;
+
+export const TEXT_CTX_DEF = TEXT_HEADER_DEF + CTX_DEF;
+export const HTML_CTX_DEF = HTML_HEADER_DEF + CTX_DEF;
+export const JSON_CTX_DEF = JSON_HEADER_DEF + CTX_DEF;
 
 // Args
 export const NO_ARG = '()';
@@ -66,13 +80,8 @@ export const RET_500 = `return ${RESPONSE_500};`;
 export const DEFAULT_EXCEPT_END = `default:${RET_500}}`;
 export const EXCEPT_START = `if(Array.isArray(${HOLDER})&&${HOLDER}[0]===${EXCEPT_SYMBOL})switch(${HOLDER}[1]){`;
 
-// Text & HTML & JSON context creation
-export const TEXT_CTX_DEF = TEXT_HEADER_DEF + CTX_DEF;
-export const HTML_CTX_DEF = HTML_HEADER_DEF + CTX_DEF;
-export const JSON_CTX_DEF = JSON_HEADER_DEF + CTX_DEF;
-
 // Default vars
-export const CONST_VARS = `var ${HTML_HEADER_PAIR}=['content-type','text/html'],${HTML_OPTIONS}={headers:[${HTML_HEADER_PAIR}]},${JSON_HEADER_PAIR}=['content-type','application/json'],${JSON_OPTIONS}={headers:[${JSON_HEADER_PAIR}]},${RESPONSE_400}=new Response(null,{status:400}),${RESPONSE_404}=new Response(null,{status:404}),${RESPONSE_500}=new Response(null,{status:500});`;
+export const CONST_VARS = `var ${TEXT_HEADER_PAIR}=['content-type','text/plain'],${TEXT_OPTIONS}={headers:[${TEXT_HEADER_PAIR}]},${HTML_HEADER_PAIR}=['content-type','text/html'],${HTML_OPTIONS}={headers:[${HTML_HEADER_PAIR}]},${JSON_HEADER_PAIR}=['content-type','application/json'],${JSON_OPTIONS}={headers:[${JSON_HEADER_PAIR}]},${RESPONSE_400}=new Response(null,{status:400}),${RESPONSE_404}=new Response(null,{status:404}),${RESPONSE_500}=new Response(null,{status:500});`;
 
 // Parsings and constants
 export const PARSE_PATH = `let ${C_URL}=${REQ}.url,${PATH_START}=${C_URL}.indexOf('/',12)+1,${PATH_END}=${C_URL}.indexOf('?',${PATH_START}),${PATH}=${C_URL}.substring(${PATH_START},${PATH_END}>>>0);`;

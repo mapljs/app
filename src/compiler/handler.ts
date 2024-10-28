@@ -1,6 +1,16 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
-import { buildStaticHandler, isFunctionAsync } from './utils.js';
+import { buildStaticHandler, isFunctionAsync, selectHeaderDef, selectResOption, selectSetHeader } from './utils.js';
+
+// eslint-disable-next-line
+const selectCtxParamsDef = (fnNoNeedContext: boolean): string => fnNoNeedContext
+  ? compilerConstants.CTX_DEF
+  : compilerConstants.CTX_PARAMS_DEF;
+
+// eslint-disable-next-line
+const selectFnArgs = (fnNoNeedContext: boolean): string => fnNoNeedContext
+  ? compilerConstants.NO_ARG
+  : compilerConstants.ONLY_CTX_ARG;
 
 /**
  * Compile a handler. This is a fast path for handlers that doesn't need recompilation
@@ -20,10 +30,7 @@ export function compileHandler(
       ? `return${isFnAsync && !previouslyAsync
         ? '(async()=>'
         : ' '
-      }new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${fnNoNeedContext
-        ? compilerConstants.NO_ARG
-        : compilerConstants.ONLY_CTX_ARG
-      },${compilerConstants.CTX})${isFnAsync && !previouslyAsync
+      }new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${selectFnArgs(fnNoNeedContext)},${compilerConstants.CTX})${isFnAsync && !previouslyAsync
         ? ')()'
         : ''
       };`
@@ -43,10 +50,7 @@ export function compileHandler(
         : `${isFnAsync && !previouslyAsync
           ? compilerConstants.ASYNC_START
           : ''
-        }${compilerConstants.TEXT_HEADER_DEF}${contextNeedParam
-          ? compilerConstants.CTX_PARAMS_DEF
-          : compilerConstants.CTX_DEF
-        }return new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${compilerConstants.ONLY_CTX_ARG},${compilerConstants.CTX});${isFnAsync && !previouslyAsync
+        }${compilerConstants.HEADER_DEF}${selectCtxParamsDef(!contextNeedParam)}return new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${compilerConstants.ONLY_CTX_ARG},${compilerConstants.CTX});${isFnAsync && !previouslyAsync
           ? compilerConstants.ASYNC_END
           : ''
         }`;
@@ -63,15 +67,12 @@ export function compileHandler(
 
   // Return a raw Response
   if (handlerType === 'response')
-    return `return f${externalValues.push(fn)}${fnNoNeedContext ? compilerConstants.NO_ARG : compilerConstants.ONLY_CTX_ARG};`;
+    return `return f${externalValues.push(fn)}${selectFnArgs(fnNoNeedContext)};`;
 
   const isFnAsync = isFunctionAsync(fn);
 
   return contextNeedParam === null
-    ? `${handlerType === 'html'
-      ? compilerConstants.SET_HTML_HEADER
-      : compilerConstants.SET_JSON_HEADER
-    }return${isFnAsync && !previouslyAsync
+    ? `${selectSetHeader(handlerType)}return${isFnAsync && !previouslyAsync
       ? '(async()=>'
       : ' '
     }new Response(${handlerType === 'json'
@@ -80,10 +81,7 @@ export function compileHandler(
     }${isFnAsync
       ? 'await '
       : ''
-    }f${externalValues.push(fn)}${fnNoNeedContext
-      ? compilerConstants.NO_ARG
-      : compilerConstants.ONLY_CTX_ARG
-    }${handlerType === 'json'
+    }f${externalValues.push(fn)}${selectFnArgs(fnNoNeedContext)}${handlerType === 'json'
       ? ')'
       : ''
     },${compilerConstants.CTX})${isFnAsync && !previouslyAsync
@@ -104,10 +102,7 @@ export function compileHandler(
       }f${externalValues.push(fn)}${compilerConstants.NO_ARG}${handlerType === 'json'
         ? ')'
         : ''
-      }${handlerType === 'html'
-        ? compilerConstants.COLON_HTML_OPTIONS
-        : compilerConstants.COLON_JSON_OPTIONS
-      })${isFnAsync && !previouslyAsync
+      }${selectResOption(handlerType)})${isFnAsync && !previouslyAsync
         ? ')()'
         : ''
       };`
@@ -115,13 +110,7 @@ export function compileHandler(
       : `${isFnAsync && !previouslyAsync
         ? compilerConstants.ASYNC_START
         : ''
-      }${handlerType === 'html'
-        ? compilerConstants.HTML_HEADER_DEF
-        : compilerConstants.JSON_HEADER_DEF
-      }${contextNeedParam
-        ? compilerConstants.CTX_PARAMS_DEF
-        : compilerConstants.CTX_DEF
-      }return new Response(${handlerType === 'json'
+      }${selectHeaderDef(handlerType)}${selectCtxParamsDef(!contextNeedParam)}return new Response(${handlerType === 'json'
         ? 'JSON.stringify('
         : ''
       }${isFnAsync
