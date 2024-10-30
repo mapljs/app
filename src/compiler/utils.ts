@@ -80,3 +80,9 @@ export function selectSetHeader(type: AnyTypedHandler['type']): string {
       ? compilerConstants.SET_JSON_HEADER
       : compilerConstants.SET_TEXT_HEADER;
 }
+
+export function selectCtxParamsDef(fnNoNeedContext: boolean): string {
+  return fnNoNeedContext
+    ? compilerConstants.CTX_DEF
+    : compilerConstants.CTX_PARAMS_DEF;
+}

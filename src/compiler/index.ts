@@ -6,6 +6,7 @@ import type { AppRouterCompilerState } from '../types/compiler.js';
 import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
 import { compileHandler } from './handler.js';
 import { symbol as exceptionSymbol } from '../exception.js';
+import { selectCtxParamsDef } from './utils.js';
 
 // DFS and compile every subrouter
 export function compileRouter(prefixPath: string, router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): void {
@@ -50,7 +51,7 @@ export const compileItem: AppRouterCompilerState['compileItem'] = (item, state, 
 
   state.contentBuilder.push(middlewareResult[1] === null
     ? middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], hasParam)
-    : middlewareResult[1] + (hasParam ? compilerConstants.CTX_PARAMS_DEF : compilerConstants.CTX_DEF) + middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], null));
+    : middlewareResult[1] + selectCtxParamsDef(!hasParam) + middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], null));
 
   // Remember to close async scope
   if (middlewareResult[2])
@@ -115,6 +116,5 @@ export function compile(router: AnyRouter, loadOnlyDependency: boolean): AppRout
   }
 
   contentBuilder.push(compilerConstants.RET_404);
-
   return state;
 }

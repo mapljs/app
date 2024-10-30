@@ -98,13 +98,13 @@ class Router<State, Routes, SubRouters> {
    */
   public headers(headers: HeadersInit): this {
     this.middlewares.push([
-      5,
-      Array.isArray(headers)
+      5, Array.isArray(headers)
         ? headers
         : headers instanceof Headers
           ? Array.from(headers.entries())
           : Object.entries(headers)
     ]);
+
     return this;
   }
 

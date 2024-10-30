@@ -1,11 +1,6 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
-import { buildStaticHandler, isFunctionAsync, selectHeaderDef, selectResOption, selectSetHeader } from './utils.js';
-
-// eslint-disable-next-line
-const selectCtxParamsDef = (fnNoNeedContext: boolean): string => fnNoNeedContext
-  ? compilerConstants.CTX_DEF
-  : compilerConstants.CTX_PARAMS_DEF;
+import { buildStaticHandler, isFunctionAsync, selectCtxParamsDef, selectHeaderDef, selectResOption, selectSetHeader } from './utils.js';
 
 // eslint-disable-next-line
 const selectFnArgs = (fnNoNeedContext: boolean): string => fnNoNeedContext

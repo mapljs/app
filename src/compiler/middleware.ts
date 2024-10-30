@@ -14,6 +14,11 @@ export type CachedMiddlewareCompilationResult = [
   builtExceptContent: string | null
 ];
 
+// eslint-disable-next-line
+const selectHolder = (hasHolder: boolean) => hasHolder
+  ? compilerConstants.HOLDER
+  : compilerConstants.CREATE_HOLDER;
+
 // Load new exceptions
 export function loadNewExceptions(prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilders {
   const routes = router.exceptRoutes;
@@ -79,10 +84,9 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
       continue;
     }
 
-    const isFnAsync = isFunctionAsync(middlewareData[1]);
-
     // Need context if fn has ctx argument or it is a parser or a setter
     const needContext = middlewareData[1].length !== 0 || middlewareData[0] === 1 || middlewareData[0] === 4;
+    const isFnAsync = isFunctionAsync(middlewareData[1]);
 
     // Wrap with an async context
     if (isFnAsync && !currentResult[2]) {
@@ -96,7 +100,7 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
 
     if (needContext && currentResult[1] === null) {
       // Move the built part to prevContext
-      currentResult[1] = currentResult[0] + compilerConstants.TEXT_HEADER_DEF;
+      currentResult[1] = currentResult[0] + compilerConstants.HEADER_DEF;
       currentResult[0] = '';
 
       // Reset the exception value
@@ -108,7 +112,7 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
       // Parsers
       case 1: {
         // Set the prop to the context (prop name must be an identifier)
-        currentResult[0] += `${currentResult[3] ? compilerConstants.HOLDER : compilerConstants.CREATE_HOLDER}=${fnCall}${
+        currentResult[0] += `${selectHolder(currentResult[3])}=${fnCall}${
           // Use the old value if it exists
           currentResult[5] ??= loadHandlers(exceptRoutes, currentResult[1] === null, currentResult[2])
         }${compilerConstants.CTX}.${middlewareData[2]}=${compilerConstants.HOLDER};`;
@@ -120,7 +124,7 @@ export function compileMiddlewares(router: AnyRouter, state: AppRouterCompilerSt
 
       // Validators
       case 2: {
-        currentResult[0] += `${currentResult[3] ? compilerConstants.HOLDER : compilerConstants.CREATE_HOLDER}=${fnCall}${
+        currentResult[0] += `${selectHolder(currentResult[3])}=${fnCall}${
           // Use the old value if it exists
           currentResult[5] ??= loadHandlers(exceptRoutes, currentResult[1] === null, currentResult[2])
         }`;
