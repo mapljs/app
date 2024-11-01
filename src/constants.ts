@@ -73,15 +73,12 @@ export const RET_400 = `return ${RESPONSE_400};`;
 const RESPONSE_404 = `${MAPL}_r404`;
 export const RET_404 = `return ${RESPONSE_404};`;
 
-const RESPONSE_500 = `${MAPL}_r500`;
-export const RET_500 = `return ${RESPONSE_500};`;
-
 // Exception constants
-export const DEFAULT_EXCEPT_END = `default:${RET_500}}`;
+export const DEFAULT_EXCEPT_END = `default:${RET_400}}`;
 export const EXCEPT_START = `if(Array.isArray(${HOLDER})&&${HOLDER}[0]===${EXCEPT_SYMBOL})switch(${HOLDER}[1]){`;
 
 // Default vars
-export const CONST_VARS = `var ${TEXT_HEADER_PAIR}=['content-type','text/plain'],${TEXT_OPTIONS}={headers:[${TEXT_HEADER_PAIR}]},${HTML_HEADER_PAIR}=['content-type','text/html'],${HTML_OPTIONS}={headers:[${HTML_HEADER_PAIR}]},${JSON_HEADER_PAIR}=['content-type','application/json'],${JSON_OPTIONS}={headers:[${JSON_HEADER_PAIR}]},${RESPONSE_400}=new Response(null,{status:400}),${RESPONSE_404}=new Response(null,{status:404}),${RESPONSE_500}=new Response(null,{status:500});`;
+export const CONST_VARS = `var ${TEXT_HEADER_PAIR}=['content-type','text/plain'],${TEXT_OPTIONS}={headers:[${TEXT_HEADER_PAIR}]},${HTML_HEADER_PAIR}=['content-type','text/html'],${HTML_OPTIONS}={headers:[${HTML_HEADER_PAIR}]},${JSON_HEADER_PAIR}=['content-type','application/json'],${JSON_OPTIONS}={headers:[${JSON_HEADER_PAIR}]},${RESPONSE_400}=new Response(null,{status:400}),${RESPONSE_404}=new Response(null,{status:404});`;
 
 // Parsings and constants
 export const PARSE_PATH = `let ${C_URL}=${REQ}.url,${PATH_START}=${C_URL}.indexOf('/',12)+1,${PATH_END}=${C_URL}.indexOf('?',${PATH_START}),${PATH}=${C_URL}.substring(${PATH_START},${PATH_END}>>>0);`;
