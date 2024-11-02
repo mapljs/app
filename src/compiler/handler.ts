@@ -10,13 +10,14 @@ const selectFnArgs = (fnNoNeedContext: boolean): string => fnNoNeedContext
 /**
  * Compile a handler. This is a fast path for handlers that doesn't need recompilation
  */
-export function compileHandler(
+// eslint-disable-next-line
+export const compileHandler = (
   handler: AnyHandler,
   externalValues: AppRouterCompilerState['externalValues'],
 
   previouslyAsync: boolean,
   contextNeedParam: boolean | null
-): string {
+): string => {
   if (typeof handler === 'function') {
     const isFnAsync = isFunctionAsync(handler);
     const fnNoNeedContext = handler.length === 0;
@@ -118,4 +119,4 @@ export function compileHandler(
         ? compilerConstants.ASYNC_END
         : ''
       }`;
-}
+};

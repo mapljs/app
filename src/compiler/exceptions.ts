@@ -14,7 +14,8 @@ const selectFnArgs = (isDynamic: boolean, fnNeedContext: boolean): string => isD
   : fnNeedContext ? compilerConstants.ONLY_CTX_ARG : compilerConstants.NO_ARG;
 
 // Build closures that generates exception content
-export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilder {
+// eslint-disable-next-line
+export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilder => {
   // Plain text
   if (typeof handler === 'function') {
     const isFnAsync = isFunctionAsync(handler);
@@ -116,9 +117,10 @@ export function buildHandler(isDynamic: boolean, handler: AnyHandler, externalVa
 
     return content;
   };
-}
+};
 
-export function loadExceptionHandlers(builders: ExceptHandlerBuilders, hasContext: boolean, isAsync: boolean): string {
+// eslint-disable-next-line
+export const loadExceptionHandlers = (builders: ExceptHandlerBuilders, hasContext: boolean, isAsync: boolean): string => {
   let str = compilerConstants.EXCEPT_START;
 
   // Build all exceptions
@@ -126,10 +128,11 @@ export function loadExceptionHandlers(builders: ExceptHandlerBuilders, hasContex
 
   // Catch all
   return str + (typeof builders[0] === 'undefined' ? compilerConstants.DEFAULT_EXCEPT_END : `default:{${builders[0](hasContext, isAsync)}}}`);
-}
+};
 
-// Load new exceptions
-export function loadNewExceptions(prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilders {
+// Load new exception handlers
+// eslint-disable-next-line
+export const buildExceptionHandlers = (prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilders => {
   const routes = router.exceptRoutes;
   const allExceptRoute = router.allExceptRoute;
 
@@ -151,4 +154,4 @@ export function loadNewExceptions(prevValue: ExceptHandlerBuilders, router: AnyR
     newRoutes[0] = buildHandler(false, allExceptRoute, externalValues);
 
   return newRoutes;
-}
+};

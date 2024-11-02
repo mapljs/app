@@ -6,23 +6,28 @@ import type { MaybePromise } from '../types/utils.js';
 /**
  * Build a function to handle requests
  */
-export function jitc(router: AnyRouter): (req: Request) => MaybePromise<Response> {
+// eslint-disable-next-line
+export const jitc = (router: AnyRouter): (req: Request) => MaybePromise<Response> => {
   const state = compile(router, false);
+
   // eslint-disable-next-line
-  return Function(...getExternalKeys(state), `'use strict';${compilerConstants.CONST_VARS}${getDeclarations(state)}return (${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}`)(...state.externalValues);
-}
+  return Function(
+    ...getExternalKeys(state),
+    `'use strict';${compilerConstants.CONST_VARS}${getDeclarations(state)}return (${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}`
+  )(...state.externalValues);
+};
 
 /**
  * Create a function string to be used in files
  */
-export function aotfn(router: AnyRouter): string {
+// eslint-disable-next-line
+export const aotfn = (router: AnyRouter): string => {
   const state = compile(router, false);
   return `((${getExternalKeys(state).join(',')})=>{${compilerConstants.CONST_VARS}${getDeclarations(state)}return (${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}})`;
-}
+};
 
 /**
  * Get router dependencies to inject
  */
-export function aotdeps(router: AnyRouter): any[] {
-  return compile(router, true).externalValues as any[];
-}
+// eslint-disable-next-line
+export const aotdeps = (router: AnyRouter): any[] => compile(router, true).externalValues as any[];

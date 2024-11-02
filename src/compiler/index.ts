@@ -9,7 +9,8 @@ import { symbol as exceptionSymbol } from '../exception.js';
 import { selectCtxParamsDef } from './utils.js';
 
 // DFS and compile every subrouter
-export function compileRouter(prefixPath: string, router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): void {
+// eslint-disable-next-line
+export const compileRouter = (prefixPath: string, router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): void => {
   // Cache the middleware result
   const middlewareCompilationResult = compileMiddlewares(router, state, prevValue);
 
@@ -42,7 +43,7 @@ export function compileRouter(prefixPath: string, router: AnyRouter, state: AppR
       middlewareCompilationResult
     );
   }
-}
+};
 
 // Compile a single item
 // eslint-disable-next-line
@@ -58,10 +59,8 @@ export const compileItem: AppRouterCompilerState['compileItem'] = (item, state, 
     state.contentBuilder.push(compilerConstants.ASYNC_END);
 };
 
-// 0: JIT
-// 1: Get only the body
-// 2: Get only the dependency
-export function compile(router: AnyRouter, loadOnlyDependency: boolean): AppRouterCompilerState {
+// eslint-disable-next-line
+export const compile = (router: AnyRouter, loadOnlyDependency: boolean): AppRouterCompilerState => {
   const routeTrees: AppRouterCompilerState['routeTrees'] = [null, null];
 
   // Fake content builder when only requires the external dependencies
@@ -79,7 +78,6 @@ export function compile(router: AnyRouter, loadOnlyDependency: boolean): AppRout
   };
 
   // Put all stuff into the radix tree
-
   compileRouter('', router, state, ['', null, false, false, {}, null]);
 
   // Actually load the entire tree here
@@ -117,4 +115,4 @@ export function compile(router: AnyRouter, loadOnlyDependency: boolean): AppRout
 
   contentBuilder.push(compilerConstants.RET_404);
   return state;
-}
+};

@@ -4,19 +4,18 @@ import type { AppRouterCompilerState } from '../types/compiler.js';
 // eslint-disable-next-line
 const AsyncFunction = (async () => { }).constructor;
 
-export function isFunctionAsync(fn: any): fn is (...args: any[]) => Promise<any> {
-  return fn instanceof AsyncFunction;
-}
+// eslint-disable-next-line
+export const isFunctionAsync = (fn: any): fn is (...args: any[]) => Promise<any> => fn instanceof AsyncFunction;
 
-export function toHeaderTuples(headers: HeadersInit): [string, string][] {
-  return Array.isArray(headers)
-    ? headers
-    : headers instanceof Headers
-      ? headers.entries().toArray()
-      : Object.entries(headers);
-}
+// eslint-disable-next-line
+export const toHeaderTuples = (headers: HeadersInit): [string, string][] => Array.isArray(headers)
+  ? headers
+  : headers instanceof Headers
+    ? headers.entries().toArray()
+    : Object.entries(headers);
 
-export function buildStaticHandler(handler: StaticHandler, externalValues: AppRouterCompilerState['externalValues'], contextNeedParam: boolean | null): string {
+// eslint-disable-next-line
+export const buildStaticHandler = (handler: StaticHandler, externalValues: AppRouterCompilerState['externalValues'], contextNeedParam: boolean | null): string => {
   const options = handler.options;
 
   // Has context then serialize options to
@@ -47,42 +46,37 @@ export function buildStaticHandler(handler: StaticHandler, externalValues: AppRo
 
   // Save the entire response object in memory and clone when necessary
   return `return f${externalValues.push(new Response(handler.body, handler.options))}.clone();`;
-}
+};
 
-export function selectHeaderDef(type: AnyTypedHandler['type']): string {
-  return type === 'html'
-    ? compilerConstants.HTML_HEADER_DEF
-    : type === 'json'
-      ? compilerConstants.JSON_HEADER_DEF
-      : compilerConstants.TEXT_HEADER_DEF;
-}
+// eslint-disable-next-line
+export const selectHeaderDef = (type: AnyTypedHandler['type']): string => type === 'html'
+  ? compilerConstants.HTML_HEADER_DEF
+  : type === 'json'
+    ? compilerConstants.JSON_HEADER_DEF
+    : compilerConstants.TEXT_HEADER_DEF;
 
-export function selectCtxDef(type: AnyTypedHandler['type']): string {
-  return type === 'html'
-    ? compilerConstants.HTML_CTX_DEF
-    : type === 'json'
-      ? compilerConstants.JSON_CTX_DEF
-      : compilerConstants.TEXT_CTX_DEF;
-}
+// eslint-disable-next-line
+export const selectCtxDef = (type: AnyTypedHandler['type']): string => type === 'html'
+  ? compilerConstants.HTML_CTX_DEF
+  : type === 'json'
+    ? compilerConstants.JSON_CTX_DEF
+    : compilerConstants.TEXT_CTX_DEF;
 
-export function selectResOption(type: AnyTypedHandler['type']): string {
-  return type === 'html'
-    ? compilerConstants.COLON_HTML_OPTIONS
-    : type === 'json'
-      ? compilerConstants.COLON_JSON_OPTIONS
-      : compilerConstants.COLON_TEXT_OPTIONS;
-}
+// eslint-disable-next-line
+export const selectResOption = (type: AnyTypedHandler['type']): string => type === 'html'
+  ? compilerConstants.COLON_HTML_OPTIONS
+  : type === 'json'
+    ? compilerConstants.COLON_JSON_OPTIONS
+    : compilerConstants.COLON_TEXT_OPTIONS;
 
-export function selectSetHeader(type: AnyTypedHandler['type']): string {
-  return type === 'html'
-    ? compilerConstants.SET_HTML_HEADER
-    : type === 'json'
-      ? compilerConstants.SET_JSON_HEADER
-      : compilerConstants.SET_TEXT_HEADER;
-}
+// eslint-disable-next-line
+export const selectSetHeader = (type: AnyTypedHandler['type']): string => type === 'html'
+  ? compilerConstants.SET_HTML_HEADER
+  : type === 'json'
+    ? compilerConstants.SET_JSON_HEADER
+    : compilerConstants.SET_TEXT_HEADER;
 
-export function selectCtxParamsDef(fnNoNeedContext: boolean): string {
-  return fnNoNeedContext
-    ? compilerConstants.CTX_DEF
-    : compilerConstants.CTX_PARAMS_DEF;
-}
+// eslint-disable-next-line
+export const selectCtxParamsDef = (fnNoNeedContext: boolean): string => fnNoNeedContext
+  ? compilerConstants.CTX_DEF
+  : compilerConstants.CTX_PARAMS_DEF;
