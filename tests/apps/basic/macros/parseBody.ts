@@ -1,26 +1,16 @@
 import { Router, macro, staticException } from '@mapl/app/index.js';
-import { CTX, REQ, RET_400, TEXT_HEADER_DEF, HOLDER, CREATE_HOLDER, ASYNC_START } from '@mapl/app/constants.js';
+import { CTX, REQ, HOLDER } from '@mapl/app/constants.js';
+import { createAsyncScope, createEmptyContext, createHolder } from '@mapl/app/compiler/middleware.js';
+import { loadExceptionHandler } from '@mapl/app/compiler/exceptions.js';
 
 export const invalidBodyFormat = staticException();
+
 export const parseBody = macro<Router<{ body: { name: string } }, [], []>>((ctx) => {
-  // Require async
-  if (!ctx[2]) {
-    ctx[0] += ASYNC_START;
-    ctx[2] = true;
-  }
-
-  // Require a context object
-  if (ctx[1] === null) {
-    ctx[1] = ctx[0] + TEXT_HEADER_DEF
-    ctx[0] = '';
-  }
-
-  const exceptHandler = ctx[4][invalidBodyFormat[1]] ?? ctx[4][0];
+  createAsyncScope(ctx);
+  createEmptyContext(ctx);
 
   // Build
-  ctx[0] += `${ctx[3] ? HOLDER : CREATE_HOLDER}=await ${REQ}.json().catch(()=>null);if(${HOLDER}===null||typeof ${HOLDER}!=='object'||typeof ${HOLDER}.name!=='string'){${
-    typeof exceptHandler === 'undefined' ? RET_400 : exceptHandler(true, true)
+  ctx[0] += `${createHolder(ctx)}=await ${REQ}.json().catch(()=>null);if(${HOLDER}===null||typeof ${HOLDER}!=='object'||typeof ${HOLDER}.name!=='string'){${
+    loadExceptionHandler(ctx[4], invalidBodyFormat[1], true, true)
   }}${CTX}.body=${HOLDER};`;
-
-  ctx[3] = true;
 });
