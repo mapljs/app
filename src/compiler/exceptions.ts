@@ -128,11 +128,6 @@ export function loadExceptionHandlers(builders: ExceptHandlerBuilders, hasContex
   return str + (typeof builders[0] === 'undefined' ? compilerConstants.DEFAULT_EXCEPT_END : `default:{${builders[0](hasContext, isAsync)}}}`);
 }
 
-export function loadExceptionHandler(builders: ExceptHandlerBuilders, targetId: number, hasContext: boolean, isAsync: boolean): string {
-  const handler = builders[targetId] ?? builders[0];
-  return typeof handler === 'undefined' ? compilerConstants.RET_400 : handler(hasContext, isAsync);
-}
-
 // Load new exceptions
 export function loadNewExceptions(prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilders {
   const routes = router.exceptRoutes;
