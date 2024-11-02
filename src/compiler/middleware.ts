@@ -16,15 +16,11 @@ export type CachedMiddlewareCompilationResult = [
 
 // eslint-disable-next-line
 export const createHolder = (currentResult: CachedMiddlewareCompilationResult) => {
-  const val = currentResult[3]
-    ? compilerConstants.HOLDER
-    : compilerConstants.CREATE_HOLDER;
+  if (currentResult[3])
+    return compilerConstants.HOLDER;
 
-  // Recognize the holder
   currentResult[3] = true;
-
-  // Return the intended value
-  return val;
+  return compilerConstants.CREATE_HOLDER;
 };
 
 // eslint-disable-next-line
