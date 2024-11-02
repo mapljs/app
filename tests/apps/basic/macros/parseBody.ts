@@ -2,7 +2,7 @@ import { Router, macro, staticException } from '@mapl/app/index.js';
 import { CTX, REQ, RET_400, TEXT_HEADER_DEF, HOLDER, CREATE_HOLDER, ASYNC_START } from '@mapl/app/constants.js';
 
 export const invalidBodyFormat = staticException();
-export const parseBody = macro<Router<{ body: { name: string } }, [], []>>((ctx, state) => {
+export const parseBody = macro<Router<{ body: { name: string } }, [], []>>((ctx) => {
   // Require async
   if (!ctx[2]) {
     ctx[0] += ASYNC_START;
