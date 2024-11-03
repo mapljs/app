@@ -1,19 +1,20 @@
 import { compile } from './index.js';
 import type { AnyRouter } from '../router/index.js';
 import { getExternalKeys, getDeclarations } from '@mapl/compiler';
-import type { MaybePromise } from '../types/utils.js';
+import { AsyncFunction } from './utils.js';
+import type { BuildResult } from '../types/fetch.js';
 
 /**
  * Build a function to handle requests
  */
 // eslint-disable-next-line
-export const jitc = (router: AnyRouter): (req: Request) => MaybePromise<Response> => {
+export const jitc = async (router: AnyRouter): Promise<BuildResult> => {
   const state = compile(router, false);
 
   // eslint-disable-next-line
-  return Function(
+  return AsyncFunction(
     ...getExternalKeys(state),
-    `'use strict';${compilerConstants.CONST_VARS}${getDeclarations(state)}return (${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}`
+    `'use strict';${compilerConstants.CONST_VARS}${getDeclarations(state)}return{fetch:(${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}}`
   )(...state.externalValues);
 };
 
@@ -23,7 +24,7 @@ export const jitc = (router: AnyRouter): (req: Request) => MaybePromise<Response
 // eslint-disable-next-line
 export const aotfn = (router: AnyRouter): string => {
   const state = compile(router, false);
-  return `((${getExternalKeys(state).join(',')})=>{${compilerConstants.CONST_VARS}${getDeclarations(state)}return (${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}})`;
+  return `(async(${getExternalKeys(state).join(',')})=>{${compilerConstants.CONST_VARS}${getDeclarations(state)}return{fetch:(${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}}})`;
 };
 
 /**

@@ -1,7 +1,7 @@
 import type { DynamicException, StaticException, ExcludeExceptionType } from '../exception.js';
 import type { RouteRegisters } from './route.js';
 import type { Context } from './types/context.js';
-import type { AnyHandler, Handler, HandlerData } from './types/handler.js';
+import type { AnyHandler, Handler, HandlerData, PrebuildData } from './types/handler.js';
 import type { MacroMiddlewareFunction, MiddlewareData, MiddlewareFunction } from './types/middleware.js';
 
 export type AnyRouter = Router<any, HandlerData[], [string, AnyRouter][]>;
@@ -219,6 +219,15 @@ class Router<State, Routes, SubRouters> {
    */
   public any(path: string, handler: any): any {
     this.routes.push([null, path, handler]);
+    return this;
+  }
+
+  /**
+   * @internal
+   * @ignore
+   */
+  public prebuild(path: string, ...options: PrebuildData): any {
+    this.routes.push([null, path, options]);
     return this;
   }
 }

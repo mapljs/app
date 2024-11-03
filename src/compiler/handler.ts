@@ -56,7 +56,7 @@ export const compileHandler = (
 
   // Build static response
   if (handlerType === 'static')
-    return buildStaticHandler(handler, externalValues, contextNeedParam);
+    return buildStaticHandler(handler.body, handler.options, externalValues, contextNeedParam);
 
   const fn = handler.fn;
   const fnNoNeedContext = fn.length === 0;

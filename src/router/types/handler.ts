@@ -1,8 +1,6 @@
 import type { Context } from './context.js';
 import type { MaybePromise } from '../../types/utils.js';
 
-export type HandlerData = [method: string | null, path: string, Handler<any>];
-
 export type PlainHandler<State, Args extends any[]> = (...args: [...Args, Context & State]) => MaybePromise<BodyInit | null>;
 
 export interface TextHandler<State, Args extends any[]> {
@@ -27,8 +25,6 @@ export interface ResponseHandler<State, Args extends any[]> {
 
 export interface StaticHandler {
   type: 'static';
-
-  // Support all static format
   body?: URLSearchParams | FormData | Blob | ArrayBuffer | string | null;
   options?: ResponseInit;
 }
@@ -40,3 +36,6 @@ export type AnyTypedHandler = TypedHandler<any> | TypedHandler<any, [any]>;
 
 export type Handler<State, Args extends any[] = []> = PlainHandler<State, Args> | TypedHandler<State, Args> | StaticHandler;
 export type AnyHandler = Handler<any> | Handler<any, [any]>;
+
+export type PrebuildData = [StaticHandler['body'], StaticHandler['options']];
+export type HandlerData = [method: string | null, path: string, AnyHandler | PrebuildData];

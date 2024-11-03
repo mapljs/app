@@ -64,8 +64,8 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
 
     // eslint-disable-next-line
     return (hasContext) => hasContext
-      ? hasContextCase ??= buildStaticHandler(handler, externalValues, null)
-      : noContextCase ??= buildStaticHandler(handler, externalValues, false);
+      ? hasContextCase ??= buildStaticHandler(handler.body, handler.options, externalValues, null)
+      : noContextCase ??= buildStaticHandler(handler.body, handler.options, externalValues, false);
   }
 
   const fn = handler.fn;

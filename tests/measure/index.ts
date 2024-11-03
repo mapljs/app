@@ -6,11 +6,11 @@ const measureAvg = async (fn: () => any) => format((await measure(fn)).avg);
 
 export const measureAppAOT = async (app: AnyRouter) => {
   await Bun.write(`${import.meta.dir}/fetch.js`, `export default ${aotfn(app)};`);
-  console.log(`AOT compilation: ${await measureAvg(async () => (await import('./fetch.js')).default(aotdeps(app)))}`);
+  console.log(`AOT compilation: ${await measureAvg(async () => await (await import('./fetch.js')).default(aotdeps(app)))}`);
 }
 
 export const measureAppJIT = async (app: AnyRouter) =>
-  console.log(`JIT compilation: ${await measureAvg(() => jitc(app))}`);
+  console.log(`JIT compilation: ${await measureAvg(async () => await jitc(app))}`);
 
 export const measureApp = (app: AnyRouter) => Promise.all([
   measureAppAOT(app), measureAppJIT(app)

@@ -2,7 +2,7 @@ import type { AnyTypedHandler, StaticHandler } from '../router/types/handler.js'
 import type { AppRouterCompilerState } from '../types/compiler.js';
 
 // eslint-disable-next-line
-const AsyncFunction = (async () => { }).constructor;
+export const AsyncFunction = (async () => { }).constructor;
 
 // eslint-disable-next-line
 export const isFunctionAsync = (fn: any): fn is (...args: any[]) => Promise<any> => fn instanceof AsyncFunction;
@@ -15,9 +15,7 @@ export const toHeaderTuples = (headers: HeadersInit): [string, string][] => Arra
     : Object.entries(headers);
 
 // eslint-disable-next-line
-export const buildStaticHandler = (handler: StaticHandler, externalValues: AppRouterCompilerState['externalValues'], contextNeedParam: boolean | null): string => {
-  const options = handler.options;
-
+export const buildStaticHandler = (body: StaticHandler['body'], options: StaticHandler['options'], externalValues: AppRouterCompilerState['externalValues'], contextNeedParam: boolean | null): string => {
   // Has context then serialize options to
   // statements that changes the context
   if (contextNeedParam === null) {
@@ -36,16 +34,16 @@ export const buildStaticHandler = (handler: StaticHandler, externalValues: AppRo
 
     // Save only the body in memory
     return `${tmpl}return new Response(${
-      handler.body == null
+      body == null
         ? 'null'
-        : typeof handler.body === 'string'
-          ? `"${handler.body.replace(/"/, '\\"')}"`
-          : `f${externalValues.push(handler.body)}`
+        : typeof body === 'string'
+          ? `"${body.replace(/"/, '\\"')}"`
+          : `f${externalValues.push(body)}`
     }${compilerConstants.COLON_CTX});`;
   }
 
   // Save the entire response object in memory and clone when necessary
-  return `return f${externalValues.push(new Response(handler.body, handler.options))}.clone();`;
+  return `return f${externalValues.push(new Response(body, options))}.clone();`;
 };
 
 // eslint-disable-next-line

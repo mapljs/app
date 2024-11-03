@@ -3,6 +3,7 @@ import { statelessNoOpBuilder } from '@mapl/compiler';
 
 import type { AnyRouter } from '../router/index.js';
 import type { AppRouterCompilerState } from '../types/compiler.js';
+
 import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
 import { compileHandler } from './handler.js';
 import { symbol as exceptionSymbol } from '../exception.js';
@@ -12,23 +13,30 @@ import { selectCtxParamsDef } from './utils.js';
 // eslint-disable-next-line
 export const compileRouter = (prefixPath: string, router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): void => {
   // Cache the middleware result
-  const middlewareCompilationResult = compileMiddlewares(router, state, prevValue);
+  const middlewareResult = compileMiddlewares(router, state, prevValue);
 
   // Load all routes into the tree
-  for (let i = 0, routeTrees = state.routeTrees, routes = router.routes, l = routes.length; i < l; i++) {
+  for (let i = 0,
+    routeTrees = state.routeTrees,
+    routes = router.routes,
+    l = routes.length; i < l; i++
+  ) {
     const route = routes[i];
+    const path = route[1] === '/'
+      ? prefixPath === '' ? '/' : prefixPath
+      : prefixPath + route[1];
+
+    // TODO: Prebuilds
+    if (Array.isArray(route[2]))
+      throw new Error('TODO: Prebuild');
 
     // Load that into the tree to compile later on
     insertItem(
       route[0] === null
         ? routeTrees[1] ??= createRouter()
         : (routeTrees[0] ??= {})[route[0]] ??= createRouter(),
-
-      route[1] === '/'
-        ? prefixPath === '' ? '/' : prefixPath
-        : prefixPath + route[1],
-
-      [middlewareCompilationResult, route[2]]
+      path,
+      [middlewareResult, route[2]]
     );
   }
 
@@ -40,7 +48,7 @@ export const compileRouter = (prefixPath: string, router: AnyRouter, state: AppR
       subrouterData[0] === '/' ? prefixPath : prefixPath + subrouterData[0],
       subrouterData[1],
       state,
-      middlewareCompilationResult
+      middlewareResult
     );
   }
 };
@@ -54,7 +62,6 @@ export const compileItem: AppRouterCompilerState['compileItem'] = (item, state, 
     ? middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], hasParam)
     : middlewareResult[1] + selectCtxParamsDef(!hasParam) + middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], null));
 
-  // Remember to close async scope
   if (middlewareResult[2])
     state.contentBuilder.push(compilerConstants.ASYNC_END);
 };

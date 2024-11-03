@@ -1,6 +1,6 @@
 {
   "name": "@mapl/app",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "description": "A low overhead web framework",
   "keywords": [
     "fast",
@@ -36,7 +36,7 @@
     "typescript-eslint": "latest"
   },
   "dependencies": {
-    "@mapl/compiler": "^0.0.6",
+    "@mapl/compiler": "^0.0.7",
     "@mapl/router": "^0.0.16"
   }
 }
