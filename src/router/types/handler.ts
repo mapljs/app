@@ -37,5 +37,4 @@ export type AnyTypedHandler = TypedHandler<any> | TypedHandler<any, [any]>;
 export type Handler<State, Args extends any[] = []> = PlainHandler<State, Args> | TypedHandler<State, Args> | StaticHandler;
 export type AnyHandler = Handler<any> | Handler<any, [any]>;
 
-export type PrebuildData = [StaticHandler['body'], StaticHandler['options']];
-export type HandlerData = [method: string | null, path: string, AnyHandler | PrebuildData];
+export type HandlerData = [method: string | null | 0, path: string, AnyHandler];

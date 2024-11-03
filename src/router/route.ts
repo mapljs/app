@@ -1,8 +1,8 @@
 import type { AnyRouter, Router } from './index.js';
-import type { Handler, HandlerData, PrebuildData } from './types/handler.js';
+import type { Handler, HandlerData } from './types/handler.js';
 
 export type RouteRegister<
-  Method extends string | null,
+  Method extends string | null | 0,
   State,
   Routes extends HandlerData[],
   SubRouters extends [string, AnyRouter][]
@@ -22,10 +22,5 @@ export type RouteRegisters<
 > = { [Method in Methods]: RouteRegister<Uppercase<Method>, State, Routes, SubRouters> }
   & {
     any: RouteRegister<null, State, Routes, SubRouters>,
-
-    prebuild: <Path extends string, T extends PrebuildData>(path: Path, ...options: T) => Router<
-      State,
-      [...Routes, [null, Path, T]],
-      SubRouters
-    >
+    prebuild: RouteRegister<0, State, Routes, SubRouters>
   };

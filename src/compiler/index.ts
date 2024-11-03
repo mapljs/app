@@ -27,7 +27,7 @@ export const compileRouter = (prefixPath: string, router: AnyRouter, state: AppR
       : prefixPath + route[1];
 
     // TODO: Prebuilds
-    if (Array.isArray(route[2]))
+    if (route[0] === 0)
       throw new Error('TODO: Prebuild');
 
     // Load that into the tree to compile later on

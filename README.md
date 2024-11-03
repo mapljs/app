@@ -29,9 +29,9 @@ const app = router()
   // Set subroutes
   .route('/api', subroute);
 
-// Compile the app to a fetch function
-const fetch = jitc(app);
+// Compile the app
+const buildResult = await jitc(app);
 
 // Example request
-fetch(new Request('http://127.0.0.1:3000')); // new Response('Hi')
+buildResult.fetch(new Request('http://127.0.0.1:3000')); // new Response('Hi')
 ```
