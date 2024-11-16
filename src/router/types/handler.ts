@@ -37,4 +37,6 @@ export type AnyTypedHandler = TypedHandler<any> | TypedHandler<any, [any]>;
 export type Handler<State, Args extends any[] = []> = PlainHandler<State, Args> | TypedHandler<State, Args> | StaticHandler;
 export type AnyHandler = Handler<any> | Handler<any, [any]>;
 
+// 0 is for prebuilt routes
+// null is for any handler
 export type HandlerData = [method: string | null | 0, path: string, AnyHandler];

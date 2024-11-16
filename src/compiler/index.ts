@@ -8,6 +8,17 @@ import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './mi
 import { compileHandler } from './handler.js';
 import { symbol as exceptionSymbol } from '../exception.js';
 import { selectCtxParamsDef } from './utils.js';
+import type { AnyHandler } from '../router/types/handler.js';
+
+// eslint-disable-next-line
+const compileHandlerWithMiddleware = (
+  middlewareResult: CachedMiddlewareCompilationResult,
+  handler: AnyHandler, state: AppRouterCompilerState,
+  hasParam: boolean
+): string => (middlewareResult[1] === null
+  ? middlewareResult[0] + compileHandler(handler, state.externalValues, middlewareResult[2], hasParam)
+  : middlewareResult[1] + selectCtxParamsDef(!hasParam) + middlewareResult[0] + compileHandler(handler, state.externalValues, middlewareResult[2], null)
+) + (middlewareResult[2] ? compilerConstants.ASYNC_END : '');
 
 // DFS and compile every subrouter
 // eslint-disable-next-line
@@ -26,18 +37,26 @@ export const compileRouter = (prefixPath: string, router: AnyRouter, state: AppR
       ? prefixPath === '' ? '/' : prefixPath
       : prefixPath + route[1];
 
-    // TODO: Prebuilds
-    if (route[0] === 0)
-      throw new Error('TODO: Prebuild');
-
-    // Load that into the tree to compile later on
-    insertItem(
-      route[0] === null
-        ? routeTrees[1] ??= createRouter()
-        : (routeTrees[0] ??= {})[route[0]] ??= createRouter(),
-      path,
-      [middlewareResult, route[2]]
-    );
+    if (route[0] === 0) {
+      // Build an iife
+      // How to compile this will be decided later
+      state.prebuilds.push([
+        path,
+        // Polyfill all required props
+        `(()=>{let ${compilerConstants.REQ}=new Request(${JSON.stringify(path)}),${compilerConstants.METHOD}="GET";${compilerConstants.PARSE_PATH}${
+          compileHandlerWithMiddleware(middlewareResult, route[2], state, false)
+        }})()`
+      ]);
+    } else {
+      // Load that into the tree to compile later on
+      insertItem(
+        route[0] === null
+          ? routeTrees[1] ??= createRouter()
+          : (routeTrees[0] ??= {})[route[0]] ??= createRouter(),
+        path,
+        [middlewareResult, route[2]]
+      );
+    }
   }
 
   // Visit and compile all sub-routers
@@ -53,29 +72,18 @@ export const compileRouter = (prefixPath: string, router: AnyRouter, state: AppR
   }
 };
 
-// Compile a single item
-// eslint-disable-next-line
-export const compileItem: AppRouterCompilerState['compileItem'] = (item, state, hasParam) => {
-  const middlewareResult = item[0];
-
-  state.contentBuilder.push(middlewareResult[1] === null
-    ? middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], hasParam)
-    : middlewareResult[1] + selectCtxParamsDef(!hasParam) + middlewareResult[0] + compileHandler(item[1], state.externalValues, middlewareResult[2], null));
-
-  if (middlewareResult[2])
-    state.contentBuilder.push(compilerConstants.ASYNC_END);
-};
-
 // eslint-disable-next-line
 export const compile = (router: AnyRouter, loadOnlyDependency: boolean): AppRouterCompilerState => {
   const routeTrees: AppRouterCompilerState['routeTrees'] = [null, null];
-
+  const prebuilds: AppRouterCompilerState['prebuilds'] = [];
   // Fake content builder when only requires the external dependencies
   const contentBuilder = loadOnlyDependency ? statelessNoOpBuilder : [] as string[];
 
   const state: AppRouterCompilerState = {
     routeTrees,
-    compileItem,
+    prebuilds,
+
+    compileItem: (item, currentState, hasParam) => state.contentBuilder.push(compileHandlerWithMiddleware(...item, currentState, hasParam)),
 
     contentBuilder,
     declarationBuilders: loadOnlyDependency ? statelessNoOpBuilder : [] as any[],
@@ -86,6 +94,8 @@ export const compile = (router: AnyRouter, loadOnlyDependency: boolean): AppRout
 
   // Put all stuff into the radix tree
   compileRouter('', router, state, ['', null, false, false, {}, null]);
+
+  // TODO: Add an option to either load prebuilts into the tree or export it
 
   // Actually load the entire tree here
   if (routeTrees[0] !== null) {

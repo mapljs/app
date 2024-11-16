@@ -9,5 +9,7 @@ export type NodeItem = [CachedMiddlewareCompilationResult, AnyHandler];
 // @ts-expect-error Override types
 export interface AppRouterCompilerState extends RouterCompilerState {
   compileItem: (item: NodeItem, state: AppRouterCompilerState, hasParam: boolean) => void;
+
   routeTrees: RouteTrees;
+  prebuilds: ([route: string, content: string])[];
 }
