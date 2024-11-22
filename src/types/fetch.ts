@@ -15,4 +15,4 @@ export interface BuildResult {
   static: Record<string, Response>;
 }
 
-export type BuildFunc = (deps: any[]) => Promise<BuildResult>;
+export type BuildFunc = (...deps: any[]) => Promise<BuildResult>;

@@ -2,7 +2,7 @@ import { createRouter, insertItem, compileRouter as compileBaseRouter } from '@m
 import { statelessNoOpBuilder } from '@mapl/compiler';
 
 import type { AnyRouter } from '../router/index.js';
-import type { AppRouterCompilerState } from '../types/compiler.js';
+import type { AppRouterCompilerState, CompilerOptions } from '../types/compiler.js';
 
 import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
 import { compileHandler } from './handler.js';
@@ -22,7 +22,7 @@ const compileHandlerWithMiddleware = (
 
 // DFS and compile every subrouter
 // eslint-disable-next-line
-export const compileRouter = (prefixPath: string, router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): void => {
+export const compileRouter = (prefixPath: string, hasParam: boolean, router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): void => {
   // Cache the middleware result
   const middlewareResult = compileMiddlewares(router, state, prevValue);
 
@@ -33,6 +33,8 @@ export const compileRouter = (prefixPath: string, router: AnyRouter, state: AppR
     l = routes.length; i < l; i++
   ) {
     const route = routes[i];
+
+    // Route concatenation
     const path = route[1] === '/'
       ? prefixPath === '' ? '/' : prefixPath
       : prefixPath + route[1];
@@ -43,18 +45,20 @@ export const compileRouter = (prefixPath: string, router: AnyRouter, state: AppR
       state.prebuilds.push([
         path,
         // Polyfill all required props
-        `(()=>{let ${compilerConstants.REQ}=new Request(${JSON.stringify(path)}),${compilerConstants.METHOD}="GET";${compilerConstants.PARSE_PATH}${
+        `(()=>{let ${compilerConstants.REQ}=new Request("http://127.0.0.1" + "${path}"),${compilerConstants.METHOD}="GET";${compilerConstants.PARSE_PATH}${
           compileHandlerWithMiddleware(middlewareResult, route[2], state, false)
         }})()`
       ]);
     } else {
       // Load that into the tree to compile later on
       insertItem(
+        // Insert to the correct method tree
         route[0] === null
           ? routeTrees[1] ??= createRouter()
           : (routeTrees[0] ??= {})[route[0]] ??= createRouter(),
         path,
-        [middlewareResult, route[2]]
+        // Check whether this path has params
+        compileHandlerWithMiddleware(middlewareResult, route[2], state, hasParam || route[1].includes('*'))
       );
     }
   }
@@ -65,6 +69,9 @@ export const compileRouter = (prefixPath: string, router: AnyRouter, state: AppR
 
     compileRouter(
       subrouterData[0] === '/' ? prefixPath : prefixPath + subrouterData[0],
+      // Check whether this path has params
+      hasParam || subrouterData[0].includes('*'),
+
       subrouterData[1],
       state,
       middlewareResult
@@ -74,18 +81,14 @@ export const compileRouter = (prefixPath: string, router: AnyRouter, state: AppR
 
 // eslint-disable-next-line
 export const compile = (router: AnyRouter, loadOnlyDependency: boolean): AppRouterCompilerState => {
-  const routeTrees: AppRouterCompilerState['routeTrees'] = [null, null];
-  const prebuilds: AppRouterCompilerState['prebuilds'] = [];
-  // Fake content builder when only requires the external dependencies
-  const contentBuilder = loadOnlyDependency ? statelessNoOpBuilder : [] as string[];
-
   const state: AppRouterCompilerState = {
-    routeTrees,
-    prebuilds,
+    routeTrees: [null, null],
+    prebuilds: [],
 
-    compileItem: (item, currentState, hasParam) => state.contentBuilder.push(compileHandlerWithMiddleware(...item, currentState, hasParam)),
+    compileItem: (item, currentState) => currentState.contentBuilder.push(item),
 
-    contentBuilder,
+    // Fake content builder when only requires the external dependencies
+    contentBuilder: loadOnlyDependency ? statelessNoOpBuilder : [] as string[],
     declarationBuilders: loadOnlyDependency ? statelessNoOpBuilder : [] as any[],
 
     // Exception symbol is f0
@@ -93,11 +96,53 @@ export const compile = (router: AnyRouter, loadOnlyDependency: boolean): AppRout
   };
 
   // Put all stuff into the radix tree
-  compileRouter('', router, state, ['', null, false, false, {}, null]);
+  compileRouter('', false, router, state, ['', null, false, false, {}, null]);
+  return state;
+};
 
-  // TODO: Add an option to either load prebuilts into the tree or export it
+export function loadStatePrebuilds(state: AppRouterCompilerState, options: CompilerOptions): string {
+  const prebuilds = state.prebuilds;
+  if (prebuilds.length === 0) return '';
 
-  // Actually load the entire tree here
+  const responses = state.declarationBuilders.push([`await Promise.all([${prebuilds.map((val) => val[1]).join()}])`]);
+
+  //
+  if (options.exportPrebuilds === true)
+    return `,static:{${prebuilds.map((val, idx) => `"${val[0]}":d${responses}[${idx}]`).join()}}`;
+
+  const emptyResponses = state.declarationBuilders.push([`d${responses}.map((r)=>new Response(null,{status:r.status,statusText:r.statusText,headers:r.headers}))`]);
+
+  for (let i = 0, l = prebuilds.length, routeTrees = state.routeTrees; i < l; i++) {
+    insertItem(
+      // eslint-disable-next-line
+      (routeTrees[0] ??= {}).GET ??= createRouter(),
+      prebuilds[i][0],
+      `return d${responses}[${i}].clone();`
+    );
+
+    // Return the response with no body for HEAD and OPTIONS method
+    insertItem(
+      // eslint-disable-next-line
+      (routeTrees[0] ??= {}).HEAD ??= createRouter(),
+      prebuilds[i][0],
+      `return d${emptyResponses}[${i}];`
+    );
+
+    insertItem(
+      // eslint-disable-next-line
+      (routeTrees[0] ??= {}).OPTIONS ??= createRouter(),
+      prebuilds[i][0],
+      `return d${emptyResponses}[${i}];`
+    );
+  }
+
+  return '';
+}
+
+export function loadStateTree(state: AppRouterCompilerState): void {
+  const routeTrees = state.routeTrees;
+  const contentBuilder = state.contentBuilder;
+
   if (routeTrees[0] !== null) {
     contentBuilder.push(`let ${compilerConstants.METHOD}=${compilerConstants.REQ}.method;`);
     const methodTrees = routeTrees[0];
@@ -131,5 +176,4 @@ export const compile = (router: AnyRouter, loadOnlyDependency: boolean): AppRout
   }
 
   contentBuilder.push(compilerConstants.RET_404);
-  return state;
-};
+}

@@ -5,7 +5,7 @@ const app = router()
   .use((c) => c.headers.push(['server', 'mapl']))
 
   // Simple endpoint
-  .get('/', () => 'Hi')
+  .prebuild('/', () => 'Hi')
 
   // Dynamic path parameter
   .get('/user/*', (c) => c.params[0])
