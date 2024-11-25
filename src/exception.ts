@@ -7,6 +7,9 @@ export type ExcludeExceptionType<T> = Exclude<T, StaticException | DynamicExcept
 
 let errorId = 0;
 
+// eslint-disable-next-line
+const exceptionInit = (...args: DynamicExceptionInstance<any>) => args;
+
 /**
  * Create a static error type
  */
@@ -15,22 +18,16 @@ export function staticException(): StaticException {
   return [symbol, errorId];
 }
 
-export class DynamicException<T> {
-  public readonly id: number;
-
-  public constructor(id: number) {
-    this.id = id;
-  }
-
-  public init(payload: T): DynamicExceptionInstance<T> {
-    return [symbol, this.id, payload];
-  }
-}
-
 /**
  * Create a dynamic error type
  */
-export function dynamicException<T>(): DynamicException<T> {
+export function dynamicException<T>(): {
+  id: number,
+  init: (id: number, payload: T) => DynamicExceptionInstance<T>
+} {
   errorId++;
-  return new DynamicException(errorId);
+  return {
+    id: errorId,
+    init: exceptionInit.bind(null, symbol, errorId)
+  };
 }
