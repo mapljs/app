@@ -1,4 +1,4 @@
-export const symbol: unique symbol = Symbol();
+export const symbol: symbol = Symbol.for(compilerConstants.EXCEPT_SYMBOL_NAME);
 export type ExceptionSymbol = typeof symbol;
 
 export type StaticException = [ExceptionSymbol, number];
@@ -7,27 +7,17 @@ export type ExcludeExceptionType<T> = Exclude<T, StaticException | DynamicExcept
 
 let errorId = 0;
 
-// eslint-disable-next-line
-const exceptionInit = (...args: DynamicExceptionInstance<any>) => args;
-
 /**
  * Create a static error type
  */
-export function staticException(): StaticException {
-  errorId++;
-  return [symbol, errorId];
-}
+// eslint-disable-next-line
+export const staticException = (): StaticException => [symbol, errorId];
 
 /**
  * Create a dynamic error type
  */
-export function dynamicException<T>(): {
-  id: number,
-  init: (id: number, payload: T) => DynamicExceptionInstance<T>
-} {
-  errorId++;
-  return {
-    id: errorId,
-    init: exceptionInit.bind(null, symbol, errorId)
-  };
-}
+// eslint-disable-next-line
+export const dynamicException = <T>() => {
+  const id = errorId++;
+  return { id, init: (payload: T) => [symbol, id, payload] as DynamicExceptionInstance<T> };
+};

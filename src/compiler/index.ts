@@ -6,7 +6,6 @@ import type { AppRouterCompilerState, CompilerOptions } from '../types/compiler.
 
 import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
 import { compileHandler } from './handler.js';
-import { symbol as exceptionSymbol } from '../exception.js';
 import { selectCtxParamsDef } from './utils.js';
 import type { AnyHandler } from '../router/types/handler.js';
 
@@ -91,8 +90,7 @@ export const compile = (router: AnyRouter, loadOnlyDependency: boolean): AppRout
     contentBuilder: loadOnlyDependency ? statelessNoOpBuilder : [] as string[],
     declarationBuilders: loadOnlyDependency ? statelessNoOpBuilder : [] as any[],
 
-    // Exception symbol is f0
-    externalValues: [exceptionSymbol]
+    externalValues: [] as any[]
   };
 
   // Put all stuff into the radix tree
