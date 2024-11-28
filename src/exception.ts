@@ -11,7 +11,7 @@ let errorId = 0;
  * Create a static error type
  */
 // eslint-disable-next-line
-export const staticException = (): StaticException => [symbol, errorId];
+export const staticException = (): StaticException => [symbol, errorId++];
 
 /**
  * Create a dynamic error type
