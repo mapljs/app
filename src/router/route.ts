@@ -22,5 +22,5 @@ export type RouteRegisters<
 > = { [Method in Methods]: RouteRegister<Uppercase<Method>, State, Routes, SubRouters> }
   & {
     any: RouteRegister<null, State, Routes, SubRouters>,
-    prebuild: RouteRegister<0, State, Routes, SubRouters>
+    build: RouteRegister<0, State, Routes, SubRouters>
   };

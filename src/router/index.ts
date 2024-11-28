@@ -226,7 +226,7 @@ class Router<State, Routes, SubRouters> {
    * @internal
    * @ignore
    */
-  public prebuild(path: string, handler: any): any {
+  public build(path: string, handler: any): any {
     this.routes.push([0, path, handler]);
     return this;
   }

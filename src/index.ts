@@ -8,6 +8,5 @@ export * from './compiler/exports.js';
 /**
  * Create a macro
  */
-export function macro<T extends AnyRouter = BaseRouter>(fn: BaseMacroMiddlewareFunction): MacroMiddlewareFunction<T> {
-  return fn as any;
-}
+// eslint-disable-next-line
+export const macro = <T extends AnyRouter = BaseRouter>(fn: BaseMacroMiddlewareFunction): MacroMiddlewareFunction<T> => fn as any;
