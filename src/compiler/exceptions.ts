@@ -1,6 +1,6 @@
 import type { AnyRouter } from '../router/index.js';
 import type { AnyHandler } from '../router/types/handler.js';
-import type { AppRouterCompilerState } from '../types/compiler.js';
+import type { AppCompilerState } from '../types/compiler.js';
 
 import { buildStaticHandler, isFunctionAsync, selectCtxDef, selectResOption, selectSetHeader } from './utils.js';
 
@@ -15,7 +15,7 @@ const selectFnArgs = (isDynamic: boolean, fnNeedContext: boolean): string => isD
 
 // Build closures that generates exception content
 // eslint-disable-next-line
-export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilder => {
+export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalValues: AppCompilerState['externalValues']): ExceptHandlerBuilder => {
   // Plain text
   if (typeof handler === 'function') {
     const isFnAsync = isFunctionAsync(handler);
@@ -132,7 +132,7 @@ export const loadExceptionHandlers = (builders: ExceptHandlerBuilders, hasContex
 
 // Load new exception handlers
 // eslint-disable-next-line
-export const buildExceptionHandlers = (prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: AppRouterCompilerState['externalValues']): ExceptHandlerBuilders => {
+export const buildExceptionHandlers = (prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: AppCompilerState['externalValues']): ExceptHandlerBuilders => {
   const routes = router.exceptRoutes;
   const allExceptRoute = router.allExceptRoute;
 

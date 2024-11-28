@@ -1,8 +1,8 @@
 import { createRouter, insertItem, compileRouter as compileBaseRouter } from '@mapl/router';
-import { statelessNoOpBuilder } from '@mapl/compiler';
+import { statelessNoOpBuilder, type Builder } from '@mapl/compiler';
 
 import type { AnyRouter } from '../router/index.js';
-import type { AppRouterCompilerState, CompilerOptions } from '../types/compiler.js';
+import type { AppCompilerState, CompilerOptions } from '../types/compiler.js';
 
 import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
 import { compileHandler } from './handler.js';
@@ -12,7 +12,7 @@ import type { AnyHandler } from '../router/types/handler.js';
 // eslint-disable-next-line
 const compileHandlerWithMiddleware = (
   middlewareResult: CachedMiddlewareCompilationResult,
-  handler: AnyHandler, state: AppRouterCompilerState,
+  handler: AnyHandler, state: AppCompilerState,
   hasParam: boolean
 ): string => (middlewareResult[1] === null
   ? middlewareResult[0] + compileHandler(handler, state.externalValues, middlewareResult[2], hasParam)
@@ -21,7 +21,11 @@ const compileHandlerWithMiddleware = (
 
 // DFS and compile every subrouter
 // eslint-disable-next-line
-export const compileRouter = (prefixPath: string, hasParam: boolean, router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): void => {
+export const compileRouter = (
+  prefixPath: string, hasParam: boolean,
+  router: AnyRouter, state: AppCompilerState,
+  prevValue: CachedMiddlewareCompilationResult
+): void => {
   // Cache the middleware result
   const middlewareResult = compileMiddlewares(router, state, prevValue);
 
@@ -79,16 +83,14 @@ export const compileRouter = (prefixPath: string, hasParam: boolean, router: Any
 };
 
 // eslint-disable-next-line
-export const compile = (router: AnyRouter, loadOnlyDependency: boolean): AppRouterCompilerState => {
-  const state: AppRouterCompilerState = {
+export const compile = (router: AnyRouter): AppCompilerState => {
+  const state: AppCompilerState = {
     routeTrees: [null, null],
     prebuilds: [],
 
-    compileItem: (item, currentState) => currentState.contentBuilder.push(item),
-
     // Fake content builder when only requires the external dependencies
-    contentBuilder: loadOnlyDependency ? statelessNoOpBuilder : [] as string[],
-    declarationBuilders: loadOnlyDependency ? statelessNoOpBuilder : [] as any[],
+    contentBuilder: [] as string[],
+    declarationBuilders: [] as any[],
 
     externalValues: [] as any[]
   };
@@ -98,7 +100,29 @@ export const compile = (router: AnyRouter, loadOnlyDependency: boolean): AppRout
   return state;
 };
 
-export function loadStatePrebuilds(state: AppRouterCompilerState, options: CompilerOptions): string {
+/**
+ * Get router dependencies to inject
+ */
+// eslint-disable-next-line
+export const compileDeps = (router: AnyRouter): any[] => {
+  const externalValues = [] as any[];
+
+  // Put all stuff into the radix tree
+  compileRouter('', false, router, {
+    routeTrees: [null, null],
+    prebuilds: [],
+
+    // Fake content builder when only requires the external dependencies
+    contentBuilder: statelessNoOpBuilder as Builder<string>,
+    declarationBuilders: statelessNoOpBuilder as Builder<Builder<string>>,
+
+    externalValues
+  }, ['', null, false, false, {}, null]);
+
+  return externalValues;
+};
+
+export function loadStatePrebuilds(state: AppCompilerState, options: CompilerOptions): string {
   const prebuilds = state.prebuilds;
   if (prebuilds.length === 0) return '';
 
@@ -137,7 +161,7 @@ export function loadStatePrebuilds(state: AppRouterCompilerState, options: Compi
   return '';
 }
 
-export function loadStateTree(state: AppRouterCompilerState): void {
+export function loadStateTree(state: AppCompilerState): void {
   const routeTrees = state.routeTrees;
   const contentBuilder = state.contentBuilder;
 
@@ -151,8 +175,7 @@ export function loadStateTree(state: AppRouterCompilerState): void {
     for (const key in methodTrees) {
       // Method should not be malformed
       contentBuilder.push(`${hasMultiple ? 'else ' : ''}if(${compilerConstants.METHOD}==="${key}"){${compilerConstants.PARSE_PATH}`);
-      // @ts-expect-error Same state lol
-      compileBaseRouter(methodTrees[key], state);
+      compileBaseRouter(methodTrees[key], contentBuilder);
       contentBuilder.push('}');
 
       // Whether to do else if or just if
@@ -166,8 +189,7 @@ export function loadStateTree(state: AppRouterCompilerState): void {
       contentBuilder.push('else{');
 
     contentBuilder.push(compilerConstants.PARSE_PATH);
-    // @ts-expect-error Same state lol
-    compileBaseRouter(routeTrees[1], state);
+    compileBaseRouter(routeTrees[1], contentBuilder);
 
     if (routeTrees[0] !== null)
       contentBuilder.push('}');

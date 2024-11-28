@@ -1,5 +1,5 @@
 import type { AnyRouter } from '../router/index.js';
-import type { AppRouterCompilerState } from '../types/compiler.js';
+import type { AppCompilerState } from '../types/compiler.js';
 import { buildExceptionHandlers, loadExceptionHandlers, type ExceptHandlerBuilders } from './exceptions.js';
 import { isFunctionAsync } from './utils.js';
 
@@ -54,7 +54,7 @@ export const createEmptyContext = (currentResult: CachedMiddlewareCompilationRes
 
 // Compile and cache middleware compilation result
 // eslint-disable-next-line
-export const compileMiddlewares = (router: AnyRouter, state: AppRouterCompilerState, prevValue: CachedMiddlewareCompilationResult): CachedMiddlewareCompilationResult => {
+export const compileMiddlewares = (router: AnyRouter, state: AppCompilerState, prevValue: CachedMiddlewareCompilationResult): CachedMiddlewareCompilationResult => {
   const externalValues = state.externalValues;
 
   const exceptRoutes = buildExceptionHandlers(prevValue[4], router, externalValues);

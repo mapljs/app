@@ -10,7 +10,7 @@ import type { CompilerOptions } from '../types/compiler.js';
  */
 // eslint-disable-next-line
 export const jitc = async (router: AnyRouter, options: CompilerOptions = {}): Promise<BuildResult> => {
-  const state = compile(router, false);
+  const state = compile(router);
 
   const staticOptions = loadStatePrebuilds(state, options);
   loadStateTree(state);
@@ -27,7 +27,7 @@ export const jitc = async (router: AnyRouter, options: CompilerOptions = {}): Pr
  */
 // eslint-disable-next-line
 export const aotfn = (router: AnyRouter, options: CompilerOptions = {}): string => {
-  const state = compile(router, false);
+  const state = compile(router);
 
   const staticOptions = loadStatePrebuilds(state, options);
   loadStateTree(state);
@@ -35,8 +35,4 @@ export const aotfn = (router: AnyRouter, options: CompilerOptions = {}): string 
   return `(async(${getExternalKeys(state).join(',')})=>{${compilerConstants.CONST_VARS}${getDeclarations(state)}return{fetch:(${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}${staticOptions}}})`;
 };
 
-/**
- * Get router dependencies to inject
- */
-// eslint-disable-next-line
-export const aotdeps = (router: AnyRouter): any[] => compile(router, true).externalValues as any[];
+export { compileDeps as aotdeps } from './index.js';

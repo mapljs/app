@@ -1,5 +1,5 @@
 import type { AnyTypedHandler, StaticHandler } from '../router/types/handler.js';
-import type { AppRouterCompilerState } from '../types/compiler.js';
+import type { AppCompilerState } from '../types/compiler.js';
 
 // eslint-disable-next-line
 export const AsyncFunction = (async () => { }).constructor;
@@ -15,7 +15,7 @@ export const toHeaderTuples = (headers: HeadersInit): [string, string][] => Arra
     : Object.entries(headers);
 
 // eslint-disable-next-line
-export const buildStaticHandler = (body: StaticHandler['body'], options: StaticHandler['options'], externalValues: AppRouterCompilerState['externalValues'], contextNeedParam: boolean | null): string => {
+export const buildStaticHandler = (body: StaticHandler['body'], options: StaticHandler['options'], externalValues: AppCompilerState['externalValues'], contextNeedParam: boolean | null): string => {
   // Has context then serialize options to
   // statements that changes the context
   if (contextNeedParam === null) {

@@ -1,5 +1,5 @@
 import type { AnyHandler } from '../router/types/handler.js';
-import type { AppRouterCompilerState } from '../types/compiler.js';
+import type { AppCompilerState } from '../types/compiler.js';
 import { buildStaticHandler, isFunctionAsync, selectCtxParamsDef, selectHeaderDef, selectResOption, selectSetHeader } from './utils.js';
 
 // eslint-disable-next-line
@@ -13,7 +13,7 @@ const selectFnArgs = (fnNoNeedContext: boolean): string => fnNoNeedContext
 // eslint-disable-next-line
 export const compileHandler = (
   handler: AnyHandler,
-  externalValues: AppRouterCompilerState['externalValues'],
+  externalValues: AppCompilerState['externalValues'],
 
   previouslyAsync: boolean,
   contextNeedParam: boolean | null
