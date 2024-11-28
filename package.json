@@ -37,6 +37,6 @@
   },
   "dependencies": {
     "@mapl/compiler": "^0.0.7",
-    "@mapl/router": "^0.0.19"
+    "@mapl/router": "^0.0.21"
   }
 }
