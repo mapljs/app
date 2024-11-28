@@ -234,6 +234,5 @@ class Router<State, Routes, SubRouters> {
 
 export { Router };
 
-export function router(): BaseRouter {
-  return new Router();
-}
+// eslint-disable-next-line
+export const router = (): BaseRouter => new Router();

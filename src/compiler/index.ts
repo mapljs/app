@@ -122,7 +122,8 @@ export const compileDeps = (router: AnyRouter): any[] => {
   return externalValues;
 };
 
-export function loadStatePrebuilds(state: AppCompilerState, options: CompilerOptions): string {
+// eslint-disable-next-line
+export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOptions): string => {
   const prebuilds = state.prebuilds;
   if (prebuilds.length === 0) return '';
 
@@ -159,7 +160,7 @@ export function loadStatePrebuilds(state: AppCompilerState, options: CompilerOpt
   }
 
   return '';
-}
+};
 
 export function loadStateTree(state: AppCompilerState): void {
   const routeTrees = state.routeTrees;

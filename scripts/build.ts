@@ -39,9 +39,7 @@ for (const path of new Bun.Glob('**/*.ts').scanSync(SOURCEDIR))
           const pathExtStart = path.lastIndexOf('.');
           Bun.write(
             `${OUTDIR}/${path.substring(0, pathExtStart === -1 ? path.length : pathExtStart) + '.js'}`,
-            res
-              .replace(/export const /g, "export var ")
-              .replace(/const /g, "let ")
+            res.replace(/const /g, "let ")
           );
         }
       })
