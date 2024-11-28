@@ -1,9 +1,7 @@
-export const symbol: symbol = Symbol.for(compilerConstants.EXCEPT_SYMBOL_NAME);
-export type ExceptionSymbol = typeof symbol;
+const symbol: symbol = Symbol.for(compilerConstants.EXCEPT_SYMBOL_NAME);
 
-export type StaticException = [ExceptionSymbol, number];
-
-export type DynamicExceptionInstance<T> = [ExceptionSymbol, number, T];
+export type StaticException = [symbol, number];
+export type DynamicExceptionInstance<T> = [symbol, number, T];
 export interface DynamicException<T> {
   id: number;
   init: (payload: T) => DynamicExceptionInstance<T>;
