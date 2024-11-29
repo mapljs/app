@@ -9,5 +9,9 @@ export interface AppCompilerState extends CompilerState {
 }
 
 export interface CompilerOptions {
-  exportPrebuilds?: boolean;
+  /**
+   * Whether to not include static routes in the routing process.
+   * If set to `true`, the static routes will instead be in the result object.
+   */
+  excludeStatic?: boolean;
 }
