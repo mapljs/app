@@ -130,33 +130,34 @@ export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOpt
   const responses = state.declarationBuilders.push([`await Promise.all([${prebuilds.map((val) => val[1]).join()}])`]);
 
   // Expose static routes
-  if (options.excludeStatic === true)
+  if (options.exposeStatic === true)
     return `,static:{${prebuilds.map((val, idx) => `"${val[0]}":d${responses}[${idx}]`).join()}}`;
 
+  // Inject as dependencies
   const emptyResponses = state.declarationBuilders.push([`d${responses}.map((r)=>new Response(null,{status:r.status,statusText:r.statusText,headers:r.headers}))`]);
 
-  for (let i = 0, l = prebuilds.length, routeTrees = state.routeTrees; i < l; i++) {
-    insertItem(
+  for (
+    let i = 0,
+      l = prebuilds.length,
+      routeTrees = state.routeTrees[0] ?? {},
       // eslint-disable-next-line
-      (routeTrees[0] ??= {}).GET ??= createRouter(),
-      prebuilds[i][0],
-      `return d${responses}[${i}].clone();`
-    );
+      GET = routeTrees.GET ??= createRouter(),
+      // eslint-disable-next-line
+      HEAD = routeTrees.HEAD ??= createRouter(),
+      // eslint-disable-next-line
+      OPTIONS = routeTrees.OPTIONS ??= createRouter(),
+      // State
+      emptyResponseRet: string, path: string;
+    i < l;
+    i++
+  ) {
+    path = prebuilds[i][0];
+    insertItem(GET, path, `return d${responses}[${i}].clone();`);
 
     // Return the response with no body for HEAD and OPTIONS method
-    insertItem(
-      // eslint-disable-next-line
-      (routeTrees[0] ??= {}).HEAD ??= createRouter(),
-      prebuilds[i][0],
-      `return d${emptyResponses}[${i}];`
-    );
-
-    insertItem(
-      // eslint-disable-next-line
-      (routeTrees[0] ??= {}).OPTIONS ??= createRouter(),
-      prebuilds[i][0],
-      `return d${emptyResponses}[${i}];`
-    );
+    emptyResponseRet = `return d${emptyResponses}[${i}];`;
+    insertItem(HEAD, path, emptyResponseRet);
+    insertItem(OPTIONS, path, emptyResponseRet);
   }
 
   return '';
