@@ -4,4 +4,4 @@ const app = router()
   .build('/', () => 'Hi');
 
 export default
-  await jitc(app, { exportPrebuilds: true });
+  await jitc(app, { excludeStatic: true });
