@@ -129,8 +129,8 @@ export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOpt
 
   const responses = state.declarationBuilders.push([`await Promise.all([${prebuilds.map((val) => val[1]).join()}])`]);
 
-  //
-  if (options.exportPrebuilds === true)
+  // Expose static routes
+  if (options.excludeStatic === true)
     return `,static:{${prebuilds.map((val, idx) => `"${val[0]}":d${responses}[${idx}]`).join()}}`;
 
   const emptyResponses = state.declarationBuilders.push([`d${responses}.map((r)=>new Response(null,{status:r.status,statusText:r.statusText,headers:r.headers}))`]);
