@@ -84,9 +84,9 @@ export const compileMiddlewares = (router: AnyRouter, state: AppCompilerState, p
 
       // Check whether the header pair has been initialized yet
       if (currentResult[1] === null)
-        createContext(currentResult, `let ${compilerConstants.HEADERS}=[${headersToAppend}];`);
+        createContext(currentResult, `let ${compilerConstants.HEADERS}=[f${headersToAppend}];`);
       else
-        currentResult[0] += `${compilerConstants.HEADERS}.push(${headersToAppend});`;
+        currentResult[0] += `${compilerConstants.HEADERS}.push(f${headersToAppend});`;
       continue;
     }
 
