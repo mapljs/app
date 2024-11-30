@@ -8,7 +8,6 @@ export const HOLDER = `${MAPL}_ph`;
 export const CREATE_HOLDER = `let ${HOLDER}`;
 
 export const CTX = `${MAPL}_rc`;
-export const METHOD = `${MAPL}_m`;
 export const HEADERS = `${MAPL}_h`;
 export const C_URL = `${MAPL}_u`;
 export const PATH_START = `${MAPL}_ps`;

@@ -48,7 +48,7 @@ export const compileRouter = (
       state.prebuilds.push([
         path,
         // Polyfill all required props
-        `(()=>{let ${compilerConstants.REQ}=new Request("http://127.0.0.1" + "${path}"),${compilerConstants.METHOD}="GET";${compilerConstants.PARSE_PATH}${
+        `(()=>{let ${compilerConstants.REQ}=new Request("http://127.0.0.1" + "${path}");${compilerConstants.PARSE_PATH}${
           compileHandlerWithMiddleware(middlewareResult, route[2], state, false)
         }})()`
       ]);
@@ -139,7 +139,7 @@ export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOpt
   for (
     let i = 0,
       l = prebuilds.length,
-      routeTrees = state.routeTrees[0] ?? {},
+      routeTrees = state.routeTrees[0] ??= {},
       // eslint-disable-next-line
       GET = routeTrees.GET ??= createRouter(),
       // eslint-disable-next-line
@@ -167,35 +167,35 @@ export function loadStateTree(state: AppCompilerState): void {
   const routeTrees = state.routeTrees;
   const contentBuilder = state.contentBuilder;
 
-  if (routeTrees[0] !== null) {
-    contentBuilder.push(`let ${compilerConstants.METHOD}=${compilerConstants.REQ}.method;`);
-    const methodTrees = routeTrees[0];
+  const hasMethodTrees = routeTrees[0] !== null;
 
-    // Track whether this has more than 1 element
-    let hasMultiple = false;
+  if (hasMethodTrees) {
+    // Start the switch statement
+    contentBuilder.push(`switch(${compilerConstants.REQ}.method){`);
 
-    for (const key in methodTrees) {
+    for (const key in routeTrees[0]) {
       // Method should not be malformed
-      contentBuilder.push(`${hasMultiple ? 'else ' : ''}if(${compilerConstants.METHOD}==="${key}"){${compilerConstants.PARSE_PATH}`);
-      compileBaseRouter(methodTrees[key], contentBuilder);
+      contentBuilder.push(`case"${key}":{${compilerConstants.PARSE_PATH}`);
+      compileBaseRouter(routeTrees[0][key], contentBuilder);
       contentBuilder.push('}');
-
-      // Whether to do else if or just if
-      hasMultiple = true;
     }
   }
 
   // Load all method routes
   if (routeTrees[1] !== null) {
-    if (routeTrees[0] !== null)
-      contentBuilder.push('else{');
+    if (hasMethodTrees)
+      contentBuilder.push('default:{');
 
     contentBuilder.push(compilerConstants.PARSE_PATH);
     compileBaseRouter(routeTrees[1], contentBuilder);
 
-    if (routeTrees[0] !== null)
+    if (hasMethodTrees)
       contentBuilder.push('}');
   }
+
+  // Close the switch statement
+  if (hasMethodTrees)
+    contentBuilder.push('}');
 
   contentBuilder.push(compilerConstants.RET_404);
 }
