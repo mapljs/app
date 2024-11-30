@@ -1,4 +1,4 @@
-import { aotfn, jitc, router } from '@mapl/app/index.js';
+import { jitc, router } from '@mapl/app/index.js';
 
 const app = router()
   .build('/', () => 'Hi');
