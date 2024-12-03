@@ -1,5 +1,4 @@
 import { createRouter, insertItem, compileRouter as compileBaseRouter } from '@mapl/router';
-import { statelessNoOpBuilder, type Builder } from '@mapl/compiler';
 
 import type { AnyRouter } from '../router/index.js';
 import type { AppCompilerState, CompilerOptions } from '../types/compiler.js';
@@ -98,28 +97,6 @@ export const compile = (router: AnyRouter): AppCompilerState => {
   // Put all stuff into the radix tree
   compileRouter('', false, router, state, ['', null, false, false, {}, null]);
   return state;
-};
-
-/**
- * Get router dependencies to inject
- */
-// eslint-disable-next-line
-export const compileDeps = (router: AnyRouter): any[] => {
-  const externalValues = [] as any[];
-
-  // Put all stuff into the radix tree
-  compileRouter('', false, router, {
-    routeTrees: [null, null],
-    prebuilds: [],
-
-    // Fake content builder when only requires the external dependencies
-    contentBuilder: statelessNoOpBuilder as Builder<string>,
-    declarationBuilders: statelessNoOpBuilder as Builder<Builder<string>>,
-
-    externalValues
-  }, ['', null, false, false, {}, null]);
-
-  return externalValues;
 };
 
 // eslint-disable-next-line

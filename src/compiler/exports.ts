@@ -34,5 +34,3 @@ export const aotfn = (router: AnyRouter, options: CompilerOptions = {}): string 
 
   return `(async(${getExternalKeys(state).join(',')})=>{${compilerConstants.CONST_VARS}${getDeclarations(state)}return{fetch:(${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}${staticOptions}}})`;
 };
-
-export { compileDeps as aotdeps } from './index.js';

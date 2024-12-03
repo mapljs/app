@@ -5,7 +5,7 @@ import type { AppCompilerState } from '../types/compiler.js';
 import { buildStaticHandler, isFunctionAsync, selectCtxDef, selectResOption, selectSetHeader } from './utils.js';
 
 // A cached function to build out handlers
-type ExceptHandlerBuilder = (hasContext: boolean, isAsync: boolean) => string;
+export type ExceptHandlerBuilder = (hasContext: boolean, isAsync: boolean) => string;
 export type ExceptHandlerBuilders = Record<number, ExceptHandlerBuilder>;
 
 // eslint-disable-next-line
