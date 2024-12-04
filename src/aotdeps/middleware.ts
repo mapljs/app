@@ -35,11 +35,7 @@ export const compileMiddlewares = (router: AnyRouter, state: AppCompilerState, p
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
     const middlewareData = list[i];
 
-    if (middlewareData[0] === 0) {
-      // Run macros separately
-      middlewareData[1](currentResult, state);
-      continue;
-    } else if (middlewareData[0] === 5) {
+    if (middlewareData[0] === 5) {
       externalValues.push(middlewareData[1].length === 1 ? middlewareData[1][0] : middlewareData[1]);
       createContext(currentResult);
       continue;

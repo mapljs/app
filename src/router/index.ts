@@ -2,7 +2,7 @@ import type { DynamicException, StaticException, ExcludeExceptionType } from '..
 import type { RouteRegisters } from './route.js';
 import type { Context } from './types/context.js';
 import type { AnyHandler, Handler, HandlerData } from './types/handler.js';
-import type { MacroMiddlewareFunction, MiddlewareData, MiddlewareFunction } from './types/middleware.js';
+import type { MiddlewareData, MiddlewareFunction } from './types/middleware.js';
 
 export type AnyRouter = Router<any, HandlerData[], [string, AnyRouter][]>;
 export type BaseRouter = Router<{}, [], []>;
@@ -46,14 +46,6 @@ class Router<State, Routes, SubRouters> {
     State, Routes, [...SubRouters, [Path, SubRouter]]
   > {
     this.subrouters.push([path, subrouter]);
-    return this as any;
-  }
-
-  /**
-   * Register a macro
-   */
-  public inline<TypeExtension extends AnyRouter>(fn: MacroMiddlewareFunction<TypeExtension>): MergeRouter<this, TypeExtension> {
-    this.middlewares.push([0, fn]);
     return this as any;
   }
 
