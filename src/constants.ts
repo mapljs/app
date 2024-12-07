@@ -4,14 +4,14 @@ import { PARAMS, PATH, REQ } from '@mapl/router/constants.js';
 // Prefixes
 export const MAPL = 'm';
 
-export const HOLDER = `${MAPL}_hr`;
+export const HOLDER = `${MAPL}_`;
 export const CREATE_HOLDER = `let ${HOLDER}`;
 
-export const CTX = `${MAPL}_c`;
-export const HEADERS = `${MAPL}_h`;
-export const C_URL = `${MAPL}_u`;
-export const PATH_START = `${MAPL}_ps`;
-export const PATH_END = `${MAPL}_pe`;
+export const CTX = `${MAPL}c`;
+export const HEADERS = `${MAPL}h`;
+export const C_URL = `${MAPL}u`;
+export const PATH_START = `${MAPL}s`;
+export const PATH_END = `${MAPL}e`;
 
 // Request context
 export const CTX_DEF = `let ${CTX}={status:200,req:${REQ},headers:${HEADERS}};`;
@@ -22,14 +22,14 @@ export const ASYNC_START = 'return (async()=>{';
 export const ASYNC_END = '})();';
 
 // Default vars
-export const TEXT_HEADER_PAIR = `${MAPL}_thp`;
-export const TEXT_OPTIONS = `${MAPL}_to`;
+export const TEXT_HEADER_PAIR = `${MAPL}tp`;
+export const TEXT_OPTIONS = `${MAPL}to`;
 
-export const HTML_HEADER_PAIR = `${MAPL}_hhp`;
-export const HTML_OPTIONS = `${MAPL}_ho`;
+export const HTML_HEADER_PAIR = `${MAPL}hp`;
+export const HTML_OPTIONS = `${MAPL}ho`;
 
-export const JSON_HEADER_PAIR = `${MAPL}_jhp`;
-export const JSON_OPTIONS = `${MAPL}_jo`;
+export const JSON_HEADER_PAIR = `${MAPL}jp`;
+export const JSON_OPTIONS = `${MAPL}jo`;
 
 // Context modification
 export const HEADER_DEF = `let ${HEADERS}=[];`;
@@ -63,14 +63,14 @@ export const ONLY_PAYLOAD_ARG = `(${HOLDER}[2])`;
 export const PAYLOAD_CTX_ARG = `(${HOLDER}[2]${COLON_CTX})`;
 
 // Exception symbol is always the first external value
-export const EXCEPT_SYMBOL = `${MAPL}_es`;
-export const EXCEPT_SYMBOL_NAME = `${MAPL}_esn`;
+export const EXCEPT_SYMBOL = `${MAPL}s`;
+export const EXCEPT_SYMBOL_NAME = `${MAPL}n`;
 
 // Static response
-const RESPONSE_400 = `${MAPL}_br`;
+const RESPONSE_400 = `${MAPL}br`;
 export const RET_400 = `return ${RESPONSE_400};`;
 
-const RESPONSE_404 = `${MAPL}_nf`;
+const RESPONSE_404 = `${MAPL}nf`;
 export const RET_404 = `return ${RESPONSE_404};`;
 
 // Exception constants

@@ -35,10 +35,6 @@ export const buildHandler = (handler: AnyHandler, externalValues: AppCompilerSta
 // eslint-disable-next-line
 export const loadExceptionHandlers = (builders: ExceptHandlerBuilders, hasContext: boolean, isAsync: boolean): string => {
   for (const id in builders) builders[id](hasContext, isAsync);
-
-  if (typeof builders[0] !== 'undefined')
-    builders[0](hasContext, isAsync);
-
   return '';
 };
 

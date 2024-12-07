@@ -21,18 +21,19 @@ export const buildStaticHandler = (body: StaticHandler['body'], options: StaticH
   if (contextNeedParam === null) {
     let tmpl = '';
 
+    // Save other details in memory and load later
     if (typeof options !== 'undefined') {
       if (typeof options.status === 'number')
         tmpl += `${compilerConstants.CTX}.status=${options.status};`;
 
       if (typeof options.statusText === 'string')
-        tmpl += `${compilerConstants.CTX}.statusText="${options.statusText.replace(/"/, '\\"')}";`;
+        tmpl += `${compilerConstants.CTX}.statusText=${JSON.stringify(options.statusText)};`;
 
       if (typeof options.headers === 'object')
         tmpl += `${compilerConstants.HEADERS}.push(...f${externalValues.push(toHeaderTuples(options.headers))});`;
     }
 
-    // Save only the body in memory
+    // Save the body in memory
     return `${tmpl}return new Response(${
       body == null
         ? 'null'

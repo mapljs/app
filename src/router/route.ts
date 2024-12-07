@@ -21,6 +21,14 @@ export type RouteRegisters<
   SubRouters extends [string, AnyRouter][]
 > = { [Method in Methods]: RouteRegister<Uppercase<Method>, State, Routes, SubRouters> }
   & {
+    // Weird stuff
     any: RouteRegister<null, State, Routes, SubRouters>,
-    build: RouteRegister<0, State, Routes, SubRouters>
+    build: RouteRegister<0, State, Routes, SubRouters>,
+
+    // Custom stuff
+    insert: <Method extends string, Path extends string, T extends Handler<State>>(method: Method, path: Path, handler: T) => Router<
+      State,
+      [...Routes, [Method, Path, T]],
+      SubRouters
+    >
   };

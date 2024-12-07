@@ -25,8 +25,8 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
     const retEnd = `${fnNeedContext ? compilerConstants.COLON_CTX : ''});`;
 
     // Cache previous state
-    let prevHasCtx = false;
-    let prevFnAsync: boolean | null = null;
+    let prevHasCtx: boolean;
+    let prevFnAsync: boolean;
     let content = '';
 
     return (hasContext, isAsync) => {
@@ -35,19 +35,20 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
         prevHasCtx = hasContext;
         prevFnAsync = isAsync;
 
-        content = `${!isAsync && isFnAsync
-          ? compilerConstants.ASYNC_START
-          : ''
-        }${!hasContext && fnNeedContext
-          ? compilerConstants.CTX_DEF
-          : ''
-        }${retStart}${!fnNeedContext && hasContext
-          ? compilerConstants.COLON_CTX
-          : ''
-        }${retEnd}${!isAsync && isFnAsync
-          ? compilerConstants.ASYNC_END
-          : ''
-        }`;
+        /* eslint-disable */
+        // Wrap in async
+        content = (!isAsync && isFnAsync ? compilerConstants.ASYNC_START : '') +
+          // Add context
+          (!hasContext && fnNeedContext ? compilerConstants.CTX_DEF : '') +
+          // Function call and stuff
+          + retStart
+          // Set response option
+          + (!fnNeedContext && hasContext ? compilerConstants.COLON_CTX : '')
+          // End the function call and Response
+          + retEnd
+          // End the function call and Response
+          + (!isAsync && isFnAsync ? compilerConstants.ASYNC_END : '');
+        /* eslint-enable */
       }
 
       return content;
@@ -59,8 +60,8 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
   // Static response
   if (handlerType === 'static') {
     // Lazily compile two cases
-    let hasContextCase: string | null = null;
-    let noContextCase: string | null = null;
+    let hasContextCase: string | undefined;
+    let noContextCase: string | undefined;
 
     // eslint-disable-next-line
     return (hasContext) => hasContext
@@ -83,11 +84,13 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
 
   // Cache known parts
   const retStart = `return new Response(${handlerType === 'json' ? 'JSON.stringify(' : ''}${isFnAsync ? 'await ' : ''}f${externalValues.push(fn)}${selectFnArgs(isDynamic, fnNeedContext)}${handlerType === 'json' ? ')' : ''}`;
-  const retEnd = `${fnNeedContext ? compilerConstants.COLON_CTX : ''});`;
+  const retEnd = fnNeedContext ? `${compilerConstants.COLON_CTX});` : ');';
 
   // Cache previous values
   let prevHasCtx = false;
   let prevFnAsync: boolean | null = null;
+
+  // Content cache
   let content = '';
 
   return (hasContext, isAsync) => {
@@ -96,23 +99,20 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
       prevHasCtx = hasContext;
       prevFnAsync = isAsync;
 
-      content = `${!isAsync && isFnAsync
-        ? compilerConstants.ASYNC_START
-        : ''
-      }${hasContext
-        ? selectSetHeader(handlerType)
-        : fnNeedContext
-          ? selectCtxDef(handlerType)
-          : ''
-      }${retStart}${!fnNeedContext
-        ? hasContext
-          ? compilerConstants.COLON_CTX
-          : selectResOption(handlerType)
-        : ''
-      }${retEnd}${!isAsync && isFnAsync
-        ? compilerConstants.ASYNC_END
-        : ''
-      }`;
+      /* eslint-disable */
+      // Wrap with async
+      content = (!isAsync && isFnAsync ? compilerConstants.ASYNC_START : '')
+        // Add context
+        + (hasContext ? selectSetHeader(handlerType) : fnNeedContext ? selectCtxDef(handlerType) : '')
+        // Function call and stuff
+        + retStart
+        // Set response option
+        + (!fnNeedContext ? hasContext ? compilerConstants.COLON_CTX : selectResOption(handlerType) : '')
+        // End the function call and Response
+        + retEnd
+        // End the function call and Response
+        + (!isAsync && isFnAsync ? compilerConstants.ASYNC_END : '');
+      /* eslint-enable */
     }
 
     return content;
@@ -124,7 +124,10 @@ export const loadExceptionHandlers = (builders: ExceptHandlerBuilders, hasContex
   let str = compilerConstants.EXCEPT_START;
 
   // Build all exceptions
-  for (const id in builders) str += `case ${id}:{${builders[id](hasContext, isAsync)}}`;
+  for (const id in builders) {
+    if (id !== '0')
+      str += `case ${id}:{${builders[id](hasContext, isAsync)}}`;
+  }
 
   // Catch all
   return str + (typeof builders[0] === 'undefined' ? compilerConstants.DEFAULT_EXCEPT_END : `default:{${builders[0](hasContext, isAsync)}}}`);

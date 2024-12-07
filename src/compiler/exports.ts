@@ -12,13 +12,14 @@ import type { CompilerOptions } from '../types/compiler.js';
 export const jitc = async (router: AnyRouter, options: CompilerOptions = {}): Promise<BuildResult> => {
   const state = compile(router);
 
+  // Load static options first to the tree if necessary
   const staticOptions = loadStatePrebuilds(state, options);
   loadStateTree(state);
 
   // eslint-disable-next-line
   return AsyncFunction(
     ...getExternalKeys(state),
-    `'use strict';${compilerConstants.CONST_VARS}${getDeclarations(state)}return{fetch:(${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}${staticOptions}}`
+    `${compilerConstants.CONST_VARS}${getDeclarations(state)}return{fetch:(${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}${staticOptions}}`
   )(...state.externalValues);
 };
 
@@ -29,6 +30,7 @@ export const jitc = async (router: AnyRouter, options: CompilerOptions = {}): Pr
 export const aotfn = (router: AnyRouter, options: CompilerOptions = {}): string => {
   const state = compile(router);
 
+  // Load static options first to the tree if necessary
   const staticOptions = loadStatePrebuilds(state, options);
   loadStateTree(state);
 

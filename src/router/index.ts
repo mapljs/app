@@ -222,6 +222,15 @@ class Router<State, Routes, SubRouters> {
     this.routes.push([0, path, handler]);
     return this;
   }
+
+  /**
+   * @internal
+   * @ignore
+   */
+  public insert(method: string, path: string, handler: any): any {
+    this.routes.push([method, path, handler]);
+    return this;
+  }
 }
 
 export { Router };
