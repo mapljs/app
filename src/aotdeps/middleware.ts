@@ -1,11 +1,11 @@
 import type { AnyRouter } from '../router/index.js';
 import type { AppCompilerState } from '../types/compiler.js';
 import { buildExceptionHandlers, loadExceptionHandlers } from './exceptions.js';
-import type { CachedMiddlewareCompilationResult } from '../compiler/middleware.js';
+import type { MiddlewareState } from '../compiler/middleware.js';
 import { isFunctionAsync } from '../compiler/utils.js';
 
 // eslint-disable-next-line
-const createContext = (currentResult: CachedMiddlewareCompilationResult): void => {
+const createContext = (currentResult: MiddlewareState): void => {
   if (currentResult[1] === null) {
     // Move the built part to prevContext
     currentResult[1] = '';
@@ -18,11 +18,11 @@ const createContext = (currentResult: CachedMiddlewareCompilationResult): void =
 
 // Compile and cache middleware compilation result
 // eslint-disable-next-line
-export const compileMiddlewares = (router: AnyRouter, state: AppCompilerState, prevValue: CachedMiddlewareCompilationResult): CachedMiddlewareCompilationResult => {
+export const compileMiddlewares = (router: AnyRouter, state: AppCompilerState, prevValue: MiddlewareState): MiddlewareState => {
   const externalValues = state.externalValues;
 
   const exceptRoutes = buildExceptionHandlers(prevValue[4], router, externalValues);
-  const currentResult: CachedMiddlewareCompilationResult = [
+  const currentResult: MiddlewareState = [
     prevValue[0],
     prevValue[1],
     prevValue[2],
@@ -35,6 +35,10 @@ export const compileMiddlewares = (router: AnyRouter, state: AppCompilerState, p
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
     const middlewareData = list[i];
 
+    // TODO
+    if (middlewareData[0] === 0) continue;
+
+    // Push headers
     if (middlewareData[0] === 5) {
       externalValues.push(middlewareData[1].length === 1 ? middlewareData[1][0] : middlewareData[1]);
       createContext(currentResult);

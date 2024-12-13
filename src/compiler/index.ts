@@ -3,14 +3,14 @@ import { createRouter, insertItem, compileRouter as compileBaseRouter } from '@m
 import type { AnyRouter } from '../router/index.js';
 import type { AppCompilerState, CompilerOptions } from '../types/compiler.js';
 
-import { compileMiddlewares, type CachedMiddlewareCompilationResult } from './middleware.js';
+import { compileMiddlewares, type MiddlewareState } from './middleware.js';
 import { compileHandler } from './handler.js';
 import { selectCtxParamsDef } from './utils.js';
 import type { AnyHandler } from '../router/types/handler.js';
 
 // eslint-disable-next-line
 const compileHandlerWithMiddleware = (
-  middlewareResult: CachedMiddlewareCompilationResult,
+  middlewareResult: MiddlewareState,
   handler: AnyHandler, state: AppCompilerState,
   hasParam: boolean
 ): string => (middlewareResult[1] === null
@@ -23,7 +23,7 @@ const compileHandlerWithMiddleware = (
 export const compileRouter = (
   prefixPath: string, hasParam: boolean,
   router: AnyRouter, state: AppCompilerState,
-  prevValue: CachedMiddlewareCompilationResult
+  prevValue: MiddlewareState
 ): void => {
   // Cache the middleware result
   const middlewareResult = compileMiddlewares(router, state, prevValue);

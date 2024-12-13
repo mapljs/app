@@ -4,7 +4,7 @@ import type { AnyRouter } from '../router/index.js';
 import type { AppCompilerState } from '../types/compiler.js';
 
 import { compileMiddlewares } from './middleware.js';
-import type { CachedMiddlewareCompilationResult } from '../compiler/middleware.js';
+import type { MiddlewareState } from '../compiler/middleware.js';
 import { buildStaticHandler } from './utils.js';
 
 // DFS and compile every subrouter
@@ -12,7 +12,7 @@ import { buildStaticHandler } from './utils.js';
 export const compileRouter = (
   hasParam: boolean,
   router: AnyRouter, state: AppCompilerState,
-  prevValue: CachedMiddlewareCompilationResult
+  prevValue: MiddlewareState
 ): void => {
   // Cache the middleware result
   const middlewareResult = compileMiddlewares(router, state, prevValue);
