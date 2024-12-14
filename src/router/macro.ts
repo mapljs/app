@@ -4,14 +4,14 @@ import type { AnyRouter } from './index.js';
 
 export interface Macro<Options, ModifiedRouter extends AnyRouter> {
   /**
-   * JIT mode source
+   * JIT mode source (must be an absolute path)
    */
   jitSource: string;
 
   /**
-   * AOT mode source
+   * AOT mode source (must be an absolute path)
    */
-  aotSource: string;
+  aotSource?: string;
 
   /**
    * Common options
