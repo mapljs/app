@@ -75,7 +75,7 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
     if (middlewareData[0] === 0) {
       // Import and run the macro
       // eslint-disable-next-line
-      await (await import(middlewareData[1].jitSource) as { default: MacroFunc }).default(middlewareData[1], currentResult, state);
+      await (await import(middlewareData[1].jitSource) as { default: MacroFunc }).default(middlewareData[1].options, currentResult, state);
       continue;
     }
 
