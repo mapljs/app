@@ -1,5 +1,5 @@
 import type { DynamicException, StaticException, ExcludeExceptionType } from '../exception.js';
-import type { Macro } from './macro.js';
+import type { Macro } from '../macro.js';
 import type { RouteRegisters } from './route.js';
 import type { Context } from './types/context.js';
 import type { AnyHandler, Handler, HandlerData } from './types/handler.js';
@@ -233,11 +233,8 @@ class Router<State, Routes, SubRouters> {
     return this;
   }
 
-  /**
-   * Register a macro
-   */
-  public macro<Options, Modified extends AnyRouter>(options: Macro<Options, Modified>): Modified {
-    this.middlewares.push([0, options]);
+  public macro<Options, RouterType extends AnyRouter>(macro: Macro<Options, RouterType>, options?: Options): RouterType & {} {
+    this.middlewares.push([0, macro, options]);
     return this as any;
   }
 }

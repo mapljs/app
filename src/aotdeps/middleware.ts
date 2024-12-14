@@ -3,7 +3,6 @@ import type { AppCompilerState } from '../types/compiler.js';
 import { buildExceptionHandlers, loadExceptionHandlers } from './exceptions.js';
 import type { MiddlewareState } from '../compiler/middleware.js';
 import { isFunctionAsync } from '../compiler/utils.js';
-import type { MacroFunc } from '../router/macro.js';
 
 // eslint-disable-next-line
 const createContext = (currentResult: MiddlewareState): void => {
@@ -37,10 +36,8 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
     const middlewareData = list[i];
 
     if (middlewareData[0] === 0) {
-      // Import and run the macro if exists
-      if (typeof middlewareData[1].aotSource !== 'undefined')
-        // eslint-disable-next-line
-        await (await import(middlewareData[1].aotSource) as { default: MacroFunc }).default(middlewareData[1].options, currentResult, state);
+      // eslint-disable-next-line
+      await middlewareData[1].loadDeps?.(middlewareData[2], currentResult, state);
       continue;
     }
 

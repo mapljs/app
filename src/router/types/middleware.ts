@@ -1,12 +1,11 @@
-import type { AnyRouter } from '../index.js';
-import type { Macro } from '../macro.js';
+import type { AnyMacro } from '../../macro.js';
 import type { Context } from './context.js';
 
 export type MiddlewareFunction<State, Args extends any[] = []> = (...args: [...Args, Context & State]) => unknown;
 
 export type MiddlewareData =
   // Macro
-  | [0, Macro<any, AnyRouter>]
+  | [0, AnyMacro, any]
   // Parser
   | [1, MiddlewareFunction<any>, string]
   // Validator

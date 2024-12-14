@@ -1,7 +1,6 @@
-import type { BaseRouter } from "@mapl/app/index.js";
-import type { Macro } from "@mapl/app/router/macro.js";
+import { router } from "@mapl/app/index.js";
+import { mainMacro } from "./main.js";
 
-export default (min: number) => ({
-  jitSource: `${import.meta.dir}/jit.js`,
-  options: min
-} as Macro<number, BaseRouter>);
+export default router()
+  .macro(mainMacro, 0.2)
+  .get('/', () => 'Hi');

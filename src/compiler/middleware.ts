@@ -1,5 +1,5 @@
+import type { MacroFunc } from '../macro.js';
 import type { AnyRouter } from '../router/index.js';
-import type { MacroFunc } from '../router/macro.js';
 import type { AppCompilerState } from '../types/compiler.js';
 import { buildExceptionHandlers, loadExceptionHandlers, type ExceptHandlerBuilders } from './exceptions.js';
 import { isFunctionAsync } from './utils.js';
@@ -73,9 +73,8 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
     const middlewareData = list[i];
 
     if (middlewareData[0] === 0) {
-      // Import and run the macro
       // eslint-disable-next-line
-      await (await import(middlewareData[1].jitSource) as { default: MacroFunc }).default(middlewareData[1].options, currentResult, state);
+      await (await import(middlewareData[1].loadSource) as { default: MacroFunc<unknown> }).default(middlewareData[2], currentResult, state);
       continue;
     }
 
