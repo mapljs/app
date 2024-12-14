@@ -24,4 +24,4 @@ export interface Macro<Options, ModifiedRouter extends AnyRouter> {
   modifiedType: ModifiedRouter;
 }
 
-export type MacroFunc = (options: any, ctx: MiddlewareState, state: AppCompilerState) => string;
+export type MacroFunc = (options: any, ctx: MiddlewareState, state: AppCompilerState) => void | Promise<void>;

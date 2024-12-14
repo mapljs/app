@@ -3,6 +3,7 @@ import type { AppCompilerState } from '../types/compiler.js';
 import { buildExceptionHandlers, loadExceptionHandlers } from './exceptions.js';
 import type { MiddlewareState } from '../compiler/middleware.js';
 import { isFunctionAsync } from '../compiler/utils.js';
+import type { MacroFunc } from '../router/macro.js';
 
 // eslint-disable-next-line
 const createContext = (currentResult: MiddlewareState): void => {
@@ -18,7 +19,7 @@ const createContext = (currentResult: MiddlewareState): void => {
 
 // Compile and cache middleware compilation result
 // eslint-disable-next-line
-export const compileMiddlewares = (router: AnyRouter, state: AppCompilerState, prevValue: MiddlewareState): MiddlewareState => {
+export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerState, prevValue: MiddlewareState): Promise<MiddlewareState> => {
   const externalValues = state.externalValues;
 
   const exceptRoutes = buildExceptionHandlers(prevValue[4], router, externalValues);
@@ -35,8 +36,12 @@ export const compileMiddlewares = (router: AnyRouter, state: AppCompilerState, p
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
     const middlewareData = list[i];
 
-    // TODO
-    if (middlewareData[0] === 0) continue;
+    if (middlewareData[0] === 0) {
+      // Import and run the macro
+      // eslint-disable-next-line
+      await (await import(middlewareData[1].aotSource) as { default: MacroFunc }).default(middlewareData[1], currentResult, state);
+      continue;
+    }
 
     // Push headers
     if (middlewareData[0] === 5) {

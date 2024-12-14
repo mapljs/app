@@ -20,13 +20,13 @@ const compileHandlerWithMiddleware = (
 
 // DFS and compile every subrouter
 // eslint-disable-next-line
-export const compileRouter = (
+export const compileRouter = async (
   prefixPath: string, hasParam: boolean,
   router: AnyRouter, state: AppCompilerState,
   prevValue: MiddlewareState
-): void => {
+): Promise<void> => {
   // Cache the middleware result
-  const middlewareResult = compileMiddlewares(router, state, prevValue);
+  const middlewareResult = await compileMiddlewares(router, state, prevValue);
 
   // Load all routes into the tree
   for (let i = 0,
@@ -69,7 +69,8 @@ export const compileRouter = (
   for (let i = 0, subrouters = router.subrouters, l = subrouters.length; i < l; i++) {
     const subrouterData = subrouters[i];
 
-    compileRouter(
+    // eslint-disable-next-line
+    await compileRouter(
       subrouterData[0] === '/' ? prefixPath : prefixPath + subrouterData[0],
       // Check whether this path has params
       hasParam || subrouterData[0].includes('*'),
@@ -82,7 +83,7 @@ export const compileRouter = (
 };
 
 // eslint-disable-next-line
-export const compile = (router: AnyRouter): AppCompilerState => {
+export const compile = async (router: AnyRouter): Promise<AppCompilerState> => {
   const state: AppCompilerState = {
     routeTrees: [null, null],
     prebuilds: [],
@@ -95,7 +96,7 @@ export const compile = (router: AnyRouter): AppCompilerState => {
   };
 
   // Put all stuff into the radix tree
-  compileRouter('', false, router, state, ['', null, false, false, {}, null]);
+  await compileRouter('', false, router, state, ['', null, false, false, {}, null]);
   return state;
 };
 

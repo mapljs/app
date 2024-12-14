@@ -9,13 +9,13 @@ import { buildStaticHandler } from './utils.js';
 
 // DFS and compile every subrouter
 // eslint-disable-next-line
-export const compileRouter = (
+export const compileRouter = async (
   hasParam: boolean,
   router: AnyRouter, state: AppCompilerState,
   prevValue: MiddlewareState
-): void => {
+): Promise<void> => {
   // Cache the middleware result
-  const middlewareResult = compileMiddlewares(router, state, prevValue);
+  const middlewareResult = await compileMiddlewares(router, state, prevValue);
 
   // Load all routes into the tree
   for (let i = 0,
@@ -36,14 +36,16 @@ export const compileRouter = (
   }
 
   // Visit and compile all sub-routers
-  for (let i = 0, subrouters = router.subrouters, l = subrouters.length; i < l; i++) {
-    const subrouterData = subrouters[i];
+  for (let i = 0, subrouters = router.subrouters, l = subrouters.length, cur; i < l; i++) {
+    cur = subrouters[i];
 
-    compileRouter(
+    // eslint-disable-next-line
+    await compileRouter(
       // Check whether this path has params
-      hasParam || subrouterData[0].includes('*'),
-
-      subrouterData[1],
+      hasParam || cur[0].includes('*'),
+      // Target router
+      cur[1],
+      // States
       state,
       middlewareResult
     );
@@ -53,11 +55,11 @@ export const compileRouter = (
 /**
  * Get router dependencies to inject
  */
-export default (router: AnyRouter): any[] => {
+export default async (router: AnyRouter): Promise<any[]> => {
   const externalValues = [] as any[];
 
   // Put all stuff into the radix tree
-  compileRouter(false, router, {
+  await compileRouter(false, router, {
     routeTrees: [null, null],
     prebuilds: [],
 

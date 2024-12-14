@@ -10,7 +10,7 @@ import type { CompilerOptions } from '../types/compiler.js';
  */
 // eslint-disable-next-line
 export const jitc = async (router: AnyRouter, options: CompilerOptions = {}): Promise<BuildResult> => {
-  const state = compile(router);
+  const state = await compile(router);
 
   // Load static options first to the tree if necessary
   const staticOptions = loadStatePrebuilds(state, options);
@@ -27,8 +27,8 @@ export const jitc = async (router: AnyRouter, options: CompilerOptions = {}): Pr
  * Create a function string to be used in files
  */
 // eslint-disable-next-line
-export const aotfn = (router: AnyRouter, options: CompilerOptions = {}): string => {
-  const state = compile(router);
+export const aotfn = async (router: AnyRouter, options: CompilerOptions = {}): Promise<string> => {
+  const state = await compile(router);
 
   // Load static options first to the tree if necessary
   const staticOptions = loadStatePrebuilds(state, options);

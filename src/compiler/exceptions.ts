@@ -39,7 +39,7 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
         // Wrap in async
         content = (!isAsync && isFnAsync ? compilerConstants.ASYNC_START : '') +
           // Add context
-          (!hasContext && fnNeedContext ? compilerConstants.CTX_DEF : '') +
+          (!hasContext && fnNeedContext ? compilerConstants.CTX_DEF : '')
           // Function call and stuff
           + retStart
           // Set response option

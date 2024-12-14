@@ -1,4 +1,5 @@
 import type { AnyRouter } from '../router/index.js';
+import type { MacroFunc } from '../router/macro.js';
 import type { AppCompilerState } from '../types/compiler.js';
 import { buildExceptionHandlers, loadExceptionHandlers, type ExceptHandlerBuilders } from './exceptions.js';
 import { isFunctionAsync } from './utils.js';
@@ -54,7 +55,7 @@ export const createEmptyContext = (currentResult: MiddlewareState): void => {
 
 // Compile and cache middleware compilation result
 // eslint-disable-next-line
-export const compileMiddlewares = (router: AnyRouter, state: AppCompilerState, prevValue: MiddlewareState): MiddlewareState => {
+export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerState, prevValue: MiddlewareState): Promise<MiddlewareState> => {
   const externalValues = state.externalValues;
 
   const exceptRoutes = buildExceptionHandlers(prevValue[4], router, externalValues);
@@ -71,8 +72,12 @@ export const compileMiddlewares = (router: AnyRouter, state: AppCompilerState, p
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
     const middlewareData = list[i];
 
-    // TODO
-    if (middlewareData[0] === 0) continue;
+    if (middlewareData[0] === 0) {
+      // Import and run the macro
+      // eslint-disable-next-line
+      await (await import(middlewareData[1].jitSource) as { default: MacroFunc }).default(middlewareData[1], currentResult, state);
+      continue;
+    }
 
     if (middlewareData[0] === 5) {
       // Don't use spread if there's only one single header pair
