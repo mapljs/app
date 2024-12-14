@@ -14,5 +14,5 @@ export const measureAppJIT = async (app: AnyRouter) =>
   console.log(`JIT compilation: ${await measureAvg(async () => await jitc(app, { exposeStatic: true }))}`);
 
 export const measureApp = (app: AnyRouter) => Promise.all([
-  measureAppAOT(app)
+  measureAppAOT(app), measureAppJIT(app)
 ]);
