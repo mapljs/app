@@ -37,7 +37,7 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
 
     if (middlewareData[0] === 0) {
       // eslint-disable-next-line
-      await middlewareData[1].loadDeps?.(middlewareData[2], currentResult, state);
+      await middlewareData[1].loadDeps?.(middlewareData[1].options, currentResult, state);
       continue;
     }
 

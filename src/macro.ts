@@ -4,7 +4,7 @@ import type { AppCompilerState } from './types/compiler.js';
 
 export type MacroFunc<T> = (options: T, ctx: MiddlewareState, state: AppCompilerState) => void | Promise<void>;
 
-export interface Macro<Options, ModifiedRouter extends AnyRouter = BaseRouter> {
+export interface Macro<Options, Router extends AnyRouter = BaseRouter> {
   /**
    * JIT loader source. Must be an absolute path
    */
@@ -16,14 +16,14 @@ export interface Macro<Options, ModifiedRouter extends AnyRouter = BaseRouter> {
   loadDeps?: MacroFunc<Options>;
 
   /**
-   * Plugin options (it can be omitted)
+   * Plugin options
    */
-  optionsType?: Options;
+  options: Options;
 
   /**
-   * The type of the modified router
+   * Router type for inference
    */
-  modifiedType?: ModifiedRouter;
+  routerType: Router;
 }
 
 export type AnyMacro = Macro<any, AnyRouter>;

@@ -233,8 +233,11 @@ class Router<State, Routes, SubRouters> {
     return this;
   }
 
-  public macro<Options, RouterType extends AnyRouter>(macro: Macro<Options, RouterType>, options?: Options): RouterType & {} {
-    this.middlewares.push([0, macro, options]);
+  /**
+   * Register a macro
+   */
+  public macro<RouterType extends AnyRouter>(macro: Macro<any, RouterType>): RouterType & {} {
+    this.middlewares.push([0, macro]);
     return this as any;
   }
 }

@@ -5,7 +5,7 @@ export type MiddlewareFunction<State, Args extends any[] = []> = (...args: [...A
 
 export type MiddlewareData =
   // Macro
-  | [0, AnyMacro, any]
+  | [0, AnyMacro]
   // Parser
   | [1, MiddlewareFunction<any>, string]
   // Validator

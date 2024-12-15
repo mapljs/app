@@ -1,6 +1,6 @@
 import { router } from "@mapl/app/index.js";
-import { mainMacro } from "./main.js";
+import { main } from "./main.js";
 
 export default router()
-  .macro(mainMacro, 0.2)
+  .macro(main(0.2))
   .get('/', () => 'Hi');
