@@ -154,7 +154,7 @@ export function loadStateTree(state: AppCompilerState): void {
     for (const key in routeTrees[0]) {
       // Method should not be malformed
       contentBuilder.push(`case"${key}":{${compilerConstants.PARSE_PATH}`);
-      compileBaseRouter(routeTrees[0][key], contentBuilder);
+      compileBaseRouter(routeTrees[0][key], contentBuilder as string[]);
       contentBuilder.push('}');
     }
   }
@@ -165,7 +165,7 @@ export function loadStateTree(state: AppCompilerState): void {
       contentBuilder.push('default:{');
 
     contentBuilder.push(compilerConstants.PARSE_PATH);
-    compileBaseRouter(routeTrees[1], contentBuilder);
+    compileBaseRouter(routeTrees[1], contentBuilder as string[]);
 
     if (hasMethodTrees)
       contentBuilder.push('}');
