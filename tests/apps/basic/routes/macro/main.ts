@@ -3,7 +3,7 @@ import type { MacroFunc } from "@mapl/app/macro.js";
 import { RET_404 } from "@mapl/app/constants.js";
 
 export const main = (options: number) => ({
-  loadSource: import.meta.path, options
+  loadSource: import.meta.filename, options
 } as Macro<number>);
 
 export default ((num, ctx) => {
