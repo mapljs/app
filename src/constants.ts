@@ -4,8 +4,7 @@ import { PARAMS, PATH, REQ } from '@mapl/router/constants.js';
 // Prefixes
 export const MAPL = 'm';
 
-export const HOLDER = `${MAPL}_`;
-export const CREATE_HOLDER = `let ${HOLDER}`;
+export const HOLDER = '_';
 
 export const CTX = `${MAPL}c`;
 export const HEADERS = `${MAPL}h`;

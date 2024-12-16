@@ -96,7 +96,7 @@ export const compile = async (router: AnyRouter): Promise<AppCompilerState> => {
   };
 
   // Put all stuff into the radix tree
-  await compileRouter('', false, router, state, ['', null, false, false, {}, null]);
+  await compileRouter('', false, router, state, [`let ${compilerConstants.HOLDER};`, null, false, null, {} ]);
   return state;
 };
 

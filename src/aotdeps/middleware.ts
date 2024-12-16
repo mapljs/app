@@ -12,7 +12,7 @@ const createContext = (currentResult: MiddlewareState): void => {
     currentResult[0] = '';
 
     // Reset the exception value
-    currentResult[5] = null;
+    currentResult[3] = null;
   }
 };
 
@@ -26,10 +26,9 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
     prevValue[0],
     prevValue[1],
     prevValue[2],
-    prevValue[3],
-    exceptRoutes,
     // If the exception content doesn't change then keep the original value
-    prevValue[4] === exceptRoutes ? prevValue[5] : null
+    prevValue[4] === exceptRoutes ? prevValue[3] : null,
+    exceptRoutes
   ];
 
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
@@ -54,7 +53,7 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
       currentResult[2] = true;
 
       // Reset the exception value
-      currentResult[5] = null;
+      currentResult[3] = null;
     }
 
     if (middlewareData[1].length !== 0 || middlewareData[0] === 1 || middlewareData[0] === 4) createContext(currentResult);
@@ -65,7 +64,7 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
       // Parsers and validators need exceptions
       case 1:
       case 2: {
-        currentResult[5] ??= loadExceptionHandlers(exceptRoutes, currentResult[1] === null, currentResult[2]);
+        currentResult[3] ??= loadExceptionHandlers(exceptRoutes, currentResult[1] === null, currentResult[2]);
         break;
       }
 

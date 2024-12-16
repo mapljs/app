@@ -9,20 +9,10 @@ export type MiddlewareState = [
   beforeContext: string | null,
 
   isAsync: boolean,
-  hasPlaceholder: boolean,
+  builtExceptContent: string | null,
 
-  exceptRoutes: ExceptHandlerBuilders,
-  builtExceptContent: string | null
+  exceptRoutes: ExceptHandlerBuilders
 ];
-
-// eslint-disable-next-line
-export const createHolder = (currentResult: MiddlewareState) => {
-  if (currentResult[3])
-    return compilerConstants.HOLDER;
-
-  currentResult[3] = true;
-  return compilerConstants.CREATE_HOLDER;
-};
 
 // eslint-disable-next-line
 export const createAsyncScope = (currentResult: MiddlewareState): void => {
@@ -32,7 +22,7 @@ export const createAsyncScope = (currentResult: MiddlewareState): void => {
     currentResult[2] = true;
 
     // Reset the exception value
-    currentResult[5] = null;
+    currentResult[3] = null;
   }
 };
 
@@ -44,7 +34,7 @@ export const createContext = (currentResult: MiddlewareState, headers: string): 
     currentResult[0] = '';
 
     // Reset the exception value
-    currentResult[5] = null;
+    currentResult[3] = null;
   }
 };
 
@@ -63,10 +53,9 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
     prevValue[0],
     prevValue[1],
     prevValue[2],
-    prevValue[3],
-    exceptRoutes,
     // If the exception content doesn't change then keep the original value
-    prevValue[4] === exceptRoutes ? prevValue[5] : null
+    prevValue[4] === exceptRoutes ? prevValue[3] : null,
+    exceptRoutes
   ];
 
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
@@ -107,18 +96,18 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
       // Parsers
       case 1: {
         // Set the prop to the context (prop name must be an identifier)
-        currentResult[0] += `${createHolder(currentResult)}=${fnCall}${
+        currentResult[0] += `${compilerConstants.HOLDER}=${fnCall}${
           // Use the old value if it exists
-          currentResult[5] ??= loadExceptionHandlers(exceptRoutes, currentResult[1] === null, currentResult[2])
+          currentResult[3] ??= loadExceptionHandlers(exceptRoutes, currentResult[1] === null, currentResult[2])
         }${compilerConstants.CTX}.${middlewareData[2]}=${compilerConstants.HOLDER};`;
         break;
       }
 
       // Validators
       case 2: {
-        currentResult[0] += `${createHolder(currentResult)}=${fnCall}${
+        currentResult[0] += `${compilerConstants.HOLDER}=${fnCall}${
           // Use the old value if it exists
-          currentResult[5] ??= loadExceptionHandlers(exceptRoutes, currentResult[1] === null, currentResult[2])
+          currentResult[3] ??= loadExceptionHandlers(exceptRoutes, currentResult[1] === null, currentResult[2])
         }`;
         break;
       }
