@@ -28,7 +28,8 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
     prevValue[2],
     // If the exception content doesn't change then keep the original value
     prevValue[4] === exceptRoutes ? prevValue[3] : null,
-    exceptRoutes
+    exceptRoutes,
+    prevValue[5]
   ];
 
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {

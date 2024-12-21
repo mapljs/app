@@ -68,7 +68,7 @@ export default async (router: AnyRouter): Promise<any[]> => {
     declarationBuilders: statelessNoOpBuilder as Builder<Builder<string>>,
 
     externalValues
-  }, ['', null, false, null, {} ]);
+  }, ['', null, false, null, {}, 0]);
 
   return externalValues;
 };

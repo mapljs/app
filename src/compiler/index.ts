@@ -96,7 +96,7 @@ export const compile = async (router: AnyRouter): Promise<AppCompilerState> => {
   };
 
   // Put all stuff into the radix tree
-  await compileRouter('', false, router, state, [`let ${compilerConstants.HOLDER};`, null, false, null, {} ]);
+  await compileRouter('', false, router, state, ['', null, false, null, {}, 0]);
   return state;
 };
 
@@ -145,35 +145,26 @@ export function loadStateTree(state: AppCompilerState): void {
   const routeTrees = state.routeTrees;
   const contentBuilder = state.contentBuilder;
 
-  const hasMethodTrees = routeTrees[0] !== null;
-
-  if (hasMethodTrees) {
+  if (routeTrees[0] !== null) {
     // Start the switch statement
     contentBuilder.push(`switch(${compilerConstants.REQ}.method){`);
 
-    for (const key in routeTrees[0]) {
+    const trees = routeTrees[0];
+    for (const key in trees) {
       // Method should not be malformed
       contentBuilder.push(`case"${key}":{${compilerConstants.PARSE_PATH}`);
-      compileBaseRouter(routeTrees[0][key], contentBuilder as string[]);
-      contentBuilder.push('}');
+      compileBaseRouter(trees[key], contentBuilder as string[]);
+      contentBuilder.push('break;}');
     }
+
+    contentBuilder.push('}');
   }
 
   // Load all method routes
   if (routeTrees[1] !== null) {
-    if (hasMethodTrees)
-      contentBuilder.push('default:{');
-
     contentBuilder.push(compilerConstants.PARSE_PATH);
     compileBaseRouter(routeTrees[1], contentBuilder as string[]);
-
-    if (hasMethodTrees)
-      contentBuilder.push('}');
   }
-
-  // Close the switch statement
-  if (hasMethodTrees)
-    contentBuilder.push('}');
 
   contentBuilder.push(compilerConstants.RET_404);
 }

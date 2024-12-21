@@ -4,7 +4,8 @@ import { PARAMS, PATH, REQ } from '@mapl/router/constants.js';
 // Prefixes
 export const MAPL = 'm';
 
-export const HOLDER = '_';
+export const HOLDER_PREFIX = '_';
+export const HOLDER_0 = `${HOLDER_PREFIX}0`;
 
 export const CTX = `${MAPL}c`;
 export const HEADERS = `${MAPL}h`;
@@ -58,8 +59,8 @@ export const JSON_CTX_DEF = JSON_HEADER_DEF + CTX_DEF;
 // Args
 export const NO_ARG = '()';
 export const ONLY_CTX_ARG = `(${CTX})`;
-export const ONLY_PAYLOAD_ARG = `(${HOLDER}[2])`;
-export const PAYLOAD_CTX_ARG = `(${HOLDER}[2]${COLON_CTX})`;
+export const ONLY_PAYLOAD_ARG = `(${HOLDER_0}[2])`;
+export const PAYLOAD_CTX_ARG = `(${HOLDER_0}[2]${COLON_CTX})`;
 
 // Exception symbol is always the first external value
 export const EXCEPT_SYMBOL = `${MAPL}s`;
@@ -74,7 +75,7 @@ export const RET_404 = `return ${RESPONSE_404};`;
 
 // Exception constants
 export const DEFAULT_EXCEPT_END = `default:${RET_400}}`;
-export const EXCEPT_START = `if(Array.isArray(${HOLDER})&&${HOLDER}[0]===${EXCEPT_SYMBOL})switch(${HOLDER}[1]){`;
+export const EXCEPT_START = `if(Array.isArray(${HOLDER_0})&&${HOLDER_0}[0]===${EXCEPT_SYMBOL})switch(${HOLDER_0}[1]){`;
 
 // Default vars
 export const CONST_VARS = `var ${EXCEPT_SYMBOL}=Symbol.for('${EXCEPT_SYMBOL_NAME}'),${TEXT_HEADER_PAIR}=['content-type','text/plain'],${TEXT_OPTIONS}={headers:[${TEXT_HEADER_PAIR}]},${HTML_HEADER_PAIR}=['content-type','text/html'],${HTML_OPTIONS}={headers:[${HTML_HEADER_PAIR}]},${JSON_HEADER_PAIR}=['content-type','application/json'],${JSON_OPTIONS}={headers:[${JSON_HEADER_PAIR}]},${RESPONSE_400}=new Response(null,{status:400}),${RESPONSE_404}=new Response(null,{status:404});`;
