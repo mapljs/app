@@ -24,6 +24,11 @@ export interface Macro<Options, Router extends AnyRouter = BaseRouter> {
    * Router type for inference
    */
   routerType: Router;
+
+  /**
+   * The macro hash to tell the compiler to not run it again if one has been registered
+   */
+  hash?: any;
 }
 
 export type AnyMacro = Macro<any, AnyRouter>;

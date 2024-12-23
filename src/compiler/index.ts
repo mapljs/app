@@ -88,15 +88,14 @@ export const compile = async (router: AnyRouter): Promise<AppCompilerState> => {
     routeTrees: [null, null],
     prebuilds: [],
 
-    // Fake content builder when only requires the external dependencies
-    contentBuilder: [] as string[],
-    declarationBuilders: [] as any[],
+    declarationBuilders: [],
+    globalBuilders: new Map(),
 
-    externalValues: [] as any[]
+    externalValues: []
   };
 
   // Put all stuff into the radix tree
-  await compileRouter('', false, router, state, ['', null, false, null, {}, 0]);
+  await compileRouter('', false, router, state, ['', null, false, null, {}, 0, []]);
   return state;
 };
 
@@ -141,30 +140,23 @@ export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOpt
   return '';
 };
 
-export function loadStateTree(state: AppCompilerState): void {
+export function loadStateTree(state: AppCompilerState): string {
+  let builder = '';
+
   const routeTrees = state.routeTrees;
-  const contentBuilder = state.contentBuilder;
 
   if (routeTrees[0] !== null) {
     // Start the switch statement
-    contentBuilder.push(`switch(${compilerConstants.REQ}.method){`);
-
-    const trees = routeTrees[0];
-    for (const key in trees) {
-      // Method should not be malformed
-      contentBuilder.push(`case"${key}":{${compilerConstants.PARSE_PATH}`);
-      compileBaseRouter(trees[key], contentBuilder as string[]);
-      contentBuilder.push('break;}');
-    }
-
-    contentBuilder.push('}');
+    builder += `switch(${compilerConstants.REQ}.method){`;
+    for (const key in routeTrees[0]) builder += `case"${key}":{${compilerConstants.PARSE_PATH}${compileBaseRouter(routeTrees[0][key])}break;}`;
+    builder += '}';
   }
 
   // Load all method routes
   if (routeTrees[1] !== null) {
-    contentBuilder.push(compilerConstants.PARSE_PATH);
-    compileBaseRouter(routeTrees[1], contentBuilder as string[]);
+    builder += compilerConstants.PARSE_PATH;
+    builder += compileBaseRouter(routeTrees[1]);
   }
 
-  contentBuilder.push(compilerConstants.RET_404);
+  return builder + compilerConstants.RET_404;
 }

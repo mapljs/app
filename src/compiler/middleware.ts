@@ -13,7 +13,10 @@ export type MiddlewareState = [
   builtExceptContent: string | null,
 
   exceptRoutes: ExceptHandlerBuilders,
-  holders: number
+  holders: number,
+
+  // Set is slower for most small cases
+  macroHashes: unknown[]
 ];
 
 // eslint-disable-next-line
@@ -68,6 +71,8 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
   const externalValues = state.externalValues;
 
   const exceptRoutes = buildExceptionHandlers(prevValue[4], router, externalValues);
+  const macroHashes = [...prevValue[6]];
+
   const currentResult: MiddlewareState = [
     prevValue[0],
     prevValue[1],
@@ -75,13 +80,20 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
     // If the exception content doesn't change then keep the original value
     prevValue[4] === exceptRoutes ? prevValue[3] : null,
     exceptRoutes,
-    prevValue[5]
+    prevValue[5],
+    macroHashes
   ];
 
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
     const middlewareData = list[i];
 
     if (middlewareData[0] === 0) {
+      // Hash checking stuff
+      if (middlewareData[1].hash != null) {
+        if (macroHashes.includes(middlewareData[1].hash)) continue;
+        macroHashes.push(middlewareData[1].hash);
+      }
+
       // eslint-disable-next-line
       await (await import(middlewareData[1].loadSource) as { default: MacroFunc<unknown> }).default(middlewareData[1].options, currentResult, state);
       continue;

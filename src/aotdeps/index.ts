@@ -1,5 +1,3 @@
-import { statelessNoOpBuilder, type Builder } from '@mapl/compiler';
-
 import type { AnyRouter } from '../router/index.js';
 import type { AppCompilerState } from '../types/compiler.js';
 
@@ -63,12 +61,11 @@ export default async (router: AnyRouter): Promise<any[]> => {
     routeTrees: [null, null],
     prebuilds: [],
 
-    // Fake content builder when only requires the external dependencies
-    contentBuilder: statelessNoOpBuilder as Builder<string>,
-    declarationBuilders: statelessNoOpBuilder as Builder<Builder<string>>,
+    declarationBuilders: [],
+    globalBuilders: new Map(),
 
     externalValues
-  }, ['', null, false, null, {}, 0]);
+  }, ['', null, false, null, {}, 0, []]);
 
   return externalValues;
 };

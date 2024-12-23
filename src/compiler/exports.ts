@@ -11,15 +11,13 @@ import type { CompilerOptions } from '../types/compiler.js';
 // eslint-disable-next-line
 export const jitc = async (router: AnyRouter, options: CompilerOptions = {}): Promise<BuildResult> => {
   const state = await compile(router);
-
   // Load static options first to the tree if necessary
   const staticOptions = loadStatePrebuilds(state, options);
-  loadStateTree(state);
 
   // eslint-disable-next-line
   return AsyncFunction(
     ...getExternalKeys(state),
-    `${compilerConstants.CONST_VARS}${getDeclarations(state)}return{fetch:(${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}${staticOptions}}`
+    `${compilerConstants.CONST_VARS}${getDeclarations(state)}return{fetch:(${compilerConstants.REQ})=>{${loadStateTree(state)}}${staticOptions}}`
   )(...state.externalValues);
 };
 
@@ -29,10 +27,8 @@ export const jitc = async (router: AnyRouter, options: CompilerOptions = {}): Pr
 // eslint-disable-next-line
 export const aotfn = async (router: AnyRouter, options: CompilerOptions = {}): Promise<string> => {
   const state = await compile(router);
-
   // Load static options first to the tree if necessary
   const staticOptions = loadStatePrebuilds(state, options);
-  loadStateTree(state);
 
-  return `(async(${getExternalKeys(state).join(',')})=>{${compilerConstants.CONST_VARS}${getDeclarations(state)}return{fetch:(${compilerConstants.REQ})=>{${state.contentBuilder.join('')}}${staticOptions}}})`;
+  return `(async(${getExternalKeys(state).join(',')})=>{${compilerConstants.CONST_VARS}${getDeclarations(state)}return{fetch:(${compilerConstants.REQ})=>{${loadStateTree(state)}}${staticOptions}}})`;
 };
