@@ -104,14 +104,14 @@ export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOpt
   const prebuilds = state.prebuilds;
   if (prebuilds.length === 0) return '';
 
-  const responses = state.declarationBuilders.push([`await Promise.all([${prebuilds.map((val) => val[1]).join()}])`]);
+  const responses = state.declarationBuilders.push(`await Promise.all([${prebuilds.map((val) => val[1]).join()}])`);
 
   // Expose static routes
   if (options.exposeStatic === true)
     return `,static:{${prebuilds.map((val, idx) => `"${val[0]}":d${responses}[${idx}]`).join()}}`;
 
   // Inject as dependencies
-  const emptyResponses = state.declarationBuilders.push([`d${responses}.map((r)=>new Response(null,{status:r.status,statusText:r.statusText,headers:r.headers}))`]);
+  const emptyResponses = state.declarationBuilders.push(`d${responses}.map((r)=>new Response(null,{status:r.status,statusText:r.statusText,headers:r.headers}))`);
 
   for (
     let i = 0,
@@ -142,7 +142,6 @@ export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOpt
 
 export function loadStateTree(state: AppCompilerState): string {
   let builder = '';
-
   const routeTrees = state.routeTrees;
 
   if (routeTrees[0] !== null) {
