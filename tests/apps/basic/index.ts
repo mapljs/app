@@ -15,5 +15,5 @@ const app = router()
   .route('/timer', timer)
   .route('/macro', macro);
 
-measureApp(app);
+await measureApp(app);
 export default app;
