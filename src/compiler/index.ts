@@ -1,13 +1,14 @@
-import { createRouter, insertItem } from '@mapl/router';
-import buildRouter from '@mapl/router/compile.js';
-
+import type { AnyHandler } from '../router/types/handler.js';
 import type { AnyRouter } from '../router/index.js';
 import type { AppCompilerState, CompilerOptions } from '../types/compiler.js';
+
+import { createRouter, insertItem } from '@mapl/router';
+import buildRouter from '@mapl/router/compile.js';
+import fastBuildRouter, { injectMatcher } from '@mapl/router/fast-compile.js';
 
 import { compileMiddlewares, type MiddlewareState } from './middleware.js';
 import { compileHandler } from './handler.js';
 import { selectCtxParamsDef } from './utils.js';
-import type { AnyHandler } from '../router/types/handler.js';
 
 // eslint-disable-next-line
 const compileHandlerWithMiddleware = (
@@ -48,7 +49,7 @@ export const compileRouter = async (
       state.prebuilds.push([
         path,
         // Polyfill all required props
-        `(()=>{let ${compilerConstants.REQ}=new Request("http://127.0.0.1" + "${path}");${compilerConstants.PARSE_PATH}${
+        `(()=>{let ${compilerConstants.REQ}=new Request("http://127.0.0.1${path}");${compilerConstants.PARSE_PATH}${
           compileHandlerWithMiddleware(middlewareResult, route[2], state, false)
         }})()`
       ]);
@@ -156,6 +157,36 @@ export function loadStateTree(state: AppCompilerState): string {
   if (routeTrees[1] !== null) {
     builder += compilerConstants.PARSE_PATH;
     builder += buildRouter(routeTrees[1]);
+  }
+
+  return builder + compilerConstants.RET_404;
+}
+
+export function fastLoadStateTree(state: AppCompilerState): string {
+  let builder = '';
+
+  const routeTrees = state.routeTrees;
+  const decls = state.declarationBuilders as string[];
+  const deps = state.externalValues;
+
+  // Inject the route matcher into the context
+  const matcherId = injectMatcher(decls);
+
+  if (routeTrees[0] !== null) {
+    // Start the switch statement
+    builder += `switch(${compilerConstants.REQ}.method){`;
+    for (const key in routeTrees[0]) {
+      builder += `case"${key}":{${compilerConstants.PARSE_PATH}${
+        fastBuildRouter(routeTrees[0][key], decls, deps, matcherId, compilerConstants.CAPTURE_ARGS)
+      }break;}`;
+    }
+    builder += '}';
+  }
+
+  // Load all method routes
+  if (routeTrees[1] !== null) {
+    builder += compilerConstants.PARSE_PATH;
+    builder += fastBuildRouter(routeTrees[1], decls, deps, matcherId, compilerConstants.CAPTURE_ARGS);
   }
 
   return builder + compilerConstants.RET_404;
