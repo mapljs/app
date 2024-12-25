@@ -1,4 +1,5 @@
-import { createRouter, insertItem, compileRouter as compileBaseRouter } from '@mapl/router';
+import { createRouter, insertItem } from '@mapl/router';
+import buildRouter from '@mapl/router/compile.js';
 
 import type { AnyRouter } from '../router/index.js';
 import type { AppCompilerState, CompilerOptions } from '../types/compiler.js';
@@ -147,14 +148,14 @@ export function loadStateTree(state: AppCompilerState): string {
   if (routeTrees[0] !== null) {
     // Start the switch statement
     builder += `switch(${compilerConstants.REQ}.method){`;
-    for (const key in routeTrees[0]) builder += `case"${key}":{${compilerConstants.PARSE_PATH}${compileBaseRouter(routeTrees[0][key])}break;}`;
+    for (const key in routeTrees[0]) builder += `case"${key}":{${compilerConstants.PARSE_PATH}${buildRouter(routeTrees[0][key])}break;}`;
     builder += '}';
   }
 
   // Load all method routes
   if (routeTrees[1] !== null) {
     builder += compilerConstants.PARSE_PATH;
-    builder += compileBaseRouter(routeTrees[1]);
+    builder += buildRouter(routeTrees[1]);
   }
 
   return builder + compilerConstants.RET_404;
