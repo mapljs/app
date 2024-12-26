@@ -7,8 +7,8 @@ const app = router()
     fn: (c) => `<p>Hello ${c.params[0]}</p>`
   })
   .any('/**', (c) => {
-      c.status = 404;
-      return null;
+    c.status = 404;
+    return null;
   });
 
 export default app;

@@ -1,5 +1,4 @@
 import { HOLDER_PREFIX } from '../constants.js';
-import type { MacroFunc } from '../macro.js';
 import type { AnyRouter } from '../router/index.js';
 import type { AppCompilerState } from '../types/compiler.js';
 import { buildExceptionHandlers, loadExceptionHandlers, type ExceptHandlerBuilders } from './exceptions.js';
@@ -95,7 +94,7 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
       }
 
       // eslint-disable-next-line
-      await (await import(middlewareData[1].loadSource) as { default: MacroFunc<unknown> }).default(middlewareData[1].options, currentResult, state);
+      await middlewareData[1].loadSource(middlewareData[1].options, currentResult, state);
       continue;
     }
 

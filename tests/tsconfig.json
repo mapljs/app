@@ -3,15 +3,16 @@
     // Enable latest features
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
-    "module": "NodeNext",
+    "module": "ESNext",
     "moduleDetection": "force",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
     "allowJs": true,
     // Bundler mode
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "Bundler",
     "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
     // Best practices
     "strict": true,
     "skipLibCheck": true,

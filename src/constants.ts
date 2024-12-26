@@ -78,7 +78,7 @@ export const DEFAULT_EXCEPT_END = `default:${RET_400}}`;
 export const EXCEPT_START = `if(Array.isArray(${HOLDER_0})&&${HOLDER_0}[0]===${EXCEPT_SYMBOL})switch(${HOLDER_0}[1]){`;
 
 // Default vars
-export const CONST_VARS = `var ${EXCEPT_SYMBOL}=Symbol.for('${EXCEPT_SYMBOL_NAME}'),${TEXT_HEADER_PAIR}=['content-type','text/plain'],${TEXT_OPTIONS}={headers:[${TEXT_HEADER_PAIR}]},${HTML_HEADER_PAIR}=['content-type','text/html'],${HTML_OPTIONS}={headers:[${HTML_HEADER_PAIR}]},${JSON_HEADER_PAIR}=['content-type','application/json'],${JSON_OPTIONS}={headers:[${JSON_HEADER_PAIR}]},${RESPONSE_400}=new Response(null,{status:400}),${RESPONSE_404}=new Response(null,{status:404});`;
+export const CONST_VARS = `var ${EXCEPT_SYMBOL}=Symbol.for('${EXCEPT_SYMBOL_NAME}'),_=['text/plain','text/html','application/json'].map((n)=>['content-type',n]),[${TEXT_HEADER_PAIR},${HTML_HEADER_PAIR},${JSON_HEADER_PAIR}]=_,[${TEXT_OPTIONS},${HTML_OPTIONS},${JSON_OPTIONS}]=_.map((s)=>({headers:s})),[${RESPONSE_400},${RESPONSE_404}]=[400,404].map((s)=>new Response(null,{status:s}));`;
 
 // Parsings and constants
 export const PARSE_PATH = `let ${C_URL}=${REQ}.url,${PATH_START}=${C_URL}.indexOf('/',12)+1,${PATH_END}=${C_URL}.indexOf('?',${PATH_START}),${PATH}=${C_URL}.substring(${PATH_START},${PATH_END}>>>0);`;

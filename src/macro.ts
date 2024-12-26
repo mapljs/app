@@ -8,7 +8,7 @@ export interface Macro<Options, Router extends AnyRouter = BaseRouter> {
   /**
    * JIT loader source. Must be an absolute path
    */
-  loadSource: string;
+  loadSource: MacroFunc<Options>;
 
   /**
    * Dependency loader.
@@ -23,7 +23,7 @@ export interface Macro<Options, Router extends AnyRouter = BaseRouter> {
   /**
    * Router type for inference
    */
-  routerType: Router;
+  routerType?: Router;
 
   /**
    * The macro hash to tell the compiler to not run it again if one has been registered

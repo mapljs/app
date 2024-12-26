@@ -1,5 +1,4 @@
 import { router } from '@mapl/app/index.js';
-import { measureApp } from '@measure';
 
 const app = router()
   .use(console.log)
@@ -11,5 +10,4 @@ for (let i = 0; i < 1000; i++)
     fn: (c) => c.id
   });
 
-await measureApp(app);
 export default app;

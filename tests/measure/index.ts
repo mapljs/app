@@ -1,36 +1,59 @@
-import { type AnyRouter, aotdeps, aotfn, jitc } from '@mapl/app/index.js';
+import { type AnyRouter, aotfn } from '@mapl/app/index.js';
+import { rm } from 'fs/promises';
+import { resolve } from 'path/posix';
 
-export const measureAppAOT = async (app: AnyRouter) => {
-  // Build the file
-  await Bun.write(`${import.meta.dir}/fetch.js`, `export default ${await aotfn(app)};`);
-  await Bun.build({
-    entrypoints: [`${import.meta.dir}/fetch.js`],
-    outdir: `${import.meta.dir}/lib`
-  });
+const ROOT = import.meta.dir;
+const OUTDIR = `${ROOT}/lib`;
 
-  // Output
-  const target = `${import.meta.dir}/lib/fetch.js`;
+export const prepareAppAOT = async (appSource: string, app: AnyRouter) =>
+  (await Bun.write(`${ROOT}/aot.js`, `import{aotdeps}from'@mapl/app/index.js';import app from'${appSource}';export default ${await aotfn(app)}(...await aotdeps(app));`), `${ROOT}/aot.js`);
+
+export const prepareAppJIT = async (appSource: string) =>
+  (await Bun.write(`${ROOT}/jit.js`, `import{jitc}from'@mapl/app/index.js';import app from'${appSource}';export default await jitc(app);`), `${ROOT}/jit.js`);
+
+// Main
+let arg = process.argv[2];
+if (typeof arg !== 'string') throw new Error('Ayo');
+
+arg = resolve(arg);
+const app = (await import(arg)).default;
+
+const entrypoints = await Promise.all([prepareAppJIT(arg), prepareAppAOT(arg, app)]);
+
+// Build the files
+await Bun.build({
+  entrypoints,
+  outdir: OUTDIR,
+  minify: true
+});
+await Promise.all(entrypoints.map((e) => rm(e)));
+
+export const reportFileSize = async (target: string, label: string) => {
+  const str = await Bun.file(target).bytes();
+  console.log(label + ' File size: ' + (str.byteLength / 1024).toFixed(2) + 'kB');
+  console.log(label + ' GZ size: ' + (Bun.gzipSync(str).length / 1024).toFixed() + 'kB')
+}
+
+export const measureAppAOT = async () => {
+  const target = `${OUTDIR}/aot.js`;
+  reportFileSize(target, 'AOT');
 
   // Measure the actual time
   let start = Bun.nanoseconds();
-  await (await import(target)).default(...await aotdeps(app));
+  await import(target);
   start = Bun.nanoseconds() - start;
   console.log('AOT compilation: ' + (start / 1e6).toFixed(2) + 'ms');
-
-  // Report file size
-  const str = await Bun.file(target).bytes();
-  console.log('File size: ' + (str.byteLength / 1024).toFixed(2) + 'kB');
-  console.log('GZ size: ' + (Bun.gzipSync(str).length / 1024).toFixed() + 'kB')
 }
 
-export const measureAppJIT = async (app: AnyRouter) => {
+export const measureAppJIT = async () => {
+  const target = `${OUTDIR}/jit.js`;
+  reportFileSize(target, 'JIT');
+
   let start = Bun.nanoseconds();
-  await jitc(app);
+  await import(target);
   start = Bun.nanoseconds() - start;
   console.log('JIT compilation: ' + (start / 1e6).toFixed(2) + 'ms');
 }
 
-export const measureApp = async (app: AnyRouter) => {
-  await measureAppJIT(app);
-  await measureAppAOT(app);
-}
+await measureAppJIT();
+await measureAppAOT();
