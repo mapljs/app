@@ -2,10 +2,7 @@ const symbol: symbol = Symbol.for(compilerConstants.EXCEPT_SYMBOL_NAME);
 
 export type StaticException = [symbol, number];
 export type DynamicExceptionInstance<T> = [symbol, number, T];
-export interface DynamicException<T> {
-  id: number;
-  init: (payload: T) => DynamicExceptionInstance<T>;
-}
+export type DynamicException<T> = (payload: T) => DynamicExceptionInstance<T>;
 
 export type ExcludeExceptionType<T> = Exclude<T, StaticException | DynamicExceptionInstance<any>>;
 
@@ -22,5 +19,5 @@ export const staticException = (): StaticException => [symbol, errorId++];
  */
 export function dynamicException<T>(): DynamicException<T> {
   const id = errorId++;
-  return { id, init: (payload: T) => [symbol, id, payload] };
+  return (payload: T) => [symbol, id, payload];
 }

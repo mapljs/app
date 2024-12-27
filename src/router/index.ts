@@ -54,7 +54,7 @@ class Router<State, Routes, SubRouters> {
    * Register a function to parse and set the result to the context
    */
   public parse<Prop extends string, ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
-    State & { [K in Prop]: ExcludeExceptionType<Awaited<ParserReturn>> }, Routes, SubRouters
+    State & Record<Prop, ExcludeExceptionType<Awaited<ParserReturn>>>, Routes, SubRouters
   > {
     this.middlewares.push([1, fn, prop]);
     return this as any;
@@ -80,7 +80,7 @@ class Router<State, Routes, SubRouters> {
    * Register a function that runs on every request and set result to context
    */
   public set<Prop extends string, ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
-    State & { [K in Prop]: Awaited<ParserReturn> }, Routes, SubRouters
+    State & Record<Prop, Awaited<ParserReturn>>, Routes, SubRouters
   > {
     this.middlewares.push([4, fn, prop]);
     return this as any;

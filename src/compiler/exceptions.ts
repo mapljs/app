@@ -149,7 +149,7 @@ export const buildExceptionHandlers = (prevValue: ExceptHandlerBuilders, router:
     if (Array.isArray(exception))
       newRoutes[exception[1]] = buildHandler(false, routes[i][1], externalValues);
     else
-      newRoutes[exception.id] = buildHandler(true, routes[i][1], externalValues);
+      newRoutes[exception(null)[1]] = buildHandler(true, routes[i][1], externalValues);
   }
 
   // Set all except route

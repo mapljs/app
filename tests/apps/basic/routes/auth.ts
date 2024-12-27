@@ -1,13 +1,21 @@
-import { router, staticException } from '@mapl/app/index.js';
+import { router, dynamicException } from '@mapl/app/index.js';
 
-const authException = staticException();
+const authException = dynamicException<string>();
 
 const app = router()
   .parse('token', (c) => {
-    const authPayload = c.req.headers.get('authorization');
-    return authPayload === null || !authPayload.startsWith('Bearer ') ? authException : authPayload.slice(7);
+    const val = c.req.headers.get('authorization');
+
+    return val === null
+      ? authException('No Authorization header was specified')
+      : val.startsWith('Bearer ')
+        ? val.slice(7)
+        : authException('Invalid Authorization header: ' + val);
   })
-  .catch(authException, () => 'Invalid token')
+  .catch(authException, (payload, c) => {
+    c.status = 400;
+    return payload;
+  })
   .get('/yield', (c) => c.token);
 
 export default app;
