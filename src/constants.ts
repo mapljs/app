@@ -50,7 +50,7 @@ export const COLON_HTML_OPTIONS = `,${HTML_OPTIONS}`;
 export const COLON_JSON_OPTIONS = `,${JSON_OPTIONS}`;
 
 // Text & HTML & JSON context creation
-export const PLAIN_CTX_DEF = HEADER_DEF + CTX_DEF;
+export const PLAIN_CTX_DEF = HEADER_DEF + CTX_DEF as const;
 
 export const TEXT_CTX_DEF = TEXT_HEADER_DEF + CTX_DEF;
 export const HTML_CTX_DEF = HTML_HEADER_DEF + CTX_DEF;

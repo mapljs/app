@@ -63,7 +63,7 @@ export const compileHandler = (
 
   // Return a raw Response
   if (handlerType === 'response')
-    return `return f${externalValues.push(fn)}${selectFnArgs(fnNoNeedContext)};`;
+    return `${fnNoNeedContext || contextNeedParam === null ? '' : selectCtxParamsDef(!contextNeedParam)}return f${externalValues.push(fn)}${selectFnArgs(fnNoNeedContext)};`;
 
   const isFnAsync = isFunctionAsync(fn);
 

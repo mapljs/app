@@ -76,6 +76,6 @@ export const selectSetHeader = (type: AnyTypedHandler['type']): string => type =
     : compilerConstants.SET_TEXT_HEADER;
 
 // eslint-disable-next-line
-export const selectCtxParamsDef = (fnNoNeedContext: boolean): string => fnNoNeedContext
+export const selectCtxParamsDef = (noParam: boolean): string => noParam
   ? compilerConstants.CTX_DEF
   : compilerConstants.CTX_PARAMS_DEF;
