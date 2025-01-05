@@ -30,7 +30,7 @@ export const compileHandler = (
 ): string => {
   if (typeof handler === 'function') {
     const isFnAsync = isFunctionAsync(handler);
-    const fnNoNeedContext = handler.length === 0;
+    const fnNoNeedContext = handler.length < (contextNeedParam === true ? 2 : 1);
 
     // Context has been created
     return contextNeedParam === null
@@ -70,7 +70,7 @@ export const compileHandler = (
     return buildStaticHandler(handler.body, handler.options, externalValues, contextNeedParam);
 
   const fn = handler.fn;
-  const fnNoNeedContext = fn.length === 0;
+  const fnNoNeedContext = fn.length < (contextNeedParam === true ? 2 : 1);
 
   // Return a raw Response
   if (handlerType === 'response') {
