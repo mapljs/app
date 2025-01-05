@@ -8,13 +8,14 @@ export const HOLDER_PREFIX = '_';
 export const HOLDER_0 = `${HOLDER_PREFIX}0`;
 
 export const CTX = `${MAPL}c`;
+export const INIT_CTX = `${MAPL}i`;
 export const HEADERS = `${MAPL}h`;
 export const C_URL = `${MAPL}u`;
 export const PATH_START = `${MAPL}s`;
 export const PATH_END = `${MAPL}e`;
 
 // Request context
-export const CTX_DEF = `let ${CTX}={status:200,req:${REQ},headers:${HEADERS}};`;
+export const CTX_DEF = `let ${CTX}=${INIT_CTX}(${REQ},${HEADERS});`;
 
 // Async
 export const ASYNC_START = 'return (async()=>{';
@@ -79,7 +80,7 @@ export const DEFAULT_EXCEPT_END = `default:${RET_400}}`;
 export const EXCEPT_START = `if(Array.isArray(${HOLDER_0})&&${HOLDER_0}[0]===${EXCEPT_SYMBOL})switch(${HOLDER_0}[1]){`;
 
 // Default vars
-export const CONST_VARS = `var ${EXCEPT_SYMBOL}=Symbol.for('${EXCEPT_SYMBOL_NAME}'),_=['text/plain','text/html','application/json'].map((n)=>['content-type',n]),[${TEXT_HEADER_PAIR},${HTML_HEADER_PAIR},${JSON_HEADER_PAIR}]=_,[${TEXT_OPTIONS},${HTML_OPTIONS},${JSON_OPTIONS}]=_.map((s)=>({headers:s})),[${RESPONSE_400},${RESPONSE_404}]=[400,404].map((s)=>new Response(null,{status:s}));`;
+export const CONST_VARS = `var ${INIT_CTX}=(a,b)=>({status:200,req:a,headers:b}),${EXCEPT_SYMBOL}=Symbol.for('${EXCEPT_SYMBOL_NAME}'),_=['text/plain','text/html','application/json'].map((n)=>['content-type',n]),[${TEXT_HEADER_PAIR},${HTML_HEADER_PAIR},${JSON_HEADER_PAIR}]=_,[${TEXT_OPTIONS},${HTML_OPTIONS},${JSON_OPTIONS}]=_.map((s)=>({headers:s})),[${RESPONSE_400},${RESPONSE_404}]=[400,404].map((s)=>new Response(null,{status:s}));`;
 
 // Parsings and constants
 export const PARSE_PATH = `let ${C_URL}=${REQ}.url,${PATH_START}=${C_URL}.indexOf('/',12)+1,${PATH_END}=${C_URL}.indexOf('?',${PATH_START}),${PATH}=${C_URL}.substring(${PATH_START},${PATH_END}>>>0);`;
