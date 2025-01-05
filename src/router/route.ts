@@ -1,12 +1,22 @@
 import type { AnyRouter, Router } from './index.js';
 import type { Handler, HandlerData } from './types/handler.js';
 
+export type InferParams<Path extends string> = Path extends `${string}*${infer Rest}`
+  ? Rest extends '*' ? [string] : [string, ...InferParams<Rest>]
+  : [];
+
 export type RouteRegister<
   Method extends string | null | 0,
   State,
   Routes extends HandlerData[],
   SubRouters extends [string, AnyRouter][]
-> = <Path extends string, T extends Handler<State>>(path: Path, handler: T) => Router<
+> = <
+  Path extends string,
+  T extends (InferParams<Path>['length'] extends 0
+    ? Handler<State>
+    : Handler<State, [InferParams<Path>]>
+  )
+>(path: Path, handler: T) => Router<
   State,
   [...Routes, [Method, Path, T]],
   SubRouters

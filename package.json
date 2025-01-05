@@ -1,6 +1,6 @@
 {
   "name": "@mapl/app",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "A low overhead web framework",
   "keywords": [
     "fast",

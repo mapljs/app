@@ -9,7 +9,7 @@ export type ExceptHandlerBuilder = (hasContext: boolean, isAsync: boolean) => st
 export type ExceptHandlerBuilders = Record<number, ExceptHandlerBuilder>;
 
 // eslint-disable-next-line
-const selectFnArgs = (isDynamic: boolean, fnNeedContext: boolean): string => isDynamic
+const selectFnArgIfNeeded = (isDynamic: boolean, fnNeedContext: boolean): string => isDynamic
   ? fnNeedContext ? compilerConstants.PAYLOAD_CTX_ARG : compilerConstants.ONLY_PAYLOAD_ARG
   : fnNeedContext ? compilerConstants.ONLY_CTX_ARG : compilerConstants.NO_ARG;
 
@@ -21,7 +21,7 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
     const isFnAsync = isFunctionAsync(handler);
     const fnNeedContext = handler.length > (isDynamic ? 1 : 0);
 
-    const retStart = `return new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${selectFnArgs(isDynamic, fnNeedContext)}`;
+    const retStart = `return new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${selectFnArgIfNeeded(isDynamic, fnNeedContext)}`;
     const retEnd = `${fnNeedContext ? compilerConstants.COLON_CTX : ''});`;
 
     // Cache previous state
@@ -74,7 +74,7 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
 
   // Return a raw Response
   if (handlerType === 'response') {
-    const str = `return f${externalValues.push(fn)}${selectFnArgs(isDynamic, fnNeedContext)};`;
+    const str = `return f${externalValues.push(fn)}${selectFnArgIfNeeded(isDynamic, fnNeedContext)};`;
 
     // eslint-disable-next-line
     return (hasContext) => !hasContext && fnNeedContext ? compilerConstants.CTX_DEF + str : str;
@@ -83,7 +83,7 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
   const isFnAsync = isFunctionAsync(fn);
 
   // Cache known parts
-  const retStart = `return new Response(${handlerType === 'json' ? 'JSON.stringify(' : ''}${isFnAsync ? 'await ' : ''}f${externalValues.push(fn)}${selectFnArgs(isDynamic, fnNeedContext)}${handlerType === 'json' ? ')' : ''}`;
+  const retStart = `return new Response(${handlerType === 'json' ? 'JSON.stringify(' : ''}${isFnAsync ? 'await ' : ''}f${externalValues.push(fn)}${selectFnArgIfNeeded(isDynamic, fnNeedContext)}${handlerType === 'json' ? ')' : ''}`;
   const retEnd = fnNeedContext ? `${compilerConstants.COLON_CTX});` : ');';
 
   // Cache previous values

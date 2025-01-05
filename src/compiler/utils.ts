@@ -74,8 +74,3 @@ export const selectSetHeader = (type: AnyTypedHandler['type']): string => type =
   : type === 'json'
     ? compilerConstants.SET_JSON_HEADER
     : compilerConstants.SET_TEXT_HEADER;
-
-// eslint-disable-next-line
-export const selectCtxParamsDef = (noParam: boolean): string => noParam
-  ? compilerConstants.CTX_DEF
-  : compilerConstants.CTX_PARAMS_DEF;

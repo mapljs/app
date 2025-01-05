@@ -7,7 +7,7 @@ const app = router()
 for (let i = 0; i < 1000; i++)
   app.get(`/${i}/*/dyn/**`, {
     type: 'json',
-    fn: (c) => c.id
+    fn: (params, c) => c.id + params[0] + params[1]
   });
 
 export default app;

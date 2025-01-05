@@ -8,7 +8,7 @@ const app = router()
   .build('/', () => 'Hi')
 
   // Dynamic path parameter
-  .get('/user/*', (c) => c.params[0])
+  .get('/user/*', (params) => params[0])
 
   // Send JSON
   .post('/json', {

@@ -8,7 +8,6 @@ import fastBuildRouter, { injectMatcher } from '@mapl/router/fast-compile.js';
 
 import { compileMiddlewares, type MiddlewareState } from './middleware.js';
 import { compileHandler } from './handler.js';
-import { selectCtxParamsDef } from './utils.js';
 
 // eslint-disable-next-line
 const compileHandlerWithMiddleware = (
@@ -17,7 +16,7 @@ const compileHandlerWithMiddleware = (
   hasParam: boolean
 ): string => (middlewareResult[1] === null
   ? middlewareResult[0] + compileHandler(handler, state.externalValues, middlewareResult[2], hasParam)
-  : middlewareResult[1] + selectCtxParamsDef(!hasParam) + middlewareResult[0] + compileHandler(handler, state.externalValues, middlewareResult[2], null)
+  : middlewareResult[1] + compilerConstants.CTX_DEF + middlewareResult[0] + compileHandler(handler, state.externalValues, middlewareResult[2], null)
 ) + (middlewareResult[2] ? compilerConstants.ASYNC_END : '');
 
 // DFS and compile every subrouter

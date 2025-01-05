@@ -70,7 +70,7 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
 
     // The output function call
     externalValues.push(middlewareData[1]);
-    switch (middlewareData[0]) {
+    switch (middlewareData[0] as 1 | 2) {
       // Parsers and validators need exceptions
       case 1:
       case 2: {

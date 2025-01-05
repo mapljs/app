@@ -15,7 +15,6 @@ export const PATH_END = `${MAPL}e`;
 
 // Request context
 export const CTX_DEF = `let ${CTX}={status:200,req:${REQ},headers:${HEADERS}};`;
-export const CTX_PARAMS_DEF = `let ${CTX}={status:200,req:${REQ},headers:${HEADERS},params:${PARAMS}};`;
 
 // Async
 export const ASYNC_START = 'return (async()=>{';
@@ -50,7 +49,7 @@ export const COLON_HTML_OPTIONS = `,${HTML_OPTIONS}`;
 export const COLON_JSON_OPTIONS = `,${JSON_OPTIONS}`;
 
 // Text & HTML & JSON context creation
-export const PLAIN_CTX_DEF = HEADER_DEF + CTX_DEF as const;
+export const PLAIN_CTX_DEF = HEADER_DEF + CTX_DEF;
 
 export const TEXT_CTX_DEF = TEXT_HEADER_DEF + CTX_DEF;
 export const HTML_CTX_DEF = HTML_HEADER_DEF + CTX_DEF;
@@ -59,8 +58,10 @@ export const JSON_CTX_DEF = JSON_HEADER_DEF + CTX_DEF;
 // Args
 export const NO_ARG = '()';
 export const ONLY_CTX_ARG = `(${CTX})`;
+export const ONLY_PARAM_ARG = `(${PARAMS})`;
 export const ONLY_PAYLOAD_ARG = `(${HOLDER_0}[2])`;
 export const PAYLOAD_CTX_ARG = `(${HOLDER_0}[2]${COLON_CTX})`;
+export const PARAM_CTX_ARG = `(${PARAMS}${COLON_CTX})`;
 
 // Exception symbol is always the first external value
 export const EXCEPT_SYMBOL = `${MAPL}s`;
