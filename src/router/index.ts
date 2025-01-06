@@ -15,6 +15,8 @@ export type MergeRouter<T1 extends AnyRouter, T2 extends AnyRouter> = Router<
   [...T1['subrouters'], ...T2['subrouters']]
 >;
 
+export type RouterPlugin<R> = (router: BaseRouter) => R;
+
 interface Router<
   State,
   Routes extends HandlerData[],
@@ -43,7 +45,7 @@ class Router<State, Routes, SubRouters> {
   /**
    * Register a subrouter
    */
-  public route<Path extends string, SubRouter extends AnyRouter>(path: string, subrouter: SubRouter): Router<
+  public route<const Path extends string, const SubRouter extends AnyRouter>(path: string, subrouter: SubRouter): Router<
     State, Routes, [...SubRouters, [Path, SubRouter]]
   > {
     this.subrouters.push([path, subrouter]);
@@ -53,7 +55,7 @@ class Router<State, Routes, SubRouters> {
   /**
    * Register a function to parse and set the result to the context
    */
-  public parse<Prop extends string, ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
+  public parse<const Prop extends string, const ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
     State & Record<Prop, ExcludeExceptionType<Awaited<ParserReturn>>>, Routes, SubRouters
   > {
     this.middlewares.push([1, fn, prop]);
@@ -79,7 +81,7 @@ class Router<State, Routes, SubRouters> {
   /**
    * Register a function that runs on every request and set result to context
    */
-  public set<Prop extends string, ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
+  public set<const Prop extends string, const ParserReturn>(prop: Prop, fn: (ctx: Context & State) => ParserReturn): Router<
     State & Record<Prop, Awaited<ParserReturn>>, Routes, SubRouters
   > {
     this.middlewares.push([4, fn, prop]);
@@ -102,16 +104,24 @@ class Router<State, Routes, SubRouters> {
   }
 
   /**
+   * Use a plugin
+   */
+  public plug<const T>(plugin: RouterPlugin<T>): T extends AnyRouter ? MergeRouter<this, T> : this {
+    plugin(this as unknown as BaseRouter);
+    return this as any;
+  }
+
+  /**
    * Handle a static exception
    */
-  public catch<T extends Handler<{}>>(exception: StaticException, handler: T): Router<
+  public catch<const T extends Handler<{}>>(exception: StaticException, handler: T): Router<
     State, Routes, SubRouters
   >;
 
   /**
    * Handle a dynamic exception
    */
-  public catch<Payload, T extends Handler<{}, [Payload]>>(exception: DynamicException<Payload>, handler: T): Router<
+  public catch<const Payload, const T extends Handler<{}, [Payload]>>(exception: DynamicException<Payload>, handler: T): Router<
     State, Routes, SubRouters
   >;
 
@@ -127,7 +137,7 @@ class Router<State, Routes, SubRouters> {
   /**
    * Handle all exceptions
    */
-  public catchAll<T extends Handler<{}>>(handler: T): Router<
+  public catchAll<const T extends Handler<{}>>(handler: T): Router<
     State, Routes, SubRouters
   > {
     this.allExceptRoute = handler;
@@ -236,7 +246,7 @@ class Router<State, Routes, SubRouters> {
   /**
    * Register a macro
    */
-  public macro<RouterType extends AnyRouter>(macro: Macro<any, RouterType>): RouterType & {} {
+  public macro<const RouterType extends AnyRouter>(macro: Macro<any, RouterType>): RouterType & {} {
     this.middlewares.push([0, macro]);
     return this as any;
   }

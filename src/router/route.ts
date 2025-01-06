@@ -11,8 +11,8 @@ export type RouteRegister<
   Routes extends HandlerData[],
   SubRouters extends [string, AnyRouter][]
 > = <
-  Path extends string,
-  T extends (InferParams<Path>['length'] extends 0
+  const Path extends string,
+  const T extends (InferParams<Path>['length'] extends 0
     ? Handler<State>
     : Handler<State, [InferParams<Path>]>
   )
@@ -36,7 +36,7 @@ export type RouteRegisters<
     build: RouteRegister<0, State, Routes, SubRouters>,
 
     // Custom stuff
-    insert: <Method extends string, Path extends string, T extends Handler<State>>(method: Method, path: Path, handler: T) => Router<
+    insert: <const Method extends string, const Path extends string, const T extends Handler<State>>(method: Method, path: Path, handler: T) => Router<
       State,
       [...Routes, [Method, Path, T]],
       SubRouters
