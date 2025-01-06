@@ -6,9 +6,9 @@ const app = router()
     type: 'html',
     fn: (params) => `<p>Hello ${params[0]}</p>`
   })
-  .any('/**', (_, c) => {
+  .any('/**', (params, c) => {
     c.status = 404;
-    return null;
+    return params[0] + ' not found!';
   });
 
 export default app;

@@ -24,7 +24,8 @@ const entrypoints = await Promise.all([prepareAppJIT(arg), prepareAppAOT(arg, ap
 await Bun.build({
   entrypoints,
   outdir: OUTDIR,
-  minify: true
+  minify: { syntax: true },
+  packages: 'external'
 });
 await Promise.all(entrypoints.map((e) => rm(e)));
 

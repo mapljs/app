@@ -1,5 +1,5 @@
 import type { AnyRouter } from '../router/index.js';
-import type { AnyHandler } from '../router/types/handler.js';
+import type { AnyHandler, AnyTypedHandler, StaticHandler } from '../router/types/handler.js';
 import type { AppCompilerState } from '../types/compiler.js';
 
 import { buildStaticHandler, isFunctionAsync, selectCtxDef, selectResOption, selectSetHeader } from './utils.js';
@@ -16,60 +16,31 @@ const selectFnArgIfNeeded = (isDynamic: boolean, fnNeedContext: boolean): string
 // Build closures that generates exception content
 // eslint-disable-next-line
 export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalValues: AppCompilerState['externalValues']): ExceptHandlerBuilder => {
+  let handlerType: AnyTypedHandler['type'] | 'static';
+  let fn: AnyTypedHandler['fn'];
+
   // Plain text
   if (typeof handler === 'function') {
-    const isFnAsync = isFunctionAsync(handler);
-    const fnNeedContext = handler.length > (isDynamic ? 1 : 0);
+    handlerType = 'buffer';
+    fn = handler;
+  } else {
+    handlerType = handler.type;
 
-    const retStart = `return new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${selectFnArgIfNeeded(isDynamic, fnNeedContext)}`;
-    const retEnd = `${fnNeedContext ? compilerConstants.COLON_CTX : ''});`;
+    // Static response
+    if (handlerType === 'static') {
+      // Lazily compile two cases
+      let hasContextCase: string | undefined;
+      let noContextCase: string | undefined;
 
-    // Cache previous state
-    let prevHasCtx: boolean;
-    let prevFnAsync: boolean;
-    let content = '';
+      // eslint-disable-next-line
+      return (hasContext) => hasContext
+        ? hasContextCase ??= buildStaticHandler((handler as StaticHandler).body, (handler as StaticHandler).options, externalValues, null)
+        : noContextCase ??= buildStaticHandler((handler as StaticHandler).body, (handler as StaticHandler).options, externalValues, false);
+    }
 
-    return (hasContext, isAsync) => {
-      // If state changes
-      if (isAsync !== prevFnAsync || hasContext !== prevHasCtx) {
-        prevHasCtx = hasContext;
-        prevFnAsync = isAsync;
-
-        /* eslint-disable */
-        // Wrap in async
-        content = (!isAsync && isFnAsync ? compilerConstants.ASYNC_START : '') +
-          // Add context
-          (!hasContext && fnNeedContext ? compilerConstants.CTX_DEF : '')
-          // Function call and stuff
-          + retStart
-          // Set response option
-          + (!fnNeedContext && hasContext ? compilerConstants.COLON_CTX : '')
-          // End the function call and Response
-          + retEnd
-          // End the function call and Response
-          + (!isAsync && isFnAsync ? compilerConstants.ASYNC_END : '');
-        /* eslint-enable */
-      }
-
-      return content;
-    };
+    fn = (handler as AnyTypedHandler).fn;
   }
 
-  const handlerType = handler.type;
-
-  // Static response
-  if (handlerType === 'static') {
-    // Lazily compile two cases
-    let hasContextCase: string | undefined;
-    let noContextCase: string | undefined;
-
-    // eslint-disable-next-line
-    return (hasContext) => hasContext
-      ? hasContextCase ??= buildStaticHandler(handler.body, handler.options, externalValues, null)
-      : noContextCase ??= buildStaticHandler(handler.body, handler.options, externalValues, false);
-  }
-
-  const fn = handler.fn;
   const fnNeedContext = fn.length > (isDynamic ? 1 : 0);
 
   // Return a raw Response

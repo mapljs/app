@@ -48,29 +48,37 @@ export const buildStaticHandler = (body: StaticHandler['body'], options: StaticH
 };
 
 // eslint-disable-next-line
-export const selectHeaderDef = (type: AnyTypedHandler['type']): string => type === 'html'
-  ? compilerConstants.HTML_HEADER_DEF
+export const selectHeaderDef = (type: AnyTypedHandler['type']): string => type === 'buffer'
+  ? compilerConstants.HEADER_DEF
   : type === 'json'
     ? compilerConstants.JSON_HEADER_DEF
-    : compilerConstants.TEXT_HEADER_DEF;
+    : type === 'html'
+      ? compilerConstants.HTML_HEADER_DEF
+      : compilerConstants.TEXT_HEADER_DEF;
 
 // eslint-disable-next-line
-export const selectCtxDef = (type: AnyTypedHandler['type']): string => type === 'html'
-  ? compilerConstants.HTML_CTX_DEF
+export const selectCtxDef = (type: AnyTypedHandler['type']): string => type === 'buffer'
+  ? compilerConstants.CTX_DEF
   : type === 'json'
     ? compilerConstants.JSON_CTX_DEF
-    : compilerConstants.TEXT_CTX_DEF;
+    : type === 'html'
+      ? compilerConstants.HTML_CTX_DEF
+      : compilerConstants.TEXT_CTX_DEF;
 
 // eslint-disable-next-line
-export const selectResOption = (type: AnyTypedHandler['type']): string => type === 'html'
-  ? compilerConstants.COLON_HTML_OPTIONS
+export const selectResOption = (type: AnyTypedHandler['type']): string => type === 'buffer'
+  ? ''
   : type === 'json'
     ? compilerConstants.COLON_JSON_OPTIONS
-    : compilerConstants.COLON_TEXT_OPTIONS;
+    : type === 'html'
+      ? compilerConstants.COLON_HTML_OPTIONS
+      : compilerConstants.COLON_TEXT_OPTIONS;
 
 // eslint-disable-next-line
-export const selectSetHeader = (type: AnyTypedHandler['type']): string => type === 'html'
-  ? compilerConstants.SET_HTML_HEADER
+export const selectSetHeader = (type: AnyTypedHandler['type']): string => type === 'buffer'
+  ? ''
   : type === 'json'
     ? compilerConstants.SET_JSON_HEADER
-    : compilerConstants.SET_TEXT_HEADER;
+    : type === 'html'
+      ? compilerConstants.SET_HTML_HEADER
+      : compilerConstants.SET_TEXT_HEADER;

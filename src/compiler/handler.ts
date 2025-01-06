@@ -1,4 +1,4 @@
-import type { AnyHandler } from '../router/types/handler.js';
+import type { AnyHandler, AnyTypedHandler, StaticHandler } from '../router/types/handler.js';
 import type { AppCompilerState } from '../types/compiler.js';
 import { buildStaticHandler, isFunctionAsync, selectHeaderDef, selectResOption, selectSetHeader } from './utils.js';
 
@@ -28,48 +28,22 @@ export const compileHandler = (
   previouslyAsync: boolean,
   contextNeedParam: boolean | null
 ): string => {
+  let handlerType: AnyTypedHandler['type'] | 'static';
+  let fn: AnyTypedHandler['fn'];
+
   if (typeof handler === 'function') {
-    const isFnAsync = isFunctionAsync(handler);
-    const fnNoNeedContext = handler.length < (contextNeedParam === true ? 2 : 1);
+    handlerType = 'buffer';
+    fn = handler;
+  } else {
+    handlerType = handler.type;
 
-    // Context has been created
-    return contextNeedParam === null
-      ? `return${isFnAsync && !previouslyAsync
-        ? '(async()=>'
-        : ' '
-      }new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${selectFnArgIfNeeded(fnNoNeedContext)},${compilerConstants.CTX})${isFnAsync && !previouslyAsync
-        ? ')()'
-        : ''
-      };`
+    // Build static response
+    if (handlerType === 'static')
+      return buildStaticHandler((handler as StaticHandler).body, (handler as StaticHandler).options, externalValues, contextNeedParam);
 
-      : fnNoNeedContext
-        ? `return${isFnAsync && !previouslyAsync
-          ? '(async()=>'
-          : ' '
-        }new Response(${isFnAsync
-          ? 'await '
-          : ''
-        }f${externalValues.push(handler)}${selectFnArg(contextNeedParam)})${isFnAsync && !previouslyAsync
-          ? ')()'
-          : ''
-        };`
-
-        : `${isFnAsync && !previouslyAsync
-          ? compilerConstants.ASYNC_START
-          : ''
-        }${compilerConstants.HEADER_DEF}${compilerConstants.CTX_DEF}return new Response(${isFnAsync ? 'await ' : ''}f${externalValues.push(handler)}${selectFnArgWithCtx(contextNeedParam)},${compilerConstants.CTX});${isFnAsync && !previouslyAsync
-          ? compilerConstants.ASYNC_END
-          : ''
-        }`;
+    fn = (handler as AnyTypedHandler).fn;
   }
 
-  const handlerType = handler.type;
-
-  // Build static response
-  if (handlerType === 'static')
-    return buildStaticHandler(handler.body, handler.options, externalValues, contextNeedParam);
-
-  const fn = handler.fn;
   const fnNoNeedContext = fn.length < (contextNeedParam === true ? 2 : 1);
 
   // Return a raw Response
