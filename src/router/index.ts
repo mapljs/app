@@ -254,5 +254,4 @@ class Router<State, Routes, SubRouters> {
 
 export { Router };
 
-// eslint-disable-next-line
 export const router = (): BaseRouter => new Router();

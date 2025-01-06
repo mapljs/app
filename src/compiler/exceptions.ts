@@ -8,13 +8,11 @@ import { buildStaticHandler, isFunctionAsync, selectCtxDef, selectResOption, sel
 export type ExceptHandlerBuilder = (hasContext: boolean, isAsync: boolean) => string;
 export type ExceptHandlerBuilders = Record<number, ExceptHandlerBuilder>;
 
-// eslint-disable-next-line
 const selectFnArgIfNeeded = (isDynamic: boolean, fnNeedContext: boolean): string => isDynamic
   ? fnNeedContext ? compilerConstants.PAYLOAD_CTX_ARG : compilerConstants.ONLY_PAYLOAD_ARG
   : fnNeedContext ? compilerConstants.ONLY_CTX_ARG : compilerConstants.NO_ARG;
 
 // Build closures that generates exception content
-// eslint-disable-next-line
 export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalValues: AppCompilerState['externalValues']): ExceptHandlerBuilder => {
   let handlerType: AnyTypedHandler['type'] | 'static';
   let fn: AnyTypedHandler['fn'];
@@ -29,13 +27,10 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
     // Static response
     if (handlerType === 'static') {
       // Lazily compile two cases
-      let hasContextCase: string | undefined;
-      let noContextCase: string | undefined;
+      const hasContextCase: string = buildStaticHandler((handler as StaticHandler).body, (handler as StaticHandler).options, externalValues, null);
+      const noContextCase: string = buildStaticHandler((handler as StaticHandler).body, (handler as StaticHandler).options, externalValues, false);
 
-      // eslint-disable-next-line
-      return (hasContext) => hasContext
-        ? hasContextCase ??= buildStaticHandler((handler as StaticHandler).body, (handler as StaticHandler).options, externalValues, null)
-        : noContextCase ??= buildStaticHandler((handler as StaticHandler).body, (handler as StaticHandler).options, externalValues, false);
+      return (hasContext) => hasContext ? hasContextCase : noContextCase;
     }
 
     fn = (handler as AnyTypedHandler).fn;
@@ -47,7 +42,6 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
   if (handlerType === 'response') {
     const str = `return f${externalValues.push(fn)}${selectFnArgIfNeeded(isDynamic, fnNeedContext)};`;
 
-    // eslint-disable-next-line
     return (hasContext) => !hasContext && fnNeedContext ? compilerConstants.CTX_DEF + str : str;
   }
 
@@ -90,7 +84,6 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
   };
 };
 
-// eslint-disable-next-line
 export const loadExceptionHandlers = (builders: ExceptHandlerBuilders, hasContext: boolean, isAsync: boolean): string => {
   let str = compilerConstants.EXCEPT_START;
 
@@ -105,7 +98,6 @@ export const loadExceptionHandlers = (builders: ExceptHandlerBuilders, hasContex
 };
 
 // Load new exception handlers
-// eslint-disable-next-line
 export const buildExceptionHandlers = (prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: AppCompilerState['externalValues']): ExceptHandlerBuilders => {
   const routes = router.exceptRoutes;
   const allExceptRoute = router.allExceptRoute;

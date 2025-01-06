@@ -1,6 +1,9 @@
 import { type AnyRouter, aotfn } from '@mapl/app/index.js';
+
 import { rm } from 'fs/promises';
 import { resolve } from 'path/posix';
+
+import { buildSync } from 'esbuild';
 
 const ROOT = import.meta.dir;
 const OUTDIR = `${ROOT}/lib`;
@@ -15,19 +18,29 @@ export const prepareAppJIT = async (appSource: string) =>
 let arg = process.argv[2];
 if (typeof arg !== 'string') throw new Error('Ayo');
 
-arg = resolve(arg);
+arg = resolve(`${ROOT}/../apps/${arg}`);
 const app = (await import(arg)).default;
 
-const entrypoints = await Promise.all([prepareAppJIT(arg), prepareAppAOT(arg, app)]);
+const entryPoints = await Promise.all([prepareAppJIT(arg), prepareAppAOT(arg, app)]);
 
 // Build the files
-await Bun.build({
-  entrypoints,
+await rm(OUTDIR, { recursive: true });
+
+buildSync({
+  entryPoints,
   outdir: OUTDIR,
-  minify: { syntax: true },
-  packages: 'external'
+
+  treeShaking: true,
+  allowOverwrite: true,
+
+  bundle: true,
+  format: 'esm',
+  platform: 'neutral',
+
+  minify: true
 });
-await Promise.all(entrypoints.map((e) => rm(e)));
+
+await Promise.all(entryPoints.map((e) => rm(e)));
 
 export const reportFileSize = async (target: string, label: string) => {
   const str = await Bun.file(target).bytes();

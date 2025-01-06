@@ -1,10 +1,9 @@
 import type { AnyRouter } from '../router/index.js';
 import type { AppCompilerState } from '../types/compiler.js';
-import { buildExceptionHandlers, loadExceptionHandlers } from './exceptions.js';
+import { buildExceptionHandlers } from './exceptions.js';
 import type { MiddlewareState } from '../compiler/middleware.js';
 import { isFunctionAsync } from '../compiler/utils.js';
 
-// eslint-disable-next-line
 const createContext = (currentResult: MiddlewareState): void => {
   if (currentResult[1] === null) {
     // Move the built part to prevContext
@@ -17,7 +16,6 @@ const createContext = (currentResult: MiddlewareState): void => {
 };
 
 // Compile and cache middleware compilation result
-// eslint-disable-next-line
 export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerState, prevValue: MiddlewareState): Promise<MiddlewareState> => {
   const externalValues = state.externalValues;
 
@@ -45,7 +43,6 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
         macroHashes.push(middlewareData[1].hash);
       }
 
-      // eslint-disable-next-line
       await middlewareData[1].loadDeps?.(middlewareData[1].options, currentResult, state);
       continue;
     }
@@ -74,7 +71,7 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
       // Parsers and validators need exceptions
       case 1:
       case 2: {
-        currentResult[3] ??= loadExceptionHandlers(exceptRoutes, currentResult[1] === null, currentResult[2]);
+        currentResult[3] ??= '';
         break;
       }
 

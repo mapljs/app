@@ -6,7 +6,6 @@ import type { MiddlewareState } from '../compiler/middleware.js';
 import { buildStaticHandler } from './utils.js';
 
 // DFS and compile every subrouter
-// eslint-disable-next-line
 export const compileRouter = async (
   hasParam: boolean,
   router: AnyRouter, state: AppCompilerState,
@@ -37,7 +36,6 @@ export const compileRouter = async (
   for (let i = 0, subrouters = router.subrouters, l = subrouters.length, cur; i < l; i++) {
     cur = subrouters[i];
 
-    // eslint-disable-next-line
     await compileRouter(
       // Check whether this path has params
       hasParam || cur[0].includes('*'),

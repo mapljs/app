@@ -12,7 +12,6 @@ export const selectFnArg = (needParam: boolean) => needParam
   ? compilerConstants.ONLY_PARAM_ARG
   : compilerConstants.NO_ARG;
 
-// eslint-disable-next-line
 const selectFnArgIfNeeded = (fnNoNeedContext: boolean): string => fnNoNeedContext
   ? compilerConstants.NO_ARG
   : compilerConstants.ONLY_CTX_ARG;
@@ -20,7 +19,6 @@ const selectFnArgIfNeeded = (fnNoNeedContext: boolean): string => fnNoNeedContex
 /**
  * Compile a handler. This is a fast path for handlers that doesn't need recompilation
  */
-// eslint-disable-next-line
 export const compileHandler = (
   handler: AnyHandler,
   externalValues: AppCompilerState['externalValues'],

@@ -9,7 +9,6 @@ import fastBuildRouter, { injectMatcher } from '@mapl/router/fast-compile.js';
 import { compileMiddlewares, type MiddlewareState } from './middleware.js';
 import { compileHandler } from './handler.js';
 
-// eslint-disable-next-line
 const compileHandlerWithMiddleware = (
   middlewareResult: MiddlewareState,
   handler: AnyHandler, state: AppCompilerState,
@@ -20,7 +19,6 @@ const compileHandlerWithMiddleware = (
 ) + (middlewareResult[2] ? compilerConstants.ASYNC_END : '');
 
 // DFS and compile every subrouter
-// eslint-disable-next-line
 export const compileRouter = async (
   prefixPath: string, hasParam: boolean,
   router: AnyRouter, state: AppCompilerState,
@@ -70,7 +68,6 @@ export const compileRouter = async (
   for (let i = 0, subrouters = router.subrouters, l = subrouters.length; i < l; i++) {
     const subrouterData = subrouters[i];
 
-    // eslint-disable-next-line
     await compileRouter(
       subrouterData[0] === '/' ? prefixPath : prefixPath + subrouterData[0],
       // Check whether this path has params
@@ -83,7 +80,6 @@ export const compileRouter = async (
   }
 };
 
-// eslint-disable-next-line
 export const compile = async (router: AnyRouter): Promise<AppCompilerState> => {
   const state: AppCompilerState = {
     routeTrees: [null, null],
@@ -100,7 +96,6 @@ export const compile = async (router: AnyRouter): Promise<AppCompilerState> => {
   return state;
 };
 
-// eslint-disable-next-line
 export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOptions): string => {
   const prebuilds = state.prebuilds;
   if (prebuilds.length === 0) return '';

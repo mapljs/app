@@ -18,7 +18,6 @@ export type MiddlewareState = [
   macroHashes: unknown[]
 ];
 
-// eslint-disable-next-line
 export const createAsyncScope = (currentResult: MiddlewareState): void => {
   if (!currentResult[2]) {
     // Create an async scope
@@ -30,7 +29,6 @@ export const createAsyncScope = (currentResult: MiddlewareState): void => {
   }
 };
 
-// eslint-disable-next-line
 export const createContext = (currentResult: MiddlewareState, headers: string): void => {
   if (currentResult[1] === null) {
     // Move the built part to prevContext
@@ -42,7 +40,6 @@ export const createContext = (currentResult: MiddlewareState, headers: string): 
   }
 };
 
-// eslint-disable-next-line
 export const setMinimumHolders = (currentResult: MiddlewareState, cnt: number): void => {
   if (currentResult[5] < cnt) {
     let cur = currentResult[5];
@@ -59,13 +56,11 @@ export const setMinimumHolders = (currentResult: MiddlewareState, cnt: number): 
   }
 };
 
-// eslint-disable-next-line
 export const createEmptyContext = (currentResult: MiddlewareState): void => {
   createContext(currentResult, compilerConstants.HEADER_DEF);
 };
 
 // Compile and cache middleware compilation result
-// eslint-disable-next-line
 export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerState, prevValue: MiddlewareState): Promise<MiddlewareState> => {
   const externalValues = state.externalValues;
 
@@ -93,7 +88,6 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
         macroHashes.push(middlewareData[1].hash);
       }
 
-      // eslint-disable-next-line
       await middlewareData[1].loadSource(middlewareData[1].options, currentResult, state);
       continue;
     }

@@ -1,45 +1,27 @@
 import type { AnyRouter } from '../router/index.js';
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppCompilerState } from '../types/compiler.js';
-import type { ExceptHandlerBuilders, ExceptHandlerBuilder } from '../compiler/exceptions.js';
+import type { ExceptHandlerBuilders } from '../compiler/exceptions.js';
 import { buildStaticHandler } from './utils.js';
+
+// Build closures that generates exception content
+
+export const buildHandler = (handler: AnyHandler, externalValues: AppCompilerState['externalValues']): void => {
+  // Plain text
+  if (typeof handler === 'function')
+    externalValues.push(handler);
+  // Static response
+  else if (handler.type === 'static') {
+    buildStaticHandler(handler.body, handler.options, externalValues, null);
+    buildStaticHandler(handler.body, handler.options, externalValues, false);
+  } else externalValues.push(handler.fn);
+};
 
 // eslint-disable-next-line
 const emptyCb = () => '';
 
-// Build closures that generates exception content
-// eslint-disable-next-line
-export const buildHandler = (handler: AnyHandler, externalValues: AppCompilerState['externalValues']): ExceptHandlerBuilder => {
-  // Plain text
-  if (typeof handler === 'function') {
-    externalValues.push(handler);
-    return emptyCb;
-  }
-
-  // Static response
-  if (handler.type === 'static') {
-    // Lazily compile two cases
-    let hasContextCase: string | null = null;
-    let noContextCase: string | null = null;
-
-    // eslint-disable-next-line
-    return (hasContext) => hasContext
-      ? hasContextCase ??= buildStaticHandler(handler.body, handler.options, externalValues, null)
-      : noContextCase ??= buildStaticHandler(handler.body, handler.options, externalValues, false);
-  }
-
-  externalValues.push(handler.fn);
-  return emptyCb;
-};
-
-// eslint-disable-next-line
-export const loadExceptionHandlers = (builders: ExceptHandlerBuilders, hasContext: boolean, isAsync: boolean): string => {
-  for (const id in builders) builders[id](hasContext, isAsync);
-  return '';
-};
-
 // Load new exception handlers
-// eslint-disable-next-line
+
 export const buildExceptionHandlers = (prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: AppCompilerState['externalValues']): ExceptHandlerBuilders => {
   const routes = router.exceptRoutes;
   const allExceptRoute = router.allExceptRoute;
@@ -50,12 +32,15 @@ export const buildExceptionHandlers = (prevValue: ExceptHandlerBuilders, router:
   const newRoutes = { ...prevValue };
   for (let i = 0, l = routes.length; i < l; i++) {
     const exception = routes[i][0];
-    newRoutes[Array.isArray(exception) ? exception[1] : exception(null)[1]] = buildHandler(routes[i][1], externalValues);
+    buildHandler(routes[i][1], externalValues);
+    newRoutes[Array.isArray(exception) ? exception[1] : exception(null)[1]] = emptyCb;
   }
 
   // Set all except route
-  if (typeof allExceptRoute !== 'undefined')
-    newRoutes[0] = buildHandler(allExceptRoute, externalValues);
+  if (typeof allExceptRoute !== 'undefined') {
+    buildHandler(allExceptRoute, externalValues);
+    newRoutes[0] = emptyCb;
+  }
 
   return newRoutes;
 };

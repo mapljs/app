@@ -18,7 +18,7 @@ const constantEntries = Object.entries(constants);
 
 // Transpile files concurrently
 const transpiler = new Bun.Transpiler({
-  loader: 'tsx',
+  loader: 'ts',
   target: 'node',
 
   // Lighter and more optimized output
@@ -39,9 +39,7 @@ for (const path of new Bun.Glob('**/*.ts').scanSync(SOURCEDIR))
           const pathExtStart = path.lastIndexOf('.');
           Bun.write(
             `${OUTDIR}/${path.substring(0, pathExtStart === -1 ? path.length : pathExtStart) + '.js'}`,
-            res
-              .replace(/export const /g, "export let ")
-              .replace(/const /g, "let ")
+            res.replace(/const /g, "let ")
           );
         }
       })

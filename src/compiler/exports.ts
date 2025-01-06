@@ -10,7 +10,6 @@ import { getExternalKeys, getDeclarations } from '@mapl/compiler';
 /**
  * Build a function to handle requests
  */
-// eslint-disable-next-line
 export const jitc = async (router: AnyRouter, options: CompilerOptions = {}): Promise<BuildResult> => {
   const state = await compile(router);
   // Load static options first to the tree if necessary
@@ -26,7 +25,6 @@ export const jitc = async (router: AnyRouter, options: CompilerOptions = {}): Pr
 /**
  * Build a function to handle requests
  */
-// eslint-disable-next-line
 export const jitcQuick = async (router: AnyRouter, options: CompilerOptions = {}): Promise<BuildResult> => {
   const state = await compile(router);
 
@@ -46,7 +44,6 @@ export const jitcQuick = async (router: AnyRouter, options: CompilerOptions = {}
 /**
  * Create a function string to be used in files
  */
-// eslint-disable-next-line
 export const aotfn = async (router: AnyRouter, options: CompilerOptions = {}): Promise<string> => {
   const state = await compile(router);
 

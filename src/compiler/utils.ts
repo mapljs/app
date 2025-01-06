@@ -4,17 +4,14 @@ import type { AppCompilerState } from '../types/compiler.js';
 // eslint-disable-next-line
 export const AsyncFunction = (async () => { }).constructor;
 
-// eslint-disable-next-line
 export const isFunctionAsync = (fn: any): fn is (...args: any[]) => Promise<any> => fn instanceof AsyncFunction;
 
-// eslint-disable-next-line
 export const toHeaderTuples = (headers: HeadersInit): [string, string][] => Array.isArray(headers)
   ? headers
   : headers instanceof Headers
     ? headers.entries().toArray()
     : Object.entries(headers);
 
-// eslint-disable-next-line
 export const buildStaticHandler = (body: StaticHandler['body'], options: StaticHandler['options'], externalValues: AppCompilerState['externalValues'], contextNeedParam: boolean | null): string => {
   // Has context then serialize options to
   // statements that changes the context
@@ -47,7 +44,6 @@ export const buildStaticHandler = (body: StaticHandler['body'], options: StaticH
   return `return f${externalValues.push(new Response(body, options))}.clone();`;
 };
 
-// eslint-disable-next-line
 export const selectHeaderDef = (type: AnyTypedHandler['type']): string => type === 'buffer'
   ? compilerConstants.HEADER_DEF
   : type === 'json'
@@ -56,7 +52,6 @@ export const selectHeaderDef = (type: AnyTypedHandler['type']): string => type =
       ? compilerConstants.HTML_HEADER_DEF
       : compilerConstants.TEXT_HEADER_DEF;
 
-// eslint-disable-next-line
 export const selectCtxDef = (type: AnyTypedHandler['type']): string => type === 'buffer'
   ? compilerConstants.CTX_DEF
   : type === 'json'
@@ -65,7 +60,6 @@ export const selectCtxDef = (type: AnyTypedHandler['type']): string => type === 
       ? compilerConstants.HTML_CTX_DEF
       : compilerConstants.TEXT_CTX_DEF;
 
-// eslint-disable-next-line
 export const selectResOption = (type: AnyTypedHandler['type']): string => type === 'buffer'
   ? ''
   : type === 'json'
@@ -74,7 +68,6 @@ export const selectResOption = (type: AnyTypedHandler['type']): string => type =
       ? compilerConstants.COLON_HTML_OPTIONS
       : compilerConstants.COLON_TEXT_OPTIONS;
 
-// eslint-disable-next-line
 export const selectSetHeader = (type: AnyTypedHandler['type']): string => type === 'buffer'
   ? ''
   : type === 'json'

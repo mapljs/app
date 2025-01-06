@@ -11,13 +11,13 @@ let errorId = 0;
 /**
  * Create a static error type
  */
-// eslint-disable-next-line
+
 export const staticException = (): StaticException => [symbol, errorId++];
 
 /**
  * Create a dynamic error type
  */
-export function dynamicException<T>(): DynamicException<T> {
+export const dynamicException = <T>(): DynamicException<T> => {
   const id = errorId++;
   return (payload: T) => [symbol, id, payload];
-}
+};
