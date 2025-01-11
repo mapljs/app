@@ -4,7 +4,7 @@ import type { AppCompilerState } from './types/compiler.js';
 
 export type MacroFunc<T> = (options: T | undefined, ctx: MiddlewareState, state: AppCompilerState) => void | Promise<void>;
 
-export interface Macro<Options, R extends AnyRouter = Router> {
+export interface Macro<Options = never, R extends AnyRouter = Router> {
   /**
    * JIT loader source. Must be an absolute path
    */
