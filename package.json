@@ -1,6 +1,6 @@
 {
   "name": "@mapl/app",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "A low overhead web framework",
   "keywords": [
     "fast",
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@mapl/compiler": "^0.2.2",
-    "@mapl/router": "^0.3.1"
+    "@mapl/router": "^0.3.2"
   },
   "sideEffects": false
 }

@@ -25,7 +25,7 @@ export const buildExceptionHandlers = (prevState: MiddlewareState, router: AnyRo
   if (routes.length === 0 && typeof allExceptRoute === 'undefined')
     return [...prevState];
 
-  for (let i = 0, l = routes.length; i < l; i++) buildHandler(routes[i][1], externalValues);
+  for (let i = 0; i < routes.length; i++) buildHandler(routes[i][1], externalValues);
 
   // Set all except route
   if (typeof allExceptRoute !== 'undefined')

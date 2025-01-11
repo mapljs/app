@@ -30,8 +30,8 @@ export const compileRouter = async (
   // Load all routes into the tree
   for (let i = 0,
     routeTrees = state.routeTrees,
-    routes = router.routes,
-    l = routes.length; i < l; i++
+    routes = router.routes;
+    i < routes.length; i++
   ) {
     const route = routes[i];
 
@@ -65,7 +65,7 @@ export const compileRouter = async (
   }
 
   // Visit and compile all sub-routers
-  for (let i = 0, subrouters = router.subrouters, l = subrouters.length; i < l; i++) {
+  for (let i = 0, subrouters = router.subrouters; i < subrouters.length; i++) {
     const subrouterData = subrouters[i];
 
     await compileRouter(
@@ -111,7 +111,6 @@ export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOpt
 
   for (
     let i = 0,
-      l = prebuilds.length,
       routeTrees = state.routeTrees[0] ??= {},
       // eslint-disable-next-line
       GET = routeTrees.GET ??= createRouter(),
@@ -121,7 +120,7 @@ export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOpt
       OPTIONS = routeTrees.OPTIONS ??= createRouter(),
       // State
       emptyResponseRet: string, path: string;
-    i < l;
+    i < prebuilds.length;
     i++
   ) {
     path = prebuilds[i][0];

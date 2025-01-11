@@ -17,8 +17,8 @@ export const compileRouter = async (
 
   // Load all routes into the tree
   for (let i = 0,
-    routes = router.routes,
-    l = routes.length; i < l; i++
+    routes = router.routes;
+    i < routes.length; i++
   ) {
     const route = routes[i];
 
@@ -34,7 +34,7 @@ export const compileRouter = async (
   }
 
   // Visit and compile all sub-routers
-  for (let i = 0, subrouters = router.subrouters, l = subrouters.length, cur; i < l; i++) {
+  for (let i = 0, subrouters = router.subrouters, cur; i < subrouters.length; i++) {
     cur = subrouters[i];
 
     await compileRouter(

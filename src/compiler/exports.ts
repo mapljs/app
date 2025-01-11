@@ -52,6 +52,5 @@ export const aotfn = async (router: AnyRouter, options: CompilerOptions = {}): P
 
   // Output should be minimal
   const content = fastLoadStateTree(state);
-
   return `(async(${getExternalKeys(state).join(',')})=>{${compilerConstants.CONST_VARS}${getDeclarations(state)}return{fetch:(${compilerConstants.REQ})=>{${content}}${staticOptions}}})`;
 };

@@ -65,7 +65,7 @@ export const compileMiddlewares = async (router: AnyRouter, appState: AppCompile
   const externalValues = appState.externalValues;
   const newState = buildExceptionHandlers(oldState, router, externalValues);
 
-  for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
+  for (let i = 0, list = router.middlewares; i < list.length; i++) {
     const middlewareData = list[i];
 
     if (middlewareData[0] === 0) {

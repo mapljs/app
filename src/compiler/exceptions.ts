@@ -42,7 +42,6 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
   // Return a raw Response
   if (handlerType === 'plain') {
     const str = `return f${externalValues.push(fn)}${selectFnArgIfNeeded(isDynamic, fnNeedContext)};`;
-
     return (hasContext) => !hasContext && fnNeedContext ? compilerConstants.CTX_DEF + str : str;
   }
 
@@ -108,7 +107,7 @@ export const buildExceptionHandlers = (prevState: MiddlewareState, router: AnyRo
     return [...prevState];
 
   const newRoutes = { ...prevState[4] };
-  for (let i = 0, l = routes.length; i < l; i++) {
+  for (let i = 0; i < routes.length; i++) {
     const exception = routes[i][0];
 
     if (Array.isArray(exception))

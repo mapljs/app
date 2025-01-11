@@ -1,4 +1,5 @@
 import { toHeaderTuples } from '../compiler/utils.js';
+
 import type { DynamicException, StaticException, ExcludeExceptionType } from '../exception.js';
 import type { Macro } from '../macro.js';
 import type { RouteRegisters } from './route.js';
@@ -16,7 +17,18 @@ export type MergeRouter<T1 extends AnyRouter, T2 extends AnyRouter> = Router<
   [...T1['subrouters'], ...T2['subrouters']]
 >;
 
+// Merge a list of routers
+export type MergeRouters<List extends AnyRouter[]> = List extends [infer A extends AnyRouter, ...infer Rest extends AnyRouter[]]
+  ? MergeRouter<A, MergeRouters<Rest>>
+  : BaseRouter;
+
 export type RouterPlugin<R = BaseRouter> = (router: BaseRouter) => R;
+export type AnyRouterPlugin = RouterPlugin<any>;
+
+// Merge a base router with plugins
+export type MergeRouterWithPlugins<T extends AnyRouter, List extends AnyRouterPlugin[]> = List extends [infer A extends AnyRouterPlugin, ...infer Rest extends AnyRouterPlugin[]]
+  ? MergeRouterWithPlugins<ReturnType<A> extends AnyRouter ? MergeRouter<T, ReturnType<A>> : T, Rest>
+  : T;
 
 interface Router<
   State,
@@ -98,10 +110,10 @@ class Router<State, Routes, SubRouters> {
   }
 
   /**
-   * Use a plugin
+   * Plug a list of plugins
    */
-  public plug<const T>(plugin: RouterPlugin<T>): T extends AnyRouter ? MergeRouter<this, T> : this {
-    plugin(this as unknown as BaseRouter);
+  public plug<const List extends AnyRouterPlugin[]>(...plugins: List): MergeRouterWithPlugins<this, List> {
+    for (let i = 0; i < plugins.length; i++) plugins[i](this as any);
     return this as any;
   }
 
@@ -247,5 +259,4 @@ class Router<State, Routes, SubRouters> {
 }
 
 export { Router };
-
 export const router = (): BaseRouter => new Router();
