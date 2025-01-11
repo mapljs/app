@@ -8,7 +8,6 @@ import type { AnyHandler, Handler, HandlerData } from './types/handler.js';
 import type { MiddlewareData, MiddlewareFunction } from './types/middleware.js';
 
 export type AnyRouter = Router<any, HandlerData[], [string, AnyRouter][]>;
-export type BaseRouter = Router<{}, [], []>;
 
 // Merge two router types
 export type MergeRouter<T1 extends AnyRouter, T2 extends AnyRouter> = Router<
@@ -20,9 +19,9 @@ export type MergeRouter<T1 extends AnyRouter, T2 extends AnyRouter> = Router<
 // Merge a list of routers
 export type MergeRouters<List extends AnyRouter[]> = List extends [infer A extends AnyRouter, ...infer Rest extends AnyRouter[]]
   ? MergeRouter<A, MergeRouters<Rest>>
-  : BaseRouter;
+  : Router;
 
-export type RouterPlugin<R = BaseRouter> = (router: BaseRouter) => R;
+export type RouterPlugin<R = Router> = (router: Router) => R;
 export type AnyRouterPlugin = RouterPlugin<any>;
 
 // Merge a base router with plugins
@@ -31,9 +30,9 @@ export type MergeRouterWithPlugins<T extends AnyRouter, List extends AnyRouterPl
   : T;
 
 interface Router<
-  State,
-  Routes extends HandlerData[],
-  SubRouters extends [string, AnyRouter][]
+  State = {},
+  Routes extends HandlerData[] = [],
+  SubRouters extends [string, AnyRouter][] = []
 > extends RouteRegisters<State, Routes, SubRouters> { }
 
 // eslint-disable-next-line
@@ -259,4 +258,4 @@ class Router<State, Routes, SubRouters> {
 }
 
 export { Router };
-export const router = (): BaseRouter => new Router();
+export const router = (): Router => new Router();

@@ -38,18 +38,21 @@ export const compileMiddlewares = async (router: AnyRouter, appState: AppCompile
     const middlewareData = list[i];
 
     if (middlewareData[0] === 0) {
-      const hash = middlewareData[1].hash;
+      let tmp: unknown = 'hash' in middlewareData[1]
+        ? middlewareData[1].hash
+        : middlewareData[1];
 
       // Hash checking stuff
-      if (hash != null) {
+      if (tmp !== null) {
         if (newState[6] === oldState[6])
-          newState[6] = [...oldState[6]];
+          newState[6] = new Set(oldState[6]);
 
-        if (newState[6].includes(hash)) continue;
-        newState[6].push(hash);
+        if (newState[6].has(tmp)) continue;
+        newState[6].add(tmp);
       }
 
-      await middlewareData[1].loadDeps?.(middlewareData[1].options, newState, appState);
+      tmp = middlewareData[1].loadDeps?.(middlewareData[1].options, newState, appState);
+      if (tmp instanceof Promise) tmp = await tmp;
       continue;
     }
 

@@ -92,7 +92,7 @@ export const compile = async (router: AnyRouter): Promise<AppCompilerState> => {
   };
 
   // Put all stuff into the radix tree
-  await compileRouter('', false, router, state, ['', null, false, null, {}, 0, []]);
+  await compileRouter('', false, router, state, ['', null, false, null, {}, 0, new Set()]);
   return state;
 };
 

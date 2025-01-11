@@ -50,7 +50,7 @@ export const compileRouter = async (
 };
 
 // eslint-disable-next-line
-const emptyCb = () => { };
+const emptyCb = () => '';
 // Memory saving trick
 const proxy = new Proxy({}, { get: () => emptyCb });
 
@@ -70,7 +70,7 @@ export default async (router: AnyRouter): Promise<any[]> => {
     globalBuilders: new Map(),
 
     externalValues
-  }, ['', null, false, null, proxy, 0, []]);
+  }, ['', null, false, null, proxy, 0, new Set()]);
 
   // fastLoadStateTree
   injectMatcher(externalValues);

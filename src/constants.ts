@@ -91,3 +91,6 @@ export const CAPTURE_ARGS: string = `,${REQ},${C_URL},${PATH_START},${PATH_END}`
 
 // Inject others
 export const ORIGIN: string = `${MAPL}o`;
+export const ORIGIN_VAL: string = `${C_URL}.substring(0,${PATH_START})`;
+
+export const QUERY: string = `${MAPL}q`;
