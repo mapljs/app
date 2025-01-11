@@ -40,7 +40,7 @@ export const buildHandler = (isDynamic: boolean, handler: AnyHandler, externalVa
   const fnNeedContext = fn.length > (isDynamic ? 1 : 0);
 
   // Return a raw Response
-  if (handlerType === 'response') {
+  if (handlerType === 'plain') {
     const str = `return f${externalValues.push(fn)}${selectFnArgIfNeeded(isDynamic, fnNeedContext)};`;
 
     return (hasContext) => !hasContext && fnNeedContext ? compilerConstants.CTX_DEF + str : str;

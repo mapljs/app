@@ -44,7 +44,7 @@ export const compileHandler = (
   const fnNoNeedContext = fn.length < (contextNeedParam ? 2 : 1);
 
   // Return a raw Response
-  if (handlerType === 'response') {
+  if (handlerType === 'plain') {
     return `${fnNoNeedContext
       ? ''
       : compilerConstants.HEADER_DEF + compilerConstants.CTX_DEF
