@@ -4,7 +4,7 @@ import type { AppCompilerState, CompilerOptions } from '../types/compiler.js';
 
 import { createRouter, insertItem } from '@mapl/router';
 import buildRouter from '@mapl/router/compile.js';
-import fastBuildRouter, { injectMatcher } from '@mapl/router/fast-compile.js';
+import fastBuildRouter, { injectMatcher, injectRouter } from '@mapl/router/fast-compile.js';
 
 import { compileMiddlewares, type MiddlewareState } from './middleware.js';
 import { compileHandler } from './handler.js';
@@ -14,8 +14,8 @@ const compileHandlerWithMiddleware = (
   handler: AnyHandler, state: AppCompilerState,
   hasParam: boolean
 ): string => (middlewareResult[1] === null
-  ? middlewareResult[0] + compileHandler(handler, state.externalValues, middlewareResult[2], hasParam)
-  : middlewareResult[1] + compilerConstants.CTX_DEF + middlewareResult[0] + compileHandler(handler, state.externalValues, middlewareResult[2], null)
+  ? middlewareResult[0] + compileHandler(handler, state.externalValues, middlewareResult[2], hasParam, false)
+  : middlewareResult[1] + compilerConstants.CTX_DEF + middlewareResult[0] + compileHandler(handler, state.externalValues, middlewareResult[2], hasParam, true)
 ) + (middlewareResult[2] ? compilerConstants.ASYNC_END : '');
 
 // DFS and compile every subrouter
@@ -148,12 +148,10 @@ export function loadStateTree(state: AppCompilerState): string {
   }
 
   // Load all method routes
-  if (routeTrees[1] !== null) {
-    builder += compilerConstants.PARSE_PATH;
-    builder += buildRouter(routeTrees[1]);
-  }
-
-  return builder + compilerConstants.RET_404;
+  return (routeTrees[1] === null
+    ? builder
+    : builder + compilerConstants.PARSE_PATH + buildRouter(routeTrees[1])
+  ) + compilerConstants.RET_404;
 }
 
 export function fastLoadStateTree(state: AppCompilerState): string {
@@ -169,9 +167,10 @@ export function fastLoadStateTree(state: AppCompilerState): string {
   if (routeTrees[0] !== null) {
     // Start the switch statement
     builder += `switch(${compilerConstants.REQ}.method){`;
+
     for (const key in routeTrees[0]) {
       builder += `case"${key}":{${compilerConstants.PARSE_PATH}${
-        fastBuildRouter(routeTrees[0][key], decls, deps, matcherId, compilerConstants.CAPTURE_ARGS)
+        fastBuildRouter(routeTrees[0][key], decls, injectRouter(deps, routeTrees[0][key]), matcherId, compilerConstants.CAPTURE_ARGS)
       }break;}`;
     }
     builder += '}';
@@ -180,7 +179,7 @@ export function fastLoadStateTree(state: AppCompilerState): string {
   // Load all method routes
   if (routeTrees[1] !== null) {
     builder += compilerConstants.PARSE_PATH;
-    builder += fastBuildRouter(routeTrees[1], decls, deps, matcherId, compilerConstants.CAPTURE_ARGS);
+    builder += fastBuildRouter(routeTrees[1], decls, injectRouter(deps, routeTrees[1]), matcherId, compilerConstants.CAPTURE_ARGS);
   }
 
   return builder + compilerConstants.RET_404;

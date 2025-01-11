@@ -15,7 +15,7 @@ export type MergeRouter<T1 extends AnyRouter, T2 extends AnyRouter> = Router<
   [...T1['subrouters'], ...T2['subrouters']]
 >;
 
-export type RouterPlugin<R> = (router: BaseRouter) => R;
+export type RouterPlugin<R = BaseRouter> = (router: BaseRouter) => R;
 
 interface Router<
   State,
@@ -73,7 +73,7 @@ class Router<State, Routes, SubRouters> {
   /**
    * Register a function that runs on every request
    */
-  public use(fn: MiddlewareFunction<State>): this {
+  public apply(fn: MiddlewareFunction<State>): this {
     this.middlewares.push([3, fn]);
     return this;
   }

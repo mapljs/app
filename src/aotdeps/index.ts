@@ -1,9 +1,10 @@
 import type { AnyRouter } from '../router/index.js';
-import type { AppCompilerState } from '../types/compiler.js';
+import type { AppCompilerState, RouteTrees } from '../types/compiler.js';
 
 import { compileMiddlewares } from './middleware.js';
 import type { MiddlewareState } from '../compiler/middleware.js';
 import { buildStaticHandler } from './utils.js';
+import { injectMatcher, injectRouter } from '@mapl/router/fast-compile.js';
 
 // DFS and compile every subrouter
 export const compileRouter = async (
@@ -48,22 +49,35 @@ export const compileRouter = async (
   }
 };
 
+// eslint-disable-next-line
+const emptyCb = () => { };
+// Memory saving trick
+const proxy = new Proxy({}, { get: () => emptyCb });
+
 /**
  * Get router dependencies to inject
  */
 export default async (router: AnyRouter): Promise<any[]> => {
   const externalValues = [] as any[];
+  const routeTrees = [null, null] as RouteTrees;
 
   // Put all stuff into the radix tree
   await compileRouter(false, router, {
-    routeTrees: [null, null],
+    routeTrees,
     prebuilds: [],
 
     declarationBuilders: [],
     globalBuilders: new Map(),
 
     externalValues
-  }, ['', null, false, null, {}, 0, []]);
+  }, ['', null, false, null, proxy, 0, []]);
 
+  // fastLoadStateTree
+  injectMatcher(externalValues);
+
+  if (routeTrees[0] !== null)
+    for (const key in routeTrees[0]) injectRouter(externalValues, routeTrees[0][key]);
+  if (routeTrees[1] !== null)
+    injectRouter(externalValues, routeTrees[1]);
   return externalValues;
 };

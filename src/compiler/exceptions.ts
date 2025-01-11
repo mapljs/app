@@ -1,6 +1,7 @@
 import type { AnyRouter } from '../router/index.js';
 import type { AnyHandler, AnyTypedHandler, StaticHandler } from '../router/types/handler.js';
 import type { AppCompilerState } from '../types/compiler.js';
+import type { MiddlewareState } from './middleware.js';
 
 import { buildStaticHandler, isFunctionAsync, selectCtxDef, selectResOption, selectSetHeader } from './utils.js';
 
@@ -98,14 +99,15 @@ export const loadExceptionHandlers = (builders: ExceptHandlerBuilders, hasContex
 };
 
 // Load new exception handlers
-export const buildExceptionHandlers = (prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: AppCompilerState['externalValues']): ExceptHandlerBuilders => {
+export const buildExceptionHandlers = (prevState: MiddlewareState, router: AnyRouter, externalValues: AppCompilerState['externalValues']): MiddlewareState => {
   const routes = router.exceptRoutes;
   const allExceptRoute = router.allExceptRoute;
 
   // No new routes have been set
-  if (routes.length === 0 && typeof allExceptRoute === 'undefined') return prevValue;
+  if (routes.length === 0 && typeof allExceptRoute === 'undefined')
+    return [...prevState];
 
-  const newRoutes = { ...prevValue };
+  const newRoutes = { ...prevState[4] };
   for (let i = 0, l = routes.length; i < l; i++) {
     const exception = routes[i][0];
 
@@ -119,5 +121,8 @@ export const buildExceptionHandlers = (prevValue: ExceptHandlerBuilders, router:
   if (typeof allExceptRoute !== 'undefined')
     newRoutes[0] = buildHandler(false, allExceptRoute, externalValues);
 
-  return newRoutes;
+  // Reset exception content and set the new list of exceptions
+  const newState = prevState.with(4, newRoutes) as MiddlewareState;
+  newState[3] = null;
+  return newState;
 };

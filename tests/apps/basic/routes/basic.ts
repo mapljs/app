@@ -2,7 +2,7 @@ import { router } from '@mapl/app/index.js';
 
 const app = router()
   // A simple middleware
-  .use((c) => c.headers.push(['server', 'mapl']))
+  .apply((c) => c.headers.push(['server', 'mapl']))
 
   // Simple endpoint
   .build('/', () => 'Hi')
@@ -31,7 +31,7 @@ const app = router()
 
   // Return a raw response
   .get('/response', {
-    type: 'response',
+    type: 'plain',
     fn: async () => fetch('http://example.com')
   });
 

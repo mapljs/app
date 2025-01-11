@@ -15,7 +15,7 @@ export type MiddlewareState = [
   holders: number,
 
   // Set is slower for most small cases
-  macroHashes: unknown[]
+  actions: unknown[]
 ];
 
 export const createAsyncScope = (currentResult: MiddlewareState): void => {
@@ -61,34 +61,26 @@ export const createEmptyContext = (currentResult: MiddlewareState): void => {
 };
 
 // Compile and cache middleware compilation result
-export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerState, prevValue: MiddlewareState): Promise<MiddlewareState> => {
-  const externalValues = state.externalValues;
-
-  const exceptRoutes = buildExceptionHandlers(prevValue[4], router, externalValues);
-  const macroHashes = [...prevValue[6]];
-
-  const currentResult: MiddlewareState = [
-    prevValue[0],
-    prevValue[1],
-    prevValue[2],
-    // If the exception content doesn't change then keep the original value
-    prevValue[4] === exceptRoutes ? prevValue[3] : null,
-    exceptRoutes,
-    prevValue[5],
-    macroHashes
-  ];
+export const compileMiddlewares = async (router: AnyRouter, appState: AppCompilerState, oldState: MiddlewareState): Promise<MiddlewareState> => {
+  const externalValues = appState.externalValues;
+  const newState = buildExceptionHandlers(oldState, router, externalValues);
 
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
     const middlewareData = list[i];
 
     if (middlewareData[0] === 0) {
+      const hash = middlewareData[1].hash;
+
       // Hash checking stuff
-      if (middlewareData[1].hash != null) {
-        if (macroHashes.includes(middlewareData[1].hash)) continue;
-        macroHashes.push(middlewareData[1].hash);
+      if (hash != null) {
+        if (newState[6] === oldState[6])
+          newState[6] = [...oldState[6]];
+
+        if (newState[6].includes(hash)) continue;
+        newState[6].push(hash);
       }
 
-      await middlewareData[1].loadSource(middlewareData[1].options, currentResult, state);
+      await middlewareData[1].loadSource(middlewareData[1].options, newState, appState);
       continue;
     }
 
@@ -100,58 +92,58 @@ export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerSt
         : '...' + externalValues.push(middlewareData[1]);
 
       // Check whether the header pair has been initialized yet
-      if (currentResult[1] === null)
-        createContext(currentResult, `let ${compilerConstants.HEADERS}=[f${headersToAppend}];`);
+      if (newState[1] === null)
+        createContext(newState, `let ${compilerConstants.HEADERS}=[f${headersToAppend}];`);
       else
-        currentResult[0] += `${compilerConstants.HEADERS}.push(f${headersToAppend});`;
+        newState[0] += `${compilerConstants.HEADERS}.push(f${headersToAppend});`;
       continue;
     }
 
     // Create an async scope if necessary
     const isFnAsync = isFunctionAsync(middlewareData[1]);
-    if (isFnAsync) createAsyncScope(currentResult);
+    if (isFnAsync) createAsyncScope(newState);
 
     // Need context if fn has ctx argument or it is a parser or a setter
     const needContext = middlewareData[1].length !== 0 || middlewareData[0] === 1 || middlewareData[0] === 4;
-    if (needContext) createEmptyContext(currentResult);
+    if (needContext) createEmptyContext(newState);
 
     // The output function call
     const fnCall = `${isFnAsync ? 'await ' : ''}f${externalValues.push(middlewareData[1])}(${needContext ? compilerConstants.CTX : ''});`;
     switch (middlewareData[0]) {
       // Parsers
       case 1: {
-        setMinimumHolders(currentResult, 1);
+        setMinimumHolders(newState, 1);
 
         // Set the prop to the context (prop name must be an identifier)
-        currentResult[0] += `${compilerConstants.HOLDER_0}=${fnCall}${
+        newState[0] += `${compilerConstants.HOLDER_0}=${fnCall}${
           // Use the old value if it exists
-          currentResult[3] ??= loadExceptionHandlers(exceptRoutes, currentResult[1] === null, currentResult[2])
+          newState[3] ??= loadExceptionHandlers(newState[4], newState[1] === null, newState[2])
         }${compilerConstants.CTX}.${middlewareData[2]}=${compilerConstants.HOLDER_0};`;
         break;
       }
 
       // Validators
       case 2: {
-        setMinimumHolders(currentResult, 1);
+        setMinimumHolders(newState, 1);
 
-        currentResult[0] += `${compilerConstants.HOLDER_0}=${fnCall}${
+        newState[0] += `${compilerConstants.HOLDER_0}=${fnCall}${
           // Use the old value if it exists
-          currentResult[3] ??= loadExceptionHandlers(exceptRoutes, currentResult[1] === null, currentResult[2])
+          newState[3] ??= loadExceptionHandlers(newState[4], newState[1] === null, newState[2])
         }`;
         break;
       }
 
       // Normal middlewares
       case 3:
-        currentResult[0] += fnCall;
+        newState[0] += fnCall;
         break;
 
       // Setter
       case 4:
-        currentResult[0] += `${compilerConstants.CTX}.${middlewareData[2]}=${fnCall}`;
+        newState[0] += `${compilerConstants.CTX}.${middlewareData[2]}=${fnCall}`;
         break;
     }
   }
 
-  return currentResult;
+  return newState;
 };

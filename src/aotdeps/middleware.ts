@@ -15,69 +15,80 @@ const createContext = (currentResult: MiddlewareState): void => {
   }
 };
 
+export const createAsyncScope = (currentResult: MiddlewareState): void => {
+  if (!currentResult[2]) {
+    // Create an async scope
+    currentResult[2] = true;
+
+    // Reset the exception value
+    currentResult[3] = null;
+  }
+};
+
+export const setMinimumHolders = (currentResult: MiddlewareState, cnt: number): void => {
+  currentResult[5] = Math.max(currentResult[5], cnt);
+};
+
 // Compile and cache middleware compilation result
-export const compileMiddlewares = async (router: AnyRouter, state: AppCompilerState, prevValue: MiddlewareState): Promise<MiddlewareState> => {
-  const externalValues = state.externalValues;
-
-  const exceptRoutes = buildExceptionHandlers(prevValue[4], router, externalValues);
-  const macroHashes = [...prevValue[6]];
-
-  const currentResult: MiddlewareState = [
-    prevValue[0],
-    prevValue[1],
-    prevValue[2],
-    // If the exception content doesn't change then keep the original value
-    prevValue[4] === exceptRoutes ? prevValue[3] : null,
-    exceptRoutes,
-    prevValue[5],
-    macroHashes
-  ];
+export const compileMiddlewares = async (router: AnyRouter, appState: AppCompilerState, oldState: MiddlewareState): Promise<MiddlewareState> => {
+  const externalValues = appState.externalValues;
+  const newState = buildExceptionHandlers(oldState, router, externalValues);
 
   for (let i = 0, list = router.middlewares, l = list.length; i < l; i++) {
     const middlewareData = list[i];
 
     if (middlewareData[0] === 0) {
+      const hash = middlewareData[1].hash;
+
       // Hash checking stuff
-      if (middlewareData[1].hash != null) {
-        if (macroHashes.includes(middlewareData[1].hash)) continue;
-        macroHashes.push(middlewareData[1].hash);
+      if (hash != null) {
+        if (newState[6] === oldState[6])
+          newState[6] = [...oldState[6]];
+
+        if (newState[6].includes(hash)) continue;
+        newState[6].push(hash);
       }
 
-      await middlewareData[1].loadDeps?.(middlewareData[1].options, currentResult, state);
+      await middlewareData[1].loadDeps?.(middlewareData[1].options, newState, appState);
       continue;
     }
 
-    // Push headers
     if (middlewareData[0] === 5) {
+      // Don't use spread if there's only one single header pair
       externalValues.push(middlewareData[1].length === 1 ? middlewareData[1][0] : middlewareData[1]);
-      createContext(currentResult);
+
+      // Check whether the header pair has been initialized yet
+      if (newState[1] === null)
+        createContext(newState);
+
       continue;
     }
 
     // Create an async scope if necessary
-    if (isFunctionAsync(middlewareData[1]) && !currentResult[2]) {
-      // Create an async scope
-      currentResult[2] = true;
+    if (isFunctionAsync(middlewareData[1])) createAsyncScope(newState);
 
-      // Reset the exception value
-      currentResult[3] = null;
-    }
+    // Need context if fn has ctx argument or it is a parser or a setter
+    if (middlewareData[1].length !== 0 || middlewareData[0] === 1 || middlewareData[0] === 4) createContext(newState);
 
-    if (middlewareData[1].length !== 0 || middlewareData[0] === 1 || middlewareData[0] === 4) createContext(currentResult);
+    // Add the handler
+    externalValues.push(middlewareData[1]);
 
     // The output function call
-    externalValues.push(middlewareData[1]);
     switch (middlewareData[0] as 1 | 2) {
-      // Parsers and validators need exceptions
+      // Parsers
       case 1:
       case 2: {
-        currentResult[3] ??= '';
+        setMinimumHolders(newState, 1);
+        // Pseudo exception value
+        newState[3] ??= '';
         break;
       }
 
-      default: break;
+      // Other things doesn't need to change the context
+      default:
+        break;
     }
   }
 
-  return currentResult;
+  return newState;
 };

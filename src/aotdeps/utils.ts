@@ -9,7 +9,8 @@ export const buildStaticHandler = (body: StaticHandler['body'], options: StaticH
     if (typeof options?.headers === 'object')
       externalValues.push(toHeaderTuples(options.headers));
 
-    externalValues.push(body);
+    if (body !== null)
+      externalValues.push(body);
   }
 
   // Save the entire response object in memory and clone when necessary

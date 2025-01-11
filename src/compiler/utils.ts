@@ -2,7 +2,7 @@ import type { AnyTypedHandler, StaticHandler } from '../router/types/handler.js'
 import type { AppCompilerState } from '../types/compiler.js';
 
 // eslint-disable-next-line
-export const AsyncFunction = (async () => { }).constructor;
+export const AsyncFunction: Function = (async () => { }).constructor;
 
 export const isFunctionAsync = (fn: any): fn is (...args: any[]) => Promise<any> => fn instanceof AsyncFunction;
 
@@ -34,9 +34,7 @@ export const buildStaticHandler = (body: StaticHandler['body'], options: StaticH
     return `${tmpl}return new Response(${
       body == null
         ? 'null'
-        : typeof body === 'string'
-          ? `"${body.replace(/"/, '\\"')}"`
-          : `f${externalValues.push(body)}`
+        : `f${externalValues.push(body)}`
     }${compilerConstants.COLON_CTX});`;
   }
 

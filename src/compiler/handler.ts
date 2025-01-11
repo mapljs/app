@@ -2,19 +2,17 @@ import type { AnyHandler, AnyTypedHandler, StaticHandler } from '../router/types
 import type { AppCompilerState } from '../types/compiler.js';
 import { buildStaticHandler, isFunctionAsync, selectHeaderDef, selectResOption, selectSetHeader } from './utils.js';
 
-// eslint-disable-next-line
-export const selectFnArgWithCtx = (needParam: boolean) => needParam
+export const selectFnArgWithCtx = (needParam: boolean): string => needParam
   ? compilerConstants.PARAM_CTX_ARG
   : compilerConstants.ONLY_CTX_ARG;
 
-// eslint-disable-next-line
-export const selectFnArg = (needParam: boolean) => needParam
+export const selectFnArg = (needParam: boolean): string => needParam
   ? compilerConstants.ONLY_PARAM_ARG
   : compilerConstants.NO_ARG;
 
-const selectFnArgIfNeeded = (fnNoNeedContext: boolean): string => fnNoNeedContext
-  ? compilerConstants.NO_ARG
-  : compilerConstants.ONLY_CTX_ARG;
+const selectFnArgIfNeeded = (fnNoNeedContext: boolean, needParam: boolean): string => fnNoNeedContext
+  ? selectFnArg(needParam)
+  : selectFnArgWithCtx(needParam);
 
 /**
  * Compile a handler. This is a fast path for handlers that doesn't need recompilation
@@ -24,7 +22,8 @@ export const compileHandler = (
   externalValues: AppCompilerState['externalValues'],
 
   previouslyAsync: boolean,
-  contextNeedParam: boolean | null
+  contextNeedParam: boolean,
+  hasContext: boolean
 ): string => {
   let handlerType: AnyTypedHandler['type'] | 'static';
   let fn: AnyTypedHandler['fn'];
@@ -42,19 +41,19 @@ export const compileHandler = (
     fn = (handler as AnyTypedHandler).fn;
   }
 
-  const fnNoNeedContext = fn.length < (contextNeedParam === true ? 2 : 1);
+  const fnNoNeedContext = fn.length < (contextNeedParam ? 2 : 1);
 
   // Return a raw Response
   if (handlerType === 'response') {
-    return `${fnNoNeedContext || contextNeedParam === null
+    return `${fnNoNeedContext
       ? ''
       : compilerConstants.HEADER_DEF + compilerConstants.CTX_DEF
-    }return f${externalValues.push(fn)}${selectFnArgIfNeeded(fnNoNeedContext)};`;
+    }return f${externalValues.push(fn)}${selectFnArgIfNeeded(fnNoNeedContext, contextNeedParam)};`;
   }
 
   const isFnAsync = isFunctionAsync(fn);
 
-  return contextNeedParam === null
+  return hasContext
     ? `${selectSetHeader(handlerType)}return${isFnAsync && !previouslyAsync
       ? '(async()=>'
       : ' '
@@ -64,7 +63,7 @@ export const compileHandler = (
     }${isFnAsync
       ? 'await '
       : ''
-    }f${externalValues.push(fn)}${selectFnArgIfNeeded(fnNoNeedContext)}${handlerType === 'json'
+    }f${externalValues.push(fn)}${selectFnArgIfNeeded(fnNoNeedContext, contextNeedParam)}${handlerType === 'json'
       ? ')'
       : ''
     },${compilerConstants.CTX})${isFnAsync && !previouslyAsync

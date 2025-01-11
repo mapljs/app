@@ -1,11 +1,10 @@
 import type { AnyRouter } from '../router/index.js';
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AppCompilerState } from '../types/compiler.js';
-import type { ExceptHandlerBuilders } from '../compiler/exceptions.js';
 import { buildStaticHandler } from './utils.js';
+import type { MiddlewareState } from '../compiler/middleware.js';
 
 // Build closures that generates exception content
-
 export const buildHandler = (handler: AnyHandler, externalValues: AppCompilerState['externalValues']): void => {
   // Plain text
   if (typeof handler === 'function')
@@ -17,30 +16,21 @@ export const buildHandler = (handler: AnyHandler, externalValues: AppCompilerSta
   } else externalValues.push(handler.fn);
 };
 
-// eslint-disable-next-line
-const emptyCb = () => '';
-
 // Load new exception handlers
-
-export const buildExceptionHandlers = (prevValue: ExceptHandlerBuilders, router: AnyRouter, externalValues: AppCompilerState['externalValues']): ExceptHandlerBuilders => {
+export const buildExceptionHandlers = (prevState: MiddlewareState, router: AnyRouter, externalValues: AppCompilerState['externalValues']): MiddlewareState => {
   const routes = router.exceptRoutes;
   const allExceptRoute = router.allExceptRoute;
 
   // No new routes have been set
-  if (routes.length === 0 && typeof allExceptRoute === 'undefined') return prevValue;
+  if (routes.length === 0 && typeof allExceptRoute === 'undefined')
+    return [...prevState];
 
-  const newRoutes = { ...prevValue };
-  for (let i = 0, l = routes.length; i < l; i++) {
-    const exception = routes[i][0];
-    buildHandler(routes[i][1], externalValues);
-    newRoutes[Array.isArray(exception) ? exception[1] : exception(null)[1]] = emptyCb;
-  }
+  for (let i = 0, l = routes.length; i < l; i++) buildHandler(routes[i][1], externalValues);
 
   // Set all except route
-  if (typeof allExceptRoute !== 'undefined') {
+  if (typeof allExceptRoute !== 'undefined')
     buildHandler(allExceptRoute, externalValues);
-    newRoutes[0] = emptyCb;
-  }
 
-  return newRoutes;
+  // Reset exception content only
+  return prevState.with(3, null) as MiddlewareState;
 };

@@ -24,7 +24,7 @@ export interface HTMLHandler<State, Args extends any[]> {
 }
 
 export interface ResponseHandler<State, Args extends any[]> {
-  type: 'response';
+  type: 'plain';
   fn: (...args: [...Args, Context & State]) => MaybePromise<Response | null | undefined>;
 }
 
