@@ -1,3 +1,4 @@
+import { toHeaderTuples } from '../compiler/utils.js';
 import type { DynamicException, StaticException, ExcludeExceptionType } from '../exception.js';
 import type { Macro } from '../macro.js';
 import type { RouteRegisters } from './route.js';
@@ -92,14 +93,7 @@ class Router<State, Routes, SubRouters> {
    * Add response headers
    */
   public headers(headers: HeadersInit): this {
-    this.middlewares.push([
-      5, Array.isArray(headers)
-        ? headers
-        : headers instanceof Headers
-          ? Array.from(headers.entries())
-          : Object.entries(headers)
-    ]);
-
+    this.middlewares.push([5, toHeaderTuples(headers)]);
     return this;
   }
 
