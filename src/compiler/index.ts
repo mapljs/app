@@ -160,8 +160,8 @@ export function fastLoadStateTree(state: AppCompilerState): string {
   const decls = state.declarationBuilders as string[];
   const deps = state.externalValues;
 
-  // Inject the route matcher into the context
-  const matcherId = injectMatcher(decls);
+  // Inject the route matcher into outside dependencies
+  const matcherId = injectMatcher(deps);
 
   if (routeTrees[0] !== null) {
     // Start the switch statement
