@@ -1,5 +1,5 @@
 import type { AnyRouter, Router } from './index.js';
-import type { Handler, HandlerData } from './types/handler.js';
+import type { AnyHandler, BufferHandler, Handler, HandlerData, PlainHandler } from './types/handler.js';
 
 export type InferParams<Path extends string> = Path extends `${string}*${infer Rest}`
   ? Rest extends '*' ? [string] : [string, ...InferParams<Rest>]
@@ -42,3 +42,5 @@ export type RouteRegisters<
       SubRouters
     >
   };
+
+export type CastHandler<T extends AnyHandler> = T extends PlainHandler<infer X, infer Y> ? BufferHandler<X, Y> : T;
