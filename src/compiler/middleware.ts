@@ -89,15 +89,16 @@ export const compileMiddlewares = async (router: AnyRouter, appState: AppCompile
     if (middlewareData[0] === 5) {
       // Don't use spread if there's only one single header pair
       const headersToAppend = middlewareData[1].length === 1
-        ? externalValues.push(middlewareData[1][0])
         // eslint-disable-next-line
-        : '...' + externalValues.push(middlewareData[1]);
+        ? 'f' + externalValues.push(middlewareData[1][0])
+        // eslint-disable-next-line
+        : '...f' + externalValues.push(middlewareData[1]);
 
       // Check whether the header pair has been initialized yet
       if (newState[1] === null)
-        createContext(newState, `let ${compilerConstants.HEADERS}=[f${headersToAppend}];`);
+        createContext(newState, `let ${compilerConstants.HEADERS}=[${headersToAppend}];`);
       else
-        newState[0] += `${compilerConstants.HEADERS}.push(f${headersToAppend});`;
+        newState[0] += `${compilerConstants.HEADERS}.push(${headersToAppend});`;
       continue;
     }
 
