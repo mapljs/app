@@ -24,6 +24,7 @@ const transpiler = new Bun.Transpiler({
   treeShaking: true,
 
   // Inline constants
+  inline: true,
   define: Object.fromEntries(Object.entries(constants).map((entry) => [`compilerConstants.${entry[0]}`, JSON.stringify(entry[1])]))
 });
 
@@ -36,11 +37,16 @@ for (const path of new Bun.Glob('**/*.ts').scanSync(SOURCEDIR)) {
   Bun.file(srcPath)
     .text()
     .then((buf) => {
-      transpiler.transform(buf)
-        .then((res) => {
-          if (res.length !== 0)
-            Bun.write(`${outPathNoExt}.js`, res.replace(/const /g, 'let '));
-        });
+      // Inline constants directly in this file
+      if (path === 'constants.ts')
+        Bun.write(`${outPathNoExt}.js`, Object.entries(constants).map((entry) => `export let ${entry[0]}=${JSON.stringify(entry[1])};`).join(''))
+      else {
+        transpiler.transform(buf)
+          .then((res) => {
+            if (res.length !== 0)
+              Bun.write(`${outPathNoExt}.js`, res.replace(/const /g, 'let '));
+          });
+      }
 
       Bun.write(`${outPathNoExt}.d.ts`, transpileDeclaration(buf, tsconfig as any).outputText);
     });
