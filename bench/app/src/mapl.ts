@@ -11,4 +11,4 @@ for (const path in pathMap) {
   );
 }
 
-export default await jitc(app);
+export default () => jitc(app);

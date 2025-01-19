@@ -9,13 +9,13 @@ import mapl from './src/mapl';
 // Zesti has types for these stuff
 import { requests, setupTests } from './reqs';
 
-const apps: [string, { fetch: (req: Request) => any }][] = [
-  ['Hono', hono],
-  ['Elysia', elysia],
-  ['Mapl', mapl]
-];
-
 (async () => {
+  const apps: [string, { fetch: (req: Request) => any }][] = [
+    ['Hono', hono],
+    ['Elysia', elysia],
+    ['Mapl', await mapl()]
+  ];
+
   for (const [name, obj] of apps)
     await setupTests(name, assert.strictEqual, obj);
 
@@ -30,6 +30,8 @@ const apps: [string, { fetch: (req: Request) => any }][] = [
       }).gc('inner');
     }
   });
+
+  console.log('Initial memory usage:', (process.memoryUsage().rss / 1e6).toFixed(2) + 'mb')
 
   // Start the benchmark
   run();
