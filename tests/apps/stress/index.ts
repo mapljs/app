@@ -1,7 +1,7 @@
-import { router } from '@mapl/app/index.js';
+import { router } from '@mapl/app';
 
 const app = router()
-  .use(console.log)
+  .apply(console.log)
   .set('id', Date.now);
 
 for (let i = 0; i < 1000; i++)

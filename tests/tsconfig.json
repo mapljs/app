@@ -26,7 +26,8 @@
     "noPropertyAccessFromIndexSignature": false,
     // Paths
     "paths": {
-      "@mapl/app/*": ["../lib/*"],
+      "@mapl/app/*": ["../src/*"],
+      "@mapl/app": ["../lib/index.js"],
       "@measure": ["./measure/index.ts"]
     },
     "noEmit": true
