@@ -154,7 +154,7 @@ export function loadStateTree(state: AppCompilerState): string {
 }
 
 export function fastLoadStateTree(state: AppCompilerState): string {
-  let builder = '';
+  let builder = compilerConstants.PARSE_PATH;
 
   const routeTrees = state.routeTrees;
   const decls = state.declarationBuilders as string[];
@@ -168,7 +168,7 @@ export function fastLoadStateTree(state: AppCompilerState): string {
     builder += `switch(${compilerConstants.REQ}.method){`;
 
     for (const key in routeTrees[0]) {
-      builder += `case"${key}":{${compilerConstants.PARSE_PATH}${
+      builder += `case"${key}":{${
         fastBuildRouter(routeTrees[0][key], decls, injectRouter(deps, routeTrees[0][key]), matcherId, compilerConstants.CAPTURE_ARGS)
       }break;}`;
     }
@@ -176,10 +176,8 @@ export function fastLoadStateTree(state: AppCompilerState): string {
   }
 
   // Load all method routes
-  if (routeTrees[1] !== null) {
-    builder += compilerConstants.PARSE_PATH;
+  if (routeTrees[1] !== null)
     builder += fastBuildRouter(routeTrees[1], decls, injectRouter(deps, routeTrees[1]), matcherId, compilerConstants.CAPTURE_ARGS);
-  }
 
   return builder + compilerConstants.RET_404;
 }
