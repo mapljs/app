@@ -84,7 +84,7 @@ export const EXCEPT_START: string = `if(Array.isArray(${HOLDER_0})&&${HOLDER_0}[
 export const CONST_VARS: string = `var ${INIT_CTX}=(a,b)=>({status:200,req:a,headers:b}),${EXCEPT_SYMBOL}=Symbol.for('${EXCEPT_SYMBOL_NAME}'),_=['text/plain','text/html','application/json'].map((n)=>['content-type',n]),[${TEXT_HEADER_PAIR},${HTML_HEADER_PAIR},${JSON_HEADER_PAIR}]=_,[${TEXT_OPTIONS},${HTML_OPTIONS},${JSON_OPTIONS}]=_.map((s)=>({headers:[s]})),[${RESPONSE_400},${RESPONSE_404}]=[400,404].map((s)=>new Response(null,{status:s}));`;
 
 // Parsings and constants
-export const PARSE_PATH: string = `let ${C_URL}=${REQ}.url,${PATH_START}=${C_URL}.indexOf('/',12)+1,${PATH_END}=${C_URL}.indexOf('?',${PATH_START}),${PATH}=${C_URL}.substring(${PATH_START},${PATH_END}>>>0);`;
+export const PARSE_PATH: string = `let ${C_URL}=${REQ}.url,${PATH_START}=${C_URL}.indexOf('/',12)+1,${PATH_END}=${C_URL}.indexOf('?',${PATH_START}),${PATH}=${PATH_END}===-1?${C_URL}.slice(${PATH_START}):${C_URL}.substring(${PATH_START},${PATH_END});`;
 
 // Required values for capturing
 export const CAPTURE_ARGS: string = `,${REQ},${C_URL},${PATH_START},${PATH_END}`;

@@ -136,20 +136,20 @@ export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOpt
 };
 
 export function loadStateTree(state: AppCompilerState): string {
-  let builder = '';
+  let builder = compilerConstants.PARSE_PATH;
   const routeTrees = state.routeTrees;
 
   if (routeTrees[0] !== null) {
     // Start the switch statement
     builder += `switch(${compilerConstants.REQ}.method){`;
-    for (const key in routeTrees[0]) builder += `case"${key}":{${compilerConstants.PARSE_PATH}${buildRouter(routeTrees[0][key])}break;}`;
+    for (const key in routeTrees[0]) builder += `case"${key}":{${buildRouter(routeTrees[0][key])}break;}`;
     builder += '}';
   }
 
   // Load all method routes
   return (routeTrees[1] === null
     ? builder
-    : builder + compilerConstants.PARSE_PATH + buildRouter(routeTrees[1])
+    : builder + buildRouter(routeTrees[1])
   ) + compilerConstants.RET_404;
 }
 
