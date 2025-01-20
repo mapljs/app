@@ -11,9 +11,9 @@ export interface Macro<Options = never, R extends AnyRouter = Router> {
   loadSource: MacroFunc<Options>;
 
   /**
-   * Dependency loader.
+   * Should load dependencies or not
    */
-  loadDeps?: MacroFunc<Options>;
+  loadDeps?: boolean;
 
   /**
    * Plugin options. Can be omitted to save memory

@@ -51,7 +51,10 @@ export const compileMiddlewares = async (router: AnyRouter, appState: AppCompile
         newState[6].add(tmp);
       }
 
-      tmp = middlewareData[1].loadDeps?.(middlewareData[1].options, newState, appState);
+      // Keep 1 single function only
+      if (middlewareData[1].loadDeps)
+        tmp = middlewareData[1].loadSource(middlewareData[1].options, newState, appState);
+
       if (tmp instanceof Promise) tmp = await tmp;
       continue;
     }
