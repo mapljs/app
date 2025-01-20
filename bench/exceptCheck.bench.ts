@@ -1,13 +1,8 @@
-import { summary, run, bench } from 'mitata';
-import { optimizeNextInvocation } from 'bun:jsc';
-
-// Warmup (de-optimize `bench()` calls)
-bench('noop', () => { });
-bench('noop2', () => { });
+import { summary, run, bench, do_not_optimize } from 'mitata';
 
 // Example benchmark
 summary(() => {
-  const sym = [];
+  const sym: any = [];
 
   const dataset = new Array(100000).fill(0).map(
     (_, i) => i % 5 === 0
@@ -24,15 +19,13 @@ summary(() => {
   {
     const f = (a: any) => a?.[0] === sym;
     dataset.forEach(f);
-    optimizeNextInvocation(f);
-    bench('?.', () => dataset.map(f));
+    bench('?.', () => do_not_optimize(dataset.map(f)));
   }
 
   {
     const f = (a: any) => Array.isArray(a) && a[0] === sym;
     dataset.forEach(f);
-    optimizeNextInvocation(f);
-    bench('Array check', () => dataset.map(f));
+    bench('Array check', () => do_not_optimize(dataset.map(f)));
   }
 });
 

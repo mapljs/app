@@ -31,8 +31,7 @@ import { requests, setupTests } from './reqs';
     }
   });
 
-  console.log('Initial memory usage:', (process.memoryUsage().rss / 1e6).toFixed(2) + 'mb')
-
   // Start the benchmark
   run();
+  console.log('Initial memory usage:', (process.memoryUsage().rss / 1e6).toFixed(2) + 'mb');
 })();

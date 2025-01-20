@@ -1,9 +1,4 @@
-import { summary, run, bench } from 'mitata';
-import { optimizeNextInvocation } from 'bun:jsc';
-
-// Warmup (de-optimize `bench()` calls)
-bench('noop', () => { });
-bench('noop2', () => { });
+import { summary, run, bench, do_not_optimize } from 'mitata';
 
 // Simulate warmup situation
 summary(() => {
@@ -11,17 +6,17 @@ summary(() => {
 
   {
     const f = (a: any) => a ?? false;
-    bench('??', () => dataset.map(f));
+    bench('??', () => do_not_optimize(dataset.map(f)));
   }
 
   {
     const f = (a: any) => a || false;
-    bench('||', () => dataset.map(f));
+    bench('||', () => do_not_optimize(dataset.map(f)));
   }
 
   {
     const f = (a: any) => a === null ? false : true;
-    bench('Null check', () => dataset.map(f));
+    bench('Null check', () => do_not_optimize(dataset.map(f)));
   }
 });
 
