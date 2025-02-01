@@ -33,16 +33,3 @@ export interface Macro<Options = never, R extends AnyRouter = Router> {
 }
 
 export type AnyMacro = Macro<any, AnyRouter>;
-
-// Built-in macros
-export const parseOrigin: Macro<null> = {
-  loadSource: (_, c) => {
-    c[0] += `let ${compilerConstants.ORIGIN}=${compilerConstants.ORIGIN_VAL}`;
-  }
-};
-
-export const attachOrigin: Macro<null, Router<{ origin: string }>> = {
-  loadSource: (_, c) => {
-    c[0] += `${compilerConstants.CTX}.origin=${compilerConstants.ORIGIN_VAL};`;
-  }
-};
