@@ -21,8 +21,8 @@ export type MergeRouters<List extends AnyRouter[]> = List extends [infer A exten
   ? MergeRouter<A, MergeRouters<Rest>>
   : Router;
 
-export type RouterPlugin<R = Router, Options extends any[] = []> = (router: Router, ...args: Options) => R;
-export type AnyRouterPlugin = RouterPlugin<any, any[]>;
+export type RouterPlugin<R = Router> = (router: Router) => R;
+export type AnyRouterPlugin = RouterPlugin<any>;
 
 // Merge a base router with plugins
 export type MergeRouterWithPlugin<T extends AnyRouter, A extends AnyRouterPlugin> = ReturnType<A> extends AnyRouter ? MergeRouter<T, ReturnType<A>> : T;
@@ -112,8 +112,8 @@ class Router<State, Routes, SubRouters> {
   /**
    * Use a plugin
    */
-  public plug<Options extends any[], const A extends RouterPlugin<any, Options>>(plugin: A, ...args: Options): MergeRouterWithPlugin<this, A> {
-    plugin(this as any, ...args);
+  public plug<const A extends AnyRouterPlugin>(plugin: A): MergeRouterWithPlugin<this, A> {
+    plugin(this as any);
     return this as any;
   }
 
