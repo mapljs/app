@@ -1,6 +1,6 @@
 import type { AnyHandler } from '../router/types/handler.js';
 import type { AnyRouter } from '../router/index.js';
-import type { AppCompilerState, CompilerOptions } from '../types/compiler.js';
+import type { AppCompilerState } from '../types/compiler.js';
 
 import { createRouter, insertItem } from '@mapl/router';
 import buildRouter from '@mapl/router/compile.js';
@@ -96,15 +96,15 @@ export const compile = async (router: AnyRouter): Promise<AppCompilerState> => {
   return state;
 };
 
-export const loadStatePrebuilds = (state: AppCompilerState, options: CompilerOptions): string => {
+export const loadStatePrebuilds = (state: AppCompilerState): string => {
   const prebuilds = state.prebuilds;
   if (prebuilds.length === 0) return '';
 
   const responses = state.declarationBuilders.push(`await Promise.all([${prebuilds.map((val) => val[1]).join()}])`);
 
   // Expose static routes
-  if (options.exposeStatic === true)
-    return `,static:{${prebuilds.map((val, idx) => `"${val[0]}":d${responses}[${idx}]`).join()}}`;
+  // if (options.exposeStatic === true)
+  //   return `,static:{${prebuilds.map((val, idx) => `"${val[0]}":d${responses}[${idx}]`).join()}}`;
 
   // Inject as dependencies
   const emptyResponses = state.declarationBuilders.push(`d${responses}.map((r)=>new Response(null,{status:r.status,statusText:r.statusText,headers:r.headers}))`);

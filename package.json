@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "latest",
-    "@types/bun": "latest",
+    "@types/bun": "^1.2.2",
     "esbuild": "^0.24.2",
     "eslint": "latest",
     "eslint-plugin-jsdoc": "latest",
